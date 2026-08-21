@@ -251,7 +251,6 @@ class Client:
                 },
             },
             with_session=False,
-            want_session_header=True,
         )
         message, session_id = body
         if status != 200 or "result" not in message:
@@ -322,7 +321,7 @@ class Client:
         self._next_id += 1
         return self._next_id
 
-    def _post(self, message, with_session=True, want_session_header=False):
+    def _post(self, message, with_session=True):
         # json.dumps preserves nested arrays exactly, which is the whole reason this transport
         # is written in Python: a document's connections are arrays of pairs, and a converter
         # that flattens them silently corrupts an authoring call.
