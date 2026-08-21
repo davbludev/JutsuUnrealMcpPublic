@@ -19,7 +19,7 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from jutsu_mcp import stdio, transport  # noqa: E402
+from jutsu_mcp import render as render_module, stdio, transport  # noqa: E402
 
 PROTOCOL_VERSION = "2025-11-25"
 SESSION_ID = "stub-session"
@@ -265,3 +265,66 @@ class StdioTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class RenderTests(unittest.TestCase):
+    """The renderer knows JSON Schema and nothing else, and it never invents or loses one."""
+
+    SCHEMA = {
+        "type": "object",
+        "additionalProperties": False,
+        "description": "One asset and a verb.",
+        "properties": {
+            "target": {"type": "string", "minLength": 1, "description": "asset to act on"},
+            "aspect": {"enum": ["one.inspect", "two.inspect"]},
+            "options": {"type": "object", "properties": {}, "additionalProperties": True},
+            "steps": {"type": "array", "minItems": 1, "items": {"type": "string"}},
+        },
+        "required": ["target"],
+    }
+
+    def test_a_schema_keeps_every_constraint_and_description(self):
+        text = "\n".join(render_module.signature(self.SCHEMA))
+        for expected in ("target: string", "minLength=1", "asset to act on", "One asset and a verb.",
+                         '"one.inspect"', "aspect?", "array minItems=1", "object open"):
+            self.assertIn(expected, text)
+
+    def test_a_schema_costs_less_than_its_json(self):
+        text = "\n".join(render_module.signature(self.SCHEMA))
+        self.assertLess(len(text), len(json.dumps(self.SCHEMA, separators=(",", ":"))))
+
+    def test_only_values_under_a_schema_key_are_rendered(self):
+        # Editor state may legitimately contain type and enum; mistaking it for a contract and
+        # rewriting it would lose data the caller asked for.
+        payload = {"inputSchema": self.SCHEMA, "result": {"type": "object", "enum": ["a", "b"]}}
+        rendered = render_module.render(payload)
+        self.assertIsInstance(rendered["inputSchema"], str)
+        self.assertEqual(rendered["result"], payload["result"])
+
+    def test_everything_that_is_not_a_schema_survives_untouched(self):
+        connections = [[{"alias": "begin", "port": {"name": "then"}}, {"alias": "end"}]]
+        payload = {"connections": connections, "path": "/Game/A.A", "n": 3, "ok": True, "none": None}
+        self.assertEqual(render_module.render(payload), payload)
+
+    def test_the_bridge_renders_a_call_result_but_never_the_tool_list(self):
+        with Stub() as stub:
+            client = transport.Client(stub.port)
+            client.connect({"name": "test", "version": "1"})
+            bridge = stdio.Bridge(client)
+            called = bridge.handle({"jsonrpc": "2.0", "id": 1, "method": "tools/call",
+                                    "params": {"inputSchema": self.SCHEMA}})
+            listed = bridge.handle({"jsonrpc": "2.0", "id": 2, "method": "tools/list",
+                                    "params": {"inputSchema": self.SCHEMA}})
+            client.close()
+        self.assertIsInstance(called["result"]["inputSchema"], str)
+        self.assertEqual(listed["result"]["inputSchema"], self.SCHEMA)
+
+    def test_json_mode_forwards_the_body_untouched(self):
+        with Stub() as stub:
+            client = transport.Client(stub.port)
+            client.connect({"name": "test", "version": "1"})
+            bridge = stdio.Bridge(client, render_results=False)
+            response = bridge.handle({"jsonrpc": "2.0", "id": 1, "method": "tools/call",
+                                      "params": {"inputSchema": self.SCHEMA}})
+            client.close()
+        self.assertEqual(response["result"]["inputSchema"], self.SCHEMA)

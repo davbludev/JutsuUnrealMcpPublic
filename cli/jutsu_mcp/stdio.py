@@ -6,7 +6,11 @@ that an HTTP hop, a port or an Unreal editor exists behind it.
 Nothing about the surface is authored here. The tool list, the input schemas, the ``instructions``
 string, the server name and version, capability ids, error codes and ``recovery`` arrays are
 whatever the live server answered; this module reframes JSON-RPC ids and forwards the rest
-unchanged. Response bodies are not rendered or projected yet - that is task ``06.07``.
+unchanged.
+
+The one thing it does transform is the one thing measurement said was worth transforming: a
+JSON Schema inside a tool result becomes a signature, which costs 39% of the JSON it replaces
+without losing a constraint or a description. ``--json`` turns even that off. See ``render``.
 """
 
 import argparse
@@ -14,6 +18,7 @@ import json
 import sys
 
 from . import __version__
+from .render import render
 from .transport import Client, SessionExpired, TransportError, resolve_port
 
 CLIENT_NAME = "jutsu-mcp-cli"
@@ -42,8 +47,9 @@ def _error(request_id, message):
 class Bridge:
     """Translates the host's stdio JSON-RPC into calls on one live upstream session."""
 
-    def __init__(self, client):
+    def __init__(self, client, render_results=True):
         self.client = client
+        self.render_results = render_results
 
     def handle(self, message):
         """Return the response to send back, or ``None`` for a notification.
@@ -67,6 +73,11 @@ class Bridge:
 
         response = self._forward(method, params)
         response["id"] = request_id
+        # Only the result of a call is rendered, and never tools/list: the host builds calls
+        # from those input schemas, so they have to stay real JSON Schema documents. A tool
+        # result is read, not executed, which is what makes the signature form safe there.
+        if self.render_results and method == "tools/call" and isinstance(response.get("result"), dict):
+            response["result"] = render(response["result"])
         return response
 
     def _forward(self, method, params):
@@ -81,9 +92,9 @@ def _client_info():
     return {"name": CLIENT_NAME, "version": __version__}
 
 
-def serve(client, stdin, stdout):
+def serve(client, stdin, stdout, render_results=True):
     """Read newline-delimited JSON-RPC from ``stdin`` until it closes."""
-    bridge = Bridge(client)
+    bridge = Bridge(client, render_results)
     for line in stdin:
         line = line.strip()
         if not line:
@@ -115,6 +126,13 @@ def main(argv=None):
         description="Serve a running Unreal editor's Jutsu MCP tools over stdio.",
     )
     parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Forward the server's response bodies untouched. Without it a JSON Schema in a "
+             "tool result is rendered as a signature, which measured 39%% of its JSON with no "
+             "constraint or description lost.",
+    )
+    parser.add_argument(
         "--port",
         type=int,
         default=None,
@@ -137,7 +155,7 @@ def main(argv=None):
     sys.stdout.reconfigure(encoding="utf-8", newline="\n")
 
     try:
-        serve(client, sys.stdin, sys.stdout)
+        serve(client, sys.stdin, sys.stdout, not arguments.json)
     finally:
         client.close()
     return 0

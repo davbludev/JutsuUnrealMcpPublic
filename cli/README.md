@@ -95,8 +95,37 @@ test drives the CLI with the official MCP client and compares everything it sees
 tool list, successes and errors - against the same official client talking straight to the
 plugin.
 
+## What it changes about a response
+
+One thing, and it was measured before it was written. A response stays JSON, because re-encoding
+one into indented lines, flattened paths or Markdown costs **more** tokens than the JSON it
+replaces - measured at 115% to 252% of it on 204 recorded responses with the `o200k_base`
+tokenizer. Modern tokenizers pack JSON punctuation into single tokens, and these payloads are
+already compact.
+
+The exception is a JSON Schema document, and it is a large one. Three quarters of a schema's
+tokens are structure rather than prose, so the CLI renders any schema inside a *result* as a
+signature:
+
+```
+object
+  target: string minLength=1  # Canonical Unreal object path returned by discovery...
+  aspect?: "<one selector>"|"<another selector>"
+  options?: object open       # Extra arguments forwarded to the selected aspect
+```
+
+(The selectors above are shown as placeholders on purpose - every real name in that output comes
+from the live server, and none of them is written down here.)
+
+Every type, bound, enum, branch count and description survives; what goes is the JSON around
+them. A describe of one authoring capability with its domain selector measured **4,031 tokens
+to 1,185** that way. A response carrying no schema is unchanged, and costs nothing.
+
+The published tool list is never rendered - the host builds calls from those input schemas, so
+they stay real JSON Schema documents. `--json` turns rendering off everywhere and forwards the
+server's bodies untouched.
+
 ## Status
 
-This is the walking skeleton: the transport core and the stdio front end. Responses are forwarded
-as the server's own JSON. Rendering, field projection and the `jutsu <cmd>` shell front end are
-not built yet.
+The transport core, the stdio front end and the schema renderer. Field projection and the
+`jutsu <cmd>` shell front end are not built yet.

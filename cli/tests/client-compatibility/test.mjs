@@ -21,8 +21,16 @@ const endpoint = new URL(process.env.JUTSU_MCP_URL ?? 'http://127.0.0.1:19781/mc
 const interpreter = process.env.JUTSU_CLI_PYTHON ?? 'python';
 
 const httpClient = new Client({ name: 'JutsuMcpCliCompatibilityHttp', version: '1.0.0' });
+// --json is the forwarding proof: in that mode the CLI must hand back exactly what the plugin
+// sent. The default mode renders JSON Schema documents, so it is asserted separately below.
 const stdioClient = new Client({ name: 'JutsuMcpCliCompatibilityStdio', version: '1.0.0' });
 const stdioTransport = new StdioClientTransport({
+  command: interpreter,
+  args: [entryPoint, '--json', '--port', String(endpoint.port)],
+  stderr: 'inherit'
+});
+const renderClient = new Client({ name: 'JutsuMcpCliCompatibilityRender', version: '1.0.0' });
+const renderTransport = new StdioClientTransport({
   command: interpreter,
   args: [entryPoint, '--port', String(endpoint.port)],
   stderr: 'inherit'
@@ -74,6 +82,7 @@ const errorRoutes = [
 try {
   await httpClient.connect(new StreamableHTTPClientTransport(endpoint));
   await stdioClient.connect(stdioTransport);
+  await renderClient.connect(renderTransport);
 
   assert.equal(
     stdioClient.getInstructions(),
@@ -122,8 +131,34 @@ try {
     assert.deepEqual(withoutCursors(overStdio), withoutCursors(overHttp), `${name} error differed between the CLI and the plugin`);
   }
 
+  // The rendered mode: the tool list must stay real JSON Schema, because the host builds calls
+  // from it, while a schema inside a result becomes a signature that keeps every constraint.
+  const { tools: renderTools } = await renderClient.listTools();
+  assert.deepEqual(renderTools, httpTools, 'rendering must never touch the published tool list');
+
+  const describeArguments = { requests: [{ id: 'core.registry.inspect' }] };
+  const plainDescribe = await httpClient.callTool({ name: 'jutsu_capabilities_describe', arguments: describeArguments });
+  const renderedDescribe = await renderClient.callTool({ name: 'jutsu_capabilities_describe', arguments: describeArguments });
+  const plainSchema = plainDescribe.structuredContent.results[0].capability.inputSchema;
+  const renderedSchema = renderedDescribe.structuredContent.results[0].capability.inputSchema;
+  assert.equal(typeof plainSchema, 'object', 'the plugin should still send a JSON Schema object');
+  assert.equal(typeof renderedSchema, 'string', 'the CLI should render a schema in a result as text');
+  for (const property of Object.keys(plainSchema.properties ?? {})) {
+    assert.ok(renderedSchema.includes(property), `rendered schema lost the property ${property}`);
+  }
+  for (const name of (plainSchema.required ?? [])) {
+    assert.ok(new RegExp(`\b${name}: `).test(renderedSchema), `rendered schema lost that ${name} is required`);
+  }
+  assert.ok(renderedSchema.length < JSON.stringify(plainSchema).length, 'the signature should be shorter than its JSON');
+
+  // Everything that is not a schema is identical between the two modes.
+  const strip = value => JSON.parse(JSON.stringify(value), (key, item) => key.endsWith('Schema') ? undefined : item);
+  assert.deepEqual(strip(renderedDescribe), strip(plainDescribe), 'rendering changed something other than a schema');
+
   console.log('stdio front end matched the live plugin on tools, instructions and all routes');
+  console.log('rendered mode kept the tool list intact and every schema constraint readable');
 } finally {
+  await renderClient.close().catch(() => {});
   await stdioClient.close().catch(() => {});
   await httpClient.close().catch(() => {});
 }
