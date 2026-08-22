@@ -17,15 +17,15 @@ Jutsu uses only UE-supplied plugin dependencies. No separate Python package, thi
 
 ## Why discovery first
 
-The live registry contains **530 capabilities**, exposed through only these five MCP tools:
+The live registry contains **490 capabilities**, exposed through only these five MCP tools:
 
 | Tool | Purpose |
 | --- | --- |
+| `jutsu_recommend` | State a goal and get one routed capability with a ready next call, or a bounded ambiguous answer with alternatives. |
 | `jutsu_capabilities_search` | Find concrete capabilities from a natural-language request; optionally narrow with canonical tags. |
-| `jutsu_capabilities_describe` | Load the exact input/output schema, prerequisites, side effects, recovery routes, and batch rules for selected IDs. |
-| `jutsu_inspect` | Read supported Unreal state using a registered read-only capability. |
-| `jutsu_execute` | Run one registered change with schema and prerequisite validation. |
-| `jutsu_execute_batch` | Preflight and run an ordered set of supported changes; supports backward result references and up to 100 steps. |
+| `jutsu_capabilities_describe` | Load exact compact invocation contracts. Takes an array of ids and answers them in one call; full metadata requires explicit detail. |
+| `jutsu_inspect` | Read supported Unreal state. Takes an array of read requests and answers them all in one call. |
+| `jutsu_execute` | Preflight and run up to 100 ordered changes in one call, with internal backward references; success is compact by default, with full result detail available explicitly. |
 
 This architecture keeps the agent's initial context small and makes the current registry—not an outdated prompt—the source of truth. An agent can ask for “create a damage Gameplay Effect” or “inspect a PCG static-mesh spawner,” receive the relevant capability IDs, read their exact contracts on demand, then act with canonical Unreal identities and typed data.
 
@@ -33,7 +33,7 @@ Capability records report their expected lifecycle and effects: validation error
 
 ## Dedicated Unreal workflows and reflection fallback
 
-The 530 count is the complete live registry; it is **not** a claim of unrestricted Unreal access. Dedicated native capabilities provide the supported authoring and inspection routes for systems including:
+The 490 count is the complete live registry; it is **not** a claim of unrestricted Unreal access. Dedicated native capabilities provide the supported authoring and inspection routes for systems including:
 
 - Assets and project settings; levels, actors, components, World Partition, and streaming.
 - Blueprints, interfaces, graphs, typed pins, variables, UMG, and localization.
@@ -87,6 +87,6 @@ More help: [installation](Documentation/INSTALLATION.md), [MCP client configurat
 
 ## Support
 
-For bugs, setup issues, and capability requests, open a [GitHub Issue](https://github.com/davbludev/JutsuUnrealMcp/issues). Include your Unreal Engine version, the Jutsu status-bar state/active port, the capability ID or agent request, and the returned diagnostic where possible.
+For bugs, setup issues, and capability requests, open a [GitHub Issue](https://github.com/davbludev/JutsuUnrealMcpPublic/issues). Include your Unreal Engine version, the Jutsu status-bar state/active port, the capability ID or agent request, and the returned diagnostic where possible.
 
 Jutsu Unreal MCP is an independent product and is not affiliated with, sponsored by, or endorsed by Epic Games.
