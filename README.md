@@ -8,6 +8,7 @@ It is built for practical editor work: authoring and maintaining assets, Bluepri
 
 | Requirement | Supported configuration |
 | --- | --- |
+| Plugin version | **2.0.0** |
 | Unreal Engine | **5.8.0** |
 | Platform | **Windows 64-bit Unreal Editor** |
 | Plugin type | Editor-only Code Plugin; not available in commandlets or packaged games |
@@ -24,7 +25,7 @@ The live registry contains **490 capabilities**, exposed through only these five
 | `jutsu_recommend` | State a goal and get one routed capability with a ready next call, or a bounded ambiguous answer with alternatives. |
 | `jutsu_capabilities_search` | Find concrete capabilities from a natural-language request; optionally narrow with canonical tags. |
 | `jutsu_capabilities_describe` | Load exact compact invocation contracts. Takes an array of ids and answers them in one call; full metadata requires explicit detail. |
-| `jutsu_inspect` | Read supported Unreal state. Takes an array of read requests and answers them all in one call. |
+| `jutsu_inspect` | Run supported Inspect-kind capabilities in one request array. Most are read-only; declared lifecycle polls may consume completed work or resume temporary runtime state. |
 | `jutsu_execute` | Preflight and run up to 100 ordered changes in one call, with internal backward references; success is compact by default, with full result detail available explicitly. |
 
 This architecture keeps the agent's initial context small and makes the current registry—not an outdated prompt—the source of truth. An agent can ask for “create a damage Gameplay Effect” or “inspect a PCG static-mesh spawner,” receive the relevant capability IDs, read their exact contracts on demand, then act with canonical Unreal identities and typed data.
@@ -73,6 +74,7 @@ The expected flow is search → describe → inspect → execute → inspect. Fo
 - Jutsu is an editor tool, not a runtime, viewport/UI-control, or general automation server. PIE automation does not support multiplayer or separate-process sessions.
 - Destructive operations require explicit intent. Changes can dirty, compile, save, reload, import, rename, move, or delete project data; use source control or backups for consequential work.
 - PIE validation is intentionally bounded to one native in-process standalone PIE session and exact placed Functional Test targets. Generic runtime calls reject RPC, latent, delegate, wildcard/custom-thunk, deprecated, internal, and unsupported signatures.
+- Real-frame PIE measurements complete exactly the requested selected-world ticks and hold each endpoint until poll. Put dependent reads after that poll in one `jutsu_inspect` array; set `nextFrames` on non-final polls to chain samples without a free-running gap. Manual `pie.session.advance` is refused while such an interval owns the world.
 - No AI client is named as officially tested in this documentation. Use a client that meets the Streamable HTTP and protocol requirements above.
 
 For detailed boundaries, see [Known limitations](Documentation/KNOWN_LIMITATIONS.md) and [network and security guidance](Documentation/NETWORK_AND_SECURITY.md).
