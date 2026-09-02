@@ -8,8 +8,8 @@ It is built for practical editor work: authoring and maintaining assets, Bluepri
 
 | Requirement | Supported configuration |
 | --- | --- |
-| Plugin version | **2.0.0** |
-| Unreal Engine | **5.8.0** |
+| Plugin version | **2.0.1** |
+| Unreal Engine | **5.5, 5.6, 5.7, or 5.8**; install the package matching the project's engine minor |
 | Platform | **Windows 64-bit Unreal Editor** |
 | Plugin type | Editor-only Code Plugin; not available in commandlets or packaged games |
 | MCP client | Streamable HTTP with MCP protocol `2025-11-25` |
@@ -18,7 +18,7 @@ Jutsu uses only UE-supplied plugin dependencies. No separate Python package, thi
 
 ## Why discovery first
 
-The live registry contains **490 capabilities**, exposed through only these five MCP tools:
+The live registry contains **511 capabilities on UE 5.5, 512 on UE 5.6 and 5.7, and 513 on UE 5.8**, exposed through only these five MCP tools:
 
 | Tool | Purpose |
 | --- | --- |
@@ -26,7 +26,7 @@ The live registry contains **490 capabilities**, exposed through only these five
 | `jutsu_capabilities_search` | Find concrete capabilities from a natural-language request; optionally narrow with canonical tags. |
 | `jutsu_capabilities_describe` | Load exact compact invocation contracts. Takes an array of ids and answers them in one call; full metadata requires explicit detail. |
 | `jutsu_inspect` | Run supported Inspect-kind capabilities in one request array. Most are read-only; declared lifecycle polls may consume completed work or resume temporary runtime state. |
-| `jutsu_execute` | Preflight and run up to 100 ordered changes in one call, with internal backward references; success is compact by default, with full result detail available explicitly. |
+| `jutsu_execute` | Preflight and run up to 5 ordered changes in one call, with internal backward references; success is compact by default, with full result detail available explicitly. |
 
 This architecture keeps the agent's initial context small and makes the current registry—not an outdated prompt—the source of truth. An agent can ask for “create a damage Gameplay Effect” or “inspect a PCG static-mesh spawner,” receive the relevant capability IDs, read their exact contracts on demand, then act with canonical Unreal identities and typed data.
 
@@ -34,12 +34,13 @@ Capability records report their expected lifecycle and effects: validation error
 
 ## Dedicated Unreal workflows and reflection fallback
 
-The 490 count is the complete live registry; it is **not** a claim of unrestricted Unreal access. Dedicated native capabilities provide the supported authoring and inspection routes for systems including:
+These lane-specific counts are the complete live registries; they are **not** claims of unrestricted Unreal access. Dedicated native capabilities provide the supported authoring and inspection routes for systems including:
 
 - Assets and project settings; levels, actors, components, World Partition, and streaming.
 - Blueprints, interfaces, graphs, typed pins, variables, UMG, and localization.
 - Materials, animation assets and Animation Blueprints, Control Rig, IK Rig, and Sequencer.
 - Gameplay Ability System, Gameplay Tags, Enhanced Input, StateTree, Smart Objects, Gameplay Interactions, and EQS.
+- Behavior Trees and Blackboards: the tree with its graph, composites, tasks, decorators, services, child and decorator order, composite-decorator boolean logic, and the blackboard with its typed keys, inheritance, and the cross-asset repair a key rename needs.
 - Niagara, MetaSound and audio assets, PCG graphs/components, physics, and PIE/Functional Test validation.
 
 When a dedicated route does not fit, Jutsu offers a **constrained reflection fallback**. It can search and inspect exact reflected types and members, then route eligible properties or functions through their documented policies. It does not create extra dedicated capability counts and does not expose arbitrary Python, console commands, C++, unrestricted `UFunction` calls, Editor selection lookup, or inferred targets.
@@ -49,7 +50,7 @@ Generic editor function calls are limited to public `BlueprintCallable` pure/con
 ## Install and connect
 
 1. Install **Jutsu Unreal MCP** through Fab/Launcher.
-2. Open a UE 5.8 project. In **Edit > Plugins**, enable **Jutsu Unreal MCP** and restart the Editor when prompted.
+2. Open a project in the same Unreal Engine minor as the installed package: UE 5.5, 5.6, 5.7, or 5.8. In **Edit > Plugins**, enable **Jutsu Unreal MCP** and restart the Editor when prompted.
 3. Check the **Jutsu MCP** item in the Level Editor status bar. It should report **Running** and show the active port.
 4. Add a Streamable HTTP MCP server in your coding agent/client using:
 
