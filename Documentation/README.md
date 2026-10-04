@@ -1,6 +1,6 @@
 # Jutsu Unreal MCP documentation
 
-Jutsu Unreal MCP is an independent Unreal Engine 5.8 editor Code Plugin for Win64. It serves an MCP endpoint on the local machine through which a coding agent reads and edits Unreal editor state. It is not an Epic Games product and does not redistribute Epic or third-party code, binaries, Python, or assets.
+Jutsu Unreal MCP is an independent Unreal Engine 5.5–5.8 editor Code Plugin for Win64. It serves an MCP endpoint on the local machine through which a coding agent reads and edits Unreal editor state. It is not an Epic Games product and does not redistribute Epic or third-party code, binaries, Python, or assets.
 
 1. [Installation](INSTALLATION.md)
 2. [MCP client configuration](MCP_CLIENT_CONFIGURATION.md)

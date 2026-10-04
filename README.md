@@ -9,7 +9,7 @@ Python and console commands, places actors, and plays and captures PIE.
 | Requirement | Supported configuration |
 | --- | --- |
 | Plugin version | **5.0.0** |
-| Unreal Engine | **5.8** |
+| Unreal Engine | **5.5, 5.6, 5.7, 5.8** (a separate package per version) |
 | Platform | **Windows 64-bit Unreal Editor** |
 | Plugin type | Editor-only Code Plugin; not loaded in commandlets or packaged games |
 | MCP client | Streamable HTTP |
@@ -38,7 +38,7 @@ Asset edits are saved; level edits stay unsaved until `save_assets`. See [Usage]
 
 ## Install and connect
 
-1. Install **Jutsu Unreal MCP** through Fab/Launcher for UE 5.8.
+1. Install **Jutsu Unreal MCP** through Fab/Launcher for your engine version.
 2. In **Edit > Plugins**, enable **Jutsu Unreal MCP** and restart the Editor.
 3. The **Jutsu MCP** item in the Level Editor status bar shows **Running** and the active port.
 4. Add a Streamable HTTP MCP server in your client:

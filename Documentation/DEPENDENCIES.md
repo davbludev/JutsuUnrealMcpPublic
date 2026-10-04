@@ -2,7 +2,7 @@
 
 ## Unreal Engine
 
-This release supports Unreal Engine 5.8 on the Win64 Editor. The plugin enables the following UE-supplied plugins in `JutsuUnrealMcp.uplugin`: GameplayTagsEditor, GameplayAbilities, EnhancedInput, StateTree, GameplayStateTree, SmartObjects, EnvironmentQueryEditor, GameplayInteractions, ControlRig, IKRig, Niagara, Metasound, LevelSequenceEditor, PCG, AudioModulation, **PythonScriptPlugin** (Python Editor Script Plugin) and **EditorScriptingUtilities** (Editor Scripting Utilities).
+This release supports Unreal Engine 5.5, 5.6, 5.7 and 5.8 on the Win64 Editor. The plugin enables the following UE-supplied plugins in `JutsuUnrealMcp.uplugin`: GameplayTagsEditor, GameplayAbilities, EnhancedInput, StateTree, GameplayStateTree, SmartObjects, EnvironmentQueryEditor, GameplayInteractions, ControlRig, IKRig, Niagara, Metasound, LevelSequenceEditor, PCG, AudioModulation, **PythonScriptPlugin** (Python Editor Script Plugin) and **EditorScriptingUtilities** (Editor Scripting Utilities).
 
 All of them ship with Unreal Engine; no user-made plugin is required. The Python Editor Script Plugin supplies the Python interpreter that `run_python` uses. The module also links the UE modules declared by `Source/JutsuUnrealMcp/JutsuUnrealMcp.Build.cs`.
 

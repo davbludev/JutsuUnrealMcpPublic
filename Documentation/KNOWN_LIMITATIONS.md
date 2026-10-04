@@ -1,6 +1,6 @@
 # Known limitations
 
-- Editor only, Windows 64-bit, Unreal Engine 5.8. The plugin does not load in commandlets or packaged games.
+- Editor only, Windows 64-bit, Unreal Engine 5.5–5.8. The plugin does not load in commandlets or packaged games.
 - One Play In Editor session at a time, in the Editor process. Multiplayer and separate-process PIE are not driven.
 - Client cancellation cannot stop an operation running on the game thread. After a timeout, read the affected state before retrying.
 - `get_log` returns a bounded window of recent Output Log lines, not the complete log file.
