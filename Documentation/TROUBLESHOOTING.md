@@ -2,28 +2,28 @@
 
 ## Server does not start
 
-Check the status-bar state and active/configured ports. If another process owns the configured port, choose an unused port in Editor Preferences and select **Restart**. A non-loopback bind is intentionally refused. Confirm the built-in dependencies are installed and enabled, then restart the Editor.
+Check the status-bar state and the active and configured ports. If another process owns the configured port, choose an unused port in Editor Preferences and select **Restart**. A non-loopback bind is intentionally refused. Confirm the built-in dependencies in [Dependencies](DEPENDENCIES.md) are enabled, then restart the Editor.
 
-## MCP client cannot initialize
+## Client cannot connect
 
-Use `http://127.0.0.1:<active-port>/mcp`, request protocol `2025-11-25`, omit `MCP-Session-Id` on `initialize`, then retain the returned session header. Send `notifications/initialized` before tool calls. Use JSON content type and an accepted JSON/SSE response type. Do not add a LAN hostname or proxy.
+Use `http://127.0.0.1:<active-port>/mcp` as a Streamable HTTP server. Do not use a LAN hostname or proxy. `GET http://127.0.0.1:<active-port>/mcp/health` shows whether the server is accepting requests. After an Editor restart no reconnect is needed: the endpoint keeps no session.
 
-## Timeout or unknown result
+## `run_python` fails to start
 
-Do not blindly retry. Inspect the relevant asset, object, package, compile state, and dirty/save state through MCP or the Editor. The client deadline does not preempt an already-running synchronous GameThread operation.
+The Python Editor Script Plugin must be enabled. Check **Edit > Plugins > Python Editor Script Plugin** and restart the Editor.
 
-## Continuation fails or response is incomplete
+## A call fails
 
-Follow `structuredContent.page.continuation` exactly and keep the same MCP session. Do not change arguments, byte budget, record limit, or text mode while using a cursor. `cursor_stale` means the snapshot expired, was evicted, or relevant Unreal state changed; repeat the original inspection. `cursor_mismatch` means the session or request identity changed. `invalid_cursor` means the cursor is absent or unknown. For `response_budget_too_small`, repeat the original request without that cursor and request a larger byte budget. See [Bounded responses and continuation](BOUNDED_RESPONSES.md).
+Read the error text: it names the argument at fault and lists the valid choices. `get_log` returns recent Output Log lines, where compiler, save and import errors appear.
 
-## Capability or dependency error
+## Timeout
 
-Follow the diagnostic's targeted `jutsu_capabilities_search` recovery and retry with an exact returned ID; an unknown capability does not require loading the catalog. Use bounded `expected`, `actual`, `schema`, `retryable`, recovery, related-capability, and mutation/dirty/save side-effect fields when present. Check the dependency table, including the optional Audio Modulation plugin and the Experimental/Beta UE plugins. Unsupported arbitrary execution paths are intentional.
+A client timeout does not stop an operation that is already running on the game thread; it may still complete. Read the affected asset or actor before retrying.
 
-## Compile, save, import, or reload failure
+## Compile, save or import failure
 
-Read the structured diagnostic and Editor log. Resolve the reported prerequisite or dirty/conflict state, then inspect again. Use explicit compile/save/reload operations only where the capability contract permits them. Keep source control or a backup before destructive recovery.
+`compile_assets` and `write_asset` report compiler messages; `get_log` shows save and import errors. Resolve the reported cause, then read the asset again. Keep source control or a backup before destructive recovery.
 
 ## Support
 
-Use the monitored support destination published in the Fab listing. The publisher must add the durable public support URL to release metadata before submission.
+Open a [GitHub Issue](https://github.com/davbludev/JutsuUnrealMcpPublic/issues) with your Unreal Engine version, the status-bar state and port, the tool call, and the reply.

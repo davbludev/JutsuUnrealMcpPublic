@@ -4,14 +4,14 @@
 
 - Unreal Engine 5.8 installed through the Epic Games Launcher.
 - Windows 64-bit Editor.
-- A supported Streamable HTTP MCP client.
-- The built-in Unreal plugin dependencies listed in [Dependencies](DEPENDENCIES.md).
+- A Streamable HTTP MCP client.
+- The built-in Unreal plugins listed in [Dependencies](DEPENDENCIES.md); the plugin enables them.
 
 ## Fab/Launcher installation
 
-Fab installs this Code Plugin as an engine plugin. Install the purchased or downloaded project version through the Fab/Launcher workflow, open a UE 5.8 project, and open **Edit > Plugins**. Search for **Jutsu Unreal MCP**, enable it, and restart the Editor when prompted.
+Fab installs this Code Plugin as an engine plugin. Install it for UE 5.8 through the Fab/Launcher workflow, open **Edit > Plugins**, search for **Jutsu Unreal MCP**, enable it, and restart the Editor when prompted.
 
-After restart, open the **Jutsu MCP** item in the Level Editor status bar. It reports `Running`, `Stopped`, or `Error`, the active port, and the configured port. The **Start**, **Stop**, and **Restart** commands control the loopback listener. The plugin is disabled by default and does not run in commandlets.
+After restart, open the **Jutsu MCP** item in the Level Editor status bar. It reports `Running`, `Stopped`, or `Error`, the active port, and the configured port. **Start**, **Stop**, and **Restart** control the loopback listener. The plugin is disabled by default and does not run in commandlets.
 
 ## Configuration
 
@@ -19,4 +19,4 @@ Open **Edit > Editor Preferences > Plugins > Jutsu Unreal MCP** and set **Port**
 
 ## Update or remove
 
-Stop the server, close the Editor, then update or remove the engine plugin through the Fab/Launcher installation workflow. Do not mix a project-checkout copy with the engine-installed copy. Reopen the project and verify the plugin version and status-bar state after an update.
+Stop the server, close the Editor, then update or remove the engine plugin through the Fab/Launcher workflow. Do not mix a project-checkout copy with the engine-installed copy. Reopen the project and check the plugin version and status-bar state after an update.
