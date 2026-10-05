@@ -75,7 +75,5 @@ mesh saved without UVs by `create_new_static_mesh_asset_from_mesh` crashes the E
 
 If the server refused something that looked valid, gave an error that did not say what to do next,
 or forced hand work in the Editor, report it: exact call, exact response, no paraphrase, and say
-when you guessed. Append the entry to the plugin checkout's `MCP_FEEDBACK.md` in the format its
-header gives when you have that file; otherwise open a
-[GitHub Issue](https://github.com/davbludev/JutsuUnrealMcpPublic/issues). If nothing gave you
-trouble, write nothing.
+when you guessed, in a [GitHub Issue](https://github.com/davbludev/JutsuUnrealMcpPublic/issues).
+If nothing gave you trouble, write nothing.
