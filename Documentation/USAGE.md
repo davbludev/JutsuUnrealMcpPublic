@@ -20,7 +20,7 @@ Values are plain JSON, converted to the target property's type: numbers, boolean
 
 ## Assets as text
 
-`read_asset(path)` returns an outline of the asset's sections; `read_asset(path, section)` returns one section as text. `write_asset(path, section, text)` makes the section match the text, removing what the text leaves out; `edit_asset(path, section, old_text, new_text)` applies one exact text replacement, like a file edit. A write is all or nothing, compiles Blueprints, reports what changed with any compiler messages, and saves the asset.
+`read_asset(path)` returns an outline of the asset's sections; `read_asset(path, section)` returns one section as text. `write_asset(path, section, text)` makes the section match the text, removing what the text leaves out; `edit_asset(path, section, old_text, new_text)` applies one exact text replacement, like a file edit. A write is all or nothing, compiles Blueprints, reports what changed with any compiler messages, and saves the asset. Node positions are never part of the text: every graph a write changes is laid out again by the plugin, so it stays readable without anyone arranging nodes.
 
 | Asset | Sections |
 | --- | --- |

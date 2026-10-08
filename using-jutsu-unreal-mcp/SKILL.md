@@ -15,7 +15,8 @@ with `edit_asset(path, section, old_text, new_text)` (exact, unique match, like 
 replace a section with `write_asset`. The written text is the whole resulting section: what it leaves
 out is removed (in a `Document` section, listed items are created or updated and the rest stay).
 Writes are all or nothing, compile a Blueprint whose structure or graphs change, report the
-compiler's messages and save.
+compiler's messages and save. The plugin lays out every graph it changes; node positions are not
+part of the text, so never try to place nodes.
 
 Blueprint graph (`EventGraph`, `Function:Name`, `Macro:Name`):
 
