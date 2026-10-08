@@ -9,7 +9,7 @@ Open this page only for Niagara work. The general rules of `SKILL.md` apply.
 | `Parameters` | `User.*` parameters, one per line; `System.*` ones the parameter panel declares |
 | `Emitters` | one line per emitter, in order |
 | `System` | the `SystemSpawn` and `SystemUpdate` stacks |
-| `Emitter:<Name>` | the emitter's `Properties`, `Parameters` (`Emitter.*`), four stacks, `Renderers`; a lightweight one's `Properties`, `Modules`, `Renderers` |
+| `Emitter:<Name>` | the emitter's `Properties`, `Parameters` (`Emitter.*`), four stacks, event handlers, simulation stages, `Renderers`; a lightweight one's `Properties`, `Modules`, `Renderers` |
 | `ScratchPad:<Name>`, `ScratchPad:<Emitter>/<Name>` | one scratch-pad graph (below) |
 | `Properties` | the system's own settings, as for any asset |
 
@@ -51,6 +51,11 @@ Renderers
 - A stack is its header (`SystemSpawn`, `SystemUpdate`, `EmitterSpawn`, `EmitterUpdate`,
   `ParticleSpawn`, `ParticleUpdate`), then its modules in order: `<Name>: <module script path or
   ScratchPad section> [disabled]`. A module keeps its name; a new one is named after its script.
+- `EventHandler <Emitter>/<Event> [ExecutionMode=SpawnedParticles, SpawnNumber=3]` stacks take events
+  (`DeathEvent`, `LocationEvent`, `Collision`) the source writes with its `Generate…Event` module (CPU
+  only; death events need `bRequiresPersistentIDs = true`); receive with `/Niagara/Modules/Events/Receive{Death,Location,Collision}Event`.
+- `SimulationStage <Name> [NumIterations=2, IterationSource=DataInterface, DataInterface=Emitter.Grid, disabled]`
+  stacks run on GPU emitters only (`SimTarget = "GPUComputeSim"`); a scratch pad there has `[Usage=SimulationStage]`.
 - Under a module, only overridden inputs, by the name Niagara shows (spaces included). A value is a
   literal (`2.5`, `true`, `(R=1,G=0,B=0,A=1)`, an enum entry's name), a linked parameter
   (`User.TracerColor`, `Particles.Gravity`), `Call <dynamic input script or ScratchPad section>` with
