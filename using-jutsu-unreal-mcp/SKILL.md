@@ -115,8 +115,9 @@ through `call_function` on Unreal's scripting libraries or `run_python` with the
 `create_asset` `options` set factory properties: a BlendSpace needs `{"TargetSkeleton": path}`; a
 Blueprint interface is `class Blueprint`, `parent Interface`, `{"BlueprintType": "BPTYPE_Interface"}`.
 
-No text route yet: a Niagara lightweight emitter's own settings (loop, spawn rate); only its modules
-and renderers are in `Document`.
+A Niagara lightweight emitter's own settings (loop, spawn rate) are not in `Document`: `set_properties`
+on the emitter object (the outer of a renderer `path` in `Details`), e.g.
+`"SpawnInfos[0].Rate": {"Mode": "UniformConstant", "ChannelConstantsAndRanges": [45]}`.
 
 A duplicated primary data asset shares its source's Primary Asset Id and the Asset Manager hands the
 id to the copy (engine behaviour): change the copy's id property at once; restart the editor if the
