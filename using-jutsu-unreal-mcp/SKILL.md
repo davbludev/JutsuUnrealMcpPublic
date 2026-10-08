@@ -1,6 +1,6 @@
 ---
 name: using-jutsu-unreal-mcp
-description: Text formats of the Jutsu Unreal MCP server's read_asset / write_asset / edit_asset sections (Blueprint and anim graphs, variables, components, widget trees, materials, sound cues) and how to report trouble. Use when editing Unreal assets through Jutsu as text, or when a Jutsu tool gave you trouble worth reporting.
+description: Text formats of the Jutsu Unreal MCP server's read_asset / write_asset / edit_asset sections (Blueprint and anim graphs, variables, components, widget trees, materials, sound cues, Niagara scratch pads) and how to report trouble. Use when editing Unreal assets through Jutsu as text, or when a Jutsu tool gave you trouble worth reporting.
 ---
 
 # Using Jutsu Unreal MCP
@@ -115,6 +115,9 @@ Sound Cue `Graph`: `<id> WavePlayer {"SoundWaveAssetPtr":"/Game/S_Step.S_Step"}`
 `Mixer`, `Attenuation`... (the SoundNode class without its prefix), inputs as `0 = <id>` (by index, or
 the input's name such as `True` on a Branch), then `Output = <id>`. ` [inputs=N]` keeps unlinked
 inputs; a Random node's `Weights` take one value per input (left out, each is 1). Writes keep the Sound Cue Editor's graph in step.
+
+Niagara systems (`ScratchPad:` sections and their compile reply): read [niagara.md](niagara.md)
+before writing one.
 
 `Document` (StateTree, Behavior Tree, Niagara, PCG, MetaSound, Level Sequence, Control Rig, Anim
 Blueprint state machines, maps): the JSON read returns. Copy a clause's shape to add an item
