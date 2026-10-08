@@ -88,10 +88,28 @@ old value.
 
 One line per item: `Dispatchers` `OnHit(Damage: float)`; `Interfaces` an interface path; user
 struct `Fields` `Count: int = 3`; user enum `Entries` a name; String Table `Entries`
-`Key = "Text"`; widget `Animations` a name (delete only: leave one out to delete it).
+`Key = "Text"`.
+
+Widget `Animations`: `FadeIn [0-0.5]` (range in seconds, `[was="Old"]` renames), then per keyed
+channel `  Panel.RenderOpacity: 0=0 linear, 0.5=1` or `  Title.RenderTransform.Translation.X: 0=-200, 0.5=0`
+(`Translation.X/Y`, `Angle`, `Scale.X/Y`, `Shear.X/Y`; keys `seconds=value`, `constant`/`linear`,
+cubic when omitted). Left-out keys, channels and animations are removed; other tracks are kept.
+
+Montage `Sections`: `Loop @ 0.5 -> Loop` (seconds, optional next section). Montage and sequence
+`Notifies`: `Track: Name` lines, each followed by `  0.25 AnimNotify_PlaySound {"Sound":"..."}`,
+`  0.25-0.75 AnimNotifyState_Trail {...}` (a state's start-end) or `  0.5 "Footstep"` (skeleton
+notify); one notify per start time on a track; a notify matches by track, time and class. `Sockets`: skeleton `Grip: hand_r {"RelativeLocation":{"X":10}}`,
+Static Mesh `Grip {"Tag":"grip"}`. `[was="Old"]` renames a section or socket.
+
+Gameplay tags: path `GameplayTags` (no asset). `Tags` (DefaultGameplayTags.ini) or
+`Tags:<File>.ini`: `Tag.Name [comment="..."]`, `[was="Old.Tag"]` renames with a redirect;
+`Redirects`: `Old.Tag -> New.Tag` (DefaultGameplayTags.ini only; redirects inside Config/Tags files
+are not shown). A write is usable at once, no restart; never edit the ini by hand.
 
 Material `Graph`: `<id> Multiply` with `A = <id>.RGB` inputs, then an `Output` block of
-`BaseColor = <id>` lines. Material instance `Parameters`, `Defaults`, `Properties`: `Name = <json>`.
+`BaseColor = <id>` lines. Material instance `Parameters`, `Defaults`, `Properties`: `Name = <json>`;
+an instanced subobject (input trigger, Blackboard key type) is `{"class": "InputTriggerPressed", ...}`;
+struct array elements list only changed members (`{}`: all default).
 
 Sound Cue `Graph`: `<id> WavePlayer {"SoundWaveAssetPtr":"/Game/S_Step.S_Step"}`, `<id> Random`,
 `Mixer`, `Attenuation`... (the SoundNode class without its prefix), inputs as `0 = <id>` (by index, or
