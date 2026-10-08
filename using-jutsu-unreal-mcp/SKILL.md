@@ -82,6 +82,10 @@ and type) updates it; items left out stay. Remove with `{"remove": {"authoringId
 "destructive": true}`. Leading `// ` lines of a read are notes (what it leaves out); writes skip them.
 A MetaSound preset: create the asset, then write `"preset": {"parent": "<same-kind MetaSound>"}` with
 input overrides as `{"find": {"kind": "input", "name": "Gain"}, "default": 0.25}` nodes.
+A Niagara lightweight (stateless) emitter has `modules` and `renderers` instead of `stacks`: each
+object by name with its changed properties; listed properties are written, the others stay. A
+distribution's values are its `Mode` with `ChannelConstantsAndRanges` or `ChannelCurves`; `Min`,
+`Max` and `Values` follow from them, so write those.
 
 Anything without a text section (sequencer keys, animation edits, editor utilities) is reachable
 through `call_function` on Unreal's scripting libraries or `run_python` with the full `unreal` API.
@@ -92,7 +96,8 @@ No text route yet; use these:
 - AnimGraph pose nodes, state pose graphs, transition rules: UE 5.8 Python
   `unreal.BlueprintGraphEditor.get_graph_editor_by_name(abp, "AnimGraph").create_node_from_name(...)`
   and `BlueprintGraphPinLibrary.try_create_connection`; states and transitions go through `Document`.
-- Niagara stateless (lightweight) emitters: their modules and renderers are absent from `Document`.
+- A Niagara lightweight emitter's own settings (loop, spawn rate): only its modules and renderers are
+  in `Document`.
 
 A duplicated primary data asset shares its source's Primary Asset Id and the Asset Manager hands the
 id to the copy (engine behaviour): change the copy's id property at once; restart the editor if the
