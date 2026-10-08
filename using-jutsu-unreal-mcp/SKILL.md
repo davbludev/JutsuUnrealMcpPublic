@@ -119,26 +119,18 @@ inputs; a Random node's `Weights` take one value per input (left out, each is 1)
 Niagara systems (`ScratchPad:` sections and their compile reply): read [niagara.md](niagara.md)
 before writing one.
 
-`Document` (StateTree, Behavior Tree, Niagara, PCG, MetaSound, Level Sequence, Control Rig, Anim
+`Document` (StateTree, Behavior Tree, PCG, MetaSound, Level Sequence, Control Rig, Anim
 Blueprint state machines, maps): the JSON read returns. Copy a clause's shape to add an item
 (most domains write `"create": {...}`); a clause with an existing item's `authoringId` (or its name
 and type) updates it; items left out stay. Remove with `{"remove": {"authoringId": "..."},
 "destructive": true}`. Leading `// ` lines of a read are notes (what it leaves out); writes skip them.
 A MetaSound preset: create the asset, then write `"preset": {"parent": "<same-kind MetaSound>"}` with
 input overrides as `{"find": {"kind": "input", "name": "Gain"}, "default": 0.25}` nodes.
-A Niagara lightweight (stateless) emitter has `modules` and `renderers` instead of `stacks`: each
-object by name with its changed properties; listed properties are written, the others stay. A
-distribution's values are its `Mode` with `ChannelConstantsAndRanges` or `ChannelCurves`; `Min`,
-`Max` and `Values` follow from them, so write those.
 
 Anything without a text section (sequencer keys, animation edits, editor utilities) is reachable
 through `call_function` on Unreal's scripting libraries or `run_python` with the full `unreal` API.
 `create_asset` `options` set factory properties: a BlendSpace needs `{"TargetSkeleton": path}`; a
 Blueprint interface is `class Blueprint`, `parent Interface`, `{"BlueprintType": "BPTYPE_Interface"}`.
-
-A Niagara lightweight emitter's own settings (loop, spawn rate) are not in `Document`: `set_properties`
-on the emitter object (the outer of a renderer `path` in `Details`), e.g.
-`"SpawnInfos[0].Rate": {"Mode": "UniformConstant", "ChannelConstantsAndRanges": [45]}`.
 
 A duplicated primary data asset shares its source's Primary Asset Id and the Asset Manager hands the
 id to the copy (engine behaviour): change the copy's id property at once; restart the editor if the

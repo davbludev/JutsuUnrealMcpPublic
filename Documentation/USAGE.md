@@ -28,7 +28,8 @@ Values are plain JSON, converted to the target property's type: numbers, boolean
 | Material, Material Function, Sound Cue | `Graph` |
 | Material Instance | `Parameters` |
 | DataTable | `Rows` |
-| StateTree, Behavior Tree, Niagara, PCG, MetaSound, Level Sequence, Control Rig, Animation Blueprint state machines, maps | `Document` (a JSON document) |
+| Niagara System | `Parameters`, `Emitters`, `System`, `Emitter:<Name>`, `ScratchPad:<Name>` |
+| StateTree, Behavior Tree, PCG, MetaSound, Level Sequence, Control Rig, Animation Blueprint state machines, maps | `Document` (a JSON document) |
 | Other assets | `Properties`; some also a read-only `Details` |
 
 Writing a section that does not exist creates it (a new function, macro or graph page); writing empty text to a function, macro or page deletes it. Read a section before writing it: the read is the format to write.

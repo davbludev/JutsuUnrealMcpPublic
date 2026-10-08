@@ -9,7 +9,7 @@ Open this page only for Niagara work. The general rules of `SKILL.md` apply.
 | `Parameters` | `User.*` parameters, one per line; `System.*` ones the parameter panel declares |
 | `Emitters` | one line per emitter, in order |
 | `System` | the `SystemSpawn` and `SystemUpdate` stacks |
-| `Emitter:<Name>` | the emitter's `Properties`, `Parameters` (`Emitter.*`), four stacks, `Renderers` |
+| `Emitter:<Name>` | the emitter's `Properties`, `Parameters` (`Emitter.*`), four stacks, `Renderers`; a lightweight one's `Properties`, `Modules`, `Renderers` |
 | `ScratchPad:<Name>`, `ScratchPad:<Emitter>/<Name>` | one scratch-pad graph (below) |
 | `Properties` | the system's own settings, as for any asset |
 
@@ -17,7 +17,6 @@ Each write makes the section match the text: what it leaves out is removed or re
 in this order: `Parameters`, `Emitters`, scratch pads, then `System` and `Emitter:` stacks.
 
 ```
-User.TracerChannel: DataChannelRead {"Channel": "/Game/VFX/NDC_Tracers.NDC_Tracers"}
 User.TracerColor: LinearColor = (R=6,G=3,B=0.8,A=1)
 User.TracerWidth: float = 3
 ```
@@ -25,22 +24,24 @@ User.TracerWidth: float = 3
 - Parameter lines are `Namespace.Name: type = value`; a data interface is its class without
   `NiagaraDataInterface` and its changed properties as JSON. Types are those of scratch pads.
   `System.*` and `Emitter.*` lines declare a parameter without a value (modules write it).
-- `Emitters` lines are `Name [flags]`. A new name takes `[from=<emitter asset>]` (a template under
-  `/Niagara/DefaultAssets/Templates/Emitters/`) or `[empty]` (Niagara's Minimal emitter); on an
-  existing name these are ignored. `[disabled]`
+- `Emitters` lines are `Name [flags]`. A new name takes one origin: `[from=<emitter asset>]` (a
+  template under `/Niagara/DefaultAssets/Templates/Emitters/`), `[empty]` (Niagara's Minimal emitter)
+  or `[lightweight]`; on an existing name these are ignored. `[disabled]`
   disables, leaving it out enables; `[was="Old"]` renames; a left-out line removes the emitter; the
   order of lines is the emitter order. Reads add `[lightweight]` and `[parent=<asset>]`.
-  Lightweight emitters are not added or edited as text yet.
 
 ```
 EmitterUpdate
   EmitterState: /Niagara/Modules/Emitter/EmitterState
     Life Cycle Mode = Self
   SpawnFromChannel: ScratchPad:Tracers/SpawnFromChannel
-    DataChannel = User.TracerChannel
+    DataChannel = {"Channel": "/Game/VFX/NDC_Tracers.NDC_Tracers"}
 
 ParticleSpawn
   InitializeParticle: /Niagara/Modules/Spawn/Initialization/V2/InitializeParticle
+    Lifetime = Call /Niagara/DynamicInputs/UniformRange/UniformRangedFloat
+      Minimum = 0.03
+      Maximum = 0.06
     Color = User.TracerColor
 
 Renderers
@@ -50,38 +51,57 @@ Renderers
 - A stack is its header (`SystemSpawn`, `SystemUpdate`, `EmitterSpawn`, `EmitterUpdate`,
   `ParticleSpawn`, `ParticleUpdate`), then its modules in order: `<Name>: <module script path or
   ScratchPad section> [disabled]`. A module keeps its name; a new one is named after its script.
-- Under a module, only overridden inputs, by the name Niagara shows (spaces included): a literal
-  (`2.5`, `true`, `(R=1,G=0,B=0,A=1)`, an enum entry's name) or a linked parameter
-  (`User.TracerColor`, `Particles.Gravity`). An input left out returns to the module default.
-  Reads also show `Call <script>` (a dynamic input, its inputs indented under it), `{json}` (a data
-  interface) and `Hlsl "..."`; keep those lines as read, they are not written yet.
+- Under a module, only overridden inputs, by the name Niagara shows (spaces included). A value is a
+  literal (`2.5`, `true`, `(R=1,G=0,B=0,A=1)`, an enum entry's name), a linked parameter
+  (`User.TracerColor`, `Particles.Gravity`), `Call <dynamic input script or ScratchPad section>` with
+  its own inputs indented under it, a data interface's changed properties as `{json}` (`{}` for its
+  defaults), or `Hlsl "<expression>"`. An input left out returns to the module default.
+- A Data Channel read takes its channel as the module input's `{json}` value: linked to a `User.*`
+  data interface it never spawns (engine behaviour). Read the spawned particle's entry by
+  `Op Util::ExecIndex`, not `GetNDCSpawnData`, which only the spawning module's interface answers.
 - `Properties` are `Name = <json>` lines of the emitter's settings (`SimTarget`, `bLocalSpace`,
   `CalculateBoundsMode`, `FixedBounds`, ...). `Renderers` are `Class {json}` lines (`Sprite`,
   `Ribbon`, `Mesh`, `Light`, ...); a renderer is known by its position. Its attribute bindings are
   not text yet and stay as they are.
 
+```
+Properties
+  EmitterState = {"LoopBehavior": "Once"}
+  SpawnInfos = [{"Type": "Burst", "Amount": {"Min": 12, "Max": 12}}]
+
+Modules
+  InitializeParticle {"LifetimeDistribution": {"Mode": "UniformRange", "ChannelConstantsAndRanges": [0.1, 0.25]}}
+  GravityForce {}
+  SolveVelocitiesAndForces {}
+
+Renderers
+  Sprite {"Material": "/Niagara/DefaultAssets/DefaultSpriteMaterial.DefaultSpriteMaterial"}
+```
+
+- A lightweight emitter has `Properties` (its settings: `EmitterState`, `SpawnInfos`, `FixedBounds`,
+  ...), `Modules` and `Renderers`. Its modules are fixed: a listed one is on, with its changed
+  properties as `{json}` (class without `NiagaraStatelessModule_`); one left out is off, its settings
+  kept. `InitializeParticle` and `SolveVelocitiesAndForces` are always on.
+- A distribution is its `Mode` with `ChannelConstantsAndRanges` (`UniformRange` one range for all
+  channels, `NonUniformRange` per channel); its `Min`, `Max` and `Values` follow from them (engine).
+
 ## Scratch pads
 
 A Niagara system's scratch-pad scripts are sections: `ScratchPad:<Name>` for the system's own,
-`ScratchPad:<Emitter>/<Name>` for one emitter's. Writing a name that does not exist creates a module
-scratch pad; writing an existing one replaces its whole graph. Write a scratch pad before the stack
-that uses it.
+`ScratchPad:<Emitter>/<Name>` for one emitter's. Writing a name that does not exist creates a scratch
+pad of the kind its `Output` names; writing an existing one replaces its whole graph. Write a scratch
+pad before the stack or graph that uses it.
 
 ```
 in InputMap
 get MapGet
   Source = in.Map
-  Module.DataChannel: DataChannelRead [Tooltip="Channel to read; link it to User.TracerChannel."]
+  Module.DataChannel: DataChannelRead [Tooltip="Channel to read."]
   Module.MaxRange: float = 20000
-  Engine.Emitter.ID: EmitterID
 exec Op Util::ExecIndex
-slot CallDI DataChannelRead.GetNDCSpawnData
-  Target = get.Module.DataChannel
-  Emitter ID = get.Engine.Emitter.ID
-  Spawned Particle Exec Index = exec.Result
 read CallDI DataChannelRead.Read(Origin: Position, Velocity: Vector)
   Target = get.Module.DataChannel
-  Index = slot.NDC Index
+  Index = exec.Result
 life CustomHlsl(Velocity: Vector, Range: float -> Lifetime: float)
   Velocity = read.Velocity
   Range = get.Module.MaxRange
@@ -106,8 +126,11 @@ out Output Module [Usage=ParticleSpawn]
   On the stack a module input drops `Module.`: `MaxRange`.
 - `Output Module [Usage=EmitterUpdate|ParticleSpawn]`: the module's end, input `Output`, and the
   stack groups it may run in (`SystemSpawn`, `SystemUpdate`, `EmitterSpawn`, `EmitterUpdate`,
-  `ParticleSpawn`, `ParticleUpdate`, `ParticleEvent`, `SimulationStage`). A new scratch pad is a
-  module; one made in the editor as a dynamic input or function keeps its kind.
+  `ParticleSpawn`, `ParticleUpdate`, `ParticleEvent`, `SimulationStage`).
+- `Output DynamicInput` (one result) and `Output Function` declare results like map pins:
+  `Result: float = sum.Result`. A dynamic input reads its inputs as a module does (`Module.Base` on a
+  `MapGet`) and is used on the stack as `Input = Call ScratchPad:<Name>`; a function is called from a
+  graph. The kind is fixed when the scratch pad is first written.
 - `Call <script path>` calls a Niagara function script (or `Call ScratchPad:<Name>`).
 - `CallDI <DataInterface>.<Function>`: a data interface function. Its interface pin is `Target`; a
   function that takes the parameter map has `Map` in and out. In parentheses, the outputs you add
