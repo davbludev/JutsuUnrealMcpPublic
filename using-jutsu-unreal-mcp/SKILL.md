@@ -73,7 +73,7 @@ Material `Graph`: `<id> Multiply` with `A = <id>.RGB` inputs, then an `Output` b
 Sound Cue `Graph`: `<id> WavePlayer {"SoundWaveAssetPtr":"/Game/S_Step.S_Step"}`, `<id> Random`,
 `Mixer`, `Attenuation`... (the SoundNode class without its prefix), inputs as `0 = <id>` (by index, or
 the input's name such as `True` on a Branch), then `Output = <id>`. ` [inputs=N]` keeps unlinked
-inputs; a Random node's `Weights` follow its inputs. Writes keep the Sound Cue Editor's graph in step.
+inputs; a Random node's `Weights` take one value per input (left out, each is 1). Writes keep the Sound Cue Editor's graph in step.
 
 `Document` (StateTree, Behavior Tree, Niagara, PCG, MetaSound, Level Sequence, Control Rig, Anim
 Blueprint state machines, maps): the JSON read returns. Copy a clause's shape to add an item
