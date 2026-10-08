@@ -1,6 +1,6 @@
 ---
 name: using-jutsu-unreal-mcp
-description: Text formats of the Jutsu Unreal MCP server's read_asset / write_asset / edit_asset sections (Blueprint graphs, variables, components, widget trees, materials) and how to report trouble. Use when editing Unreal assets through Jutsu as text, or when a Jutsu tool gave you trouble worth reporting.
+description: Text formats of the Jutsu Unreal MCP server's read_asset / write_asset / edit_asset sections (Blueprint graphs, variables, components, widget trees, materials, sound cues) and how to report trouble. Use when editing Unreal assets through Jutsu as text, or when a Jutsu tool gave you trouble worth reporting.
 ---
 
 # Using Jutsu Unreal MCP
@@ -70,6 +70,11 @@ struct `Fields` `Count: int = 3`; user enum `Entries` a name; String Table `Entr
 Material `Graph`: `<id> Multiply` with `A = <id>.RGB` inputs, then an `Output` block of
 `BaseColor = <id>` lines. Material instance `Parameters`, `Defaults`, `Properties`: `Name = <json>`.
 
+Sound Cue `Graph`: `<id> WavePlayer {"SoundWaveAssetPtr":"/Game/S_Step.S_Step"}`, `<id> Random`,
+`Mixer`, `Attenuation`... (the SoundNode class without its prefix), inputs as `0 = <id>` (by index, or
+the input's name such as `True` on a Branch), then `Output = <id>`. ` [inputs=N]` keeps unlinked
+inputs; a Random node's `Weights` follow its inputs. Writes keep the Sound Cue Editor's graph in step.
+
 `Document` (StateTree, Behavior Tree, Niagara, PCG, MetaSound, Level Sequence, Control Rig, Anim
 Blueprint state machines, maps): the JSON read returns. Copy a clause's shape to add an item
 (most domains write `"create": {...}`); a clause with an existing item's `authoringId` (or its name
@@ -87,7 +92,6 @@ No text route yet; use these:
 - AnimGraph pose nodes, state pose graphs, transition rules: UE 5.8 Python
   `unreal.BlueprintGraphEditor.get_graph_editor_by_name(abp, "AnimGraph").create_node_from_name(...)`
   and `BlueprintGraphPinLibrary.try_create_connection`; states and transitions go through `Document`.
-- Sound Cue graphs: build a MetaSound source instead; Python-built cue nodes leave the cue editor empty.
 - Niagara stateless (lightweight) emitters: their modules and renderers are absent from `Document`.
 
 A duplicated primary data asset shares its source's Primary Asset Id and the Asset Manager hands the

@@ -25,7 +25,7 @@ Values are plain JSON, converted to the target property's type: numbers, boolean
 | Asset | Sections |
 | --- | --- |
 | Blueprint | `Variables`, `Defaults`, `EventGraph` and other graph pages, `Function:Name`, `Macro:Name`; Actor Blueprints also `Components`; Widget Blueprints also `WidgetTree` |
-| Material, Material Function | `Graph` |
+| Material, Material Function, Sound Cue | `Graph` |
 | Material Instance | `Parameters` |
 | DataTable | `Rows` |
 | StateTree, Behavior Tree, Niagara, PCG, MetaSound, Level Sequence, Control Rig, Animation Blueprint state machines, maps | `Document` (a JSON document) |
