@@ -75,6 +75,8 @@ Blueprint state machines, maps): the JSON read returns. Copy a clause's shape to
 (most domains write `"create": {...}`); a clause with an existing item's `authoringId` (or its name
 and type) updates it; items left out stay. Remove with `{"remove": {"authoringId": "..."},
 "destructive": true}`. Leading `// ` lines of a read are notes (what it leaves out); writes skip them.
+A MetaSound preset: create the asset, then write `"preset": {"parent": "<same-kind MetaSound>"}` with
+input overrides as `{"find": {"kind": "input", "name": "Gain"}, "default": 0.25}` nodes.
 
 Anything without a text section (sequencer keys, animation edits, editor utilities) is reachable
 through `call_function` on Unreal's scripting libraries or `run_python` with the full `unreal` API.
@@ -86,9 +88,6 @@ No text route yet; use these:
   `unreal.BlueprintGraphEditor.get_graph_editor_by_name(abp, "AnimGraph").create_node_from_name(...)`
   and `BlueprintGraphPinLibrary.try_create_connection`; states and transitions go through `Document`.
 - Sound Cue graphs: build a MetaSound source instead; Python-built cue nodes leave the cue editor empty.
-- MetaSound presets: `MetaSoundBuilderSubsystem.create_source_preset_builder` + `build_to_asset`
-  drops input defaults; set them afterwards through
-  `MetaSoundEditorSubsystem.find_or_begin_building(asset)` and save.
 - Niagara stateless (lightweight) emitters: their modules and renderers are absent from `Document`.
 
 A duplicated primary data asset shares its source's Primary Asset Id and the Asset Manager hands the
