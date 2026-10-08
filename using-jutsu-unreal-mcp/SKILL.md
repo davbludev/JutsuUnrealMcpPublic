@@ -1,6 +1,6 @@
 ---
 name: using-jutsu-unreal-mcp
-description: Text formats of the Jutsu Unreal MCP server's read_asset / write_asset / edit_asset sections (Blueprint graphs, variables, components, widget trees, materials, sound cues) and how to report trouble. Use when editing Unreal assets through Jutsu as text, or when a Jutsu tool gave you trouble worth reporting.
+description: Text formats of the Jutsu Unreal MCP server's read_asset / write_asset / edit_asset sections (Blueprint and anim graphs, variables, components, widget trees, materials, sound cues) and how to report trouble. Use when editing Unreal assets through Jutsu as text, or when a Jutsu tool gave you trouble worth reporting.
 ---
 
 # Using Jutsu Unreal MCP
@@ -52,6 +52,29 @@ say Call KismetSystemLibrary.PrintString
   function is `Event Name` in the event graph; a new event-graph page: any free section name, e.g.
   `write_asset(path, "Combat", ...)`.
 
+Anim Blueprint graphs use the same text: `Function:AnimGraph`, a state's pose graph
+`State:Locomotion/Idle`, a transition rule `Transition:Locomotion/Idle->Run`. Anim nodes are their
+class without `AnimGraphNode_` (`SequencePlayer {"Node":{"Sequence":"/Game/A_Run.A_Run"}}`,
+`BlendListByBool`, `LocalRefPose`); poses link like values; `StateMachine Locomotion` is a machine
+(another name renames it). The result node (`Root`, `StateResult`, `TransitionResult`) stays:
+
+```
+sm StateMachine Locomotion
+out Root
+  Result = sm.Pose
+```
+```
+speed Get Speed
+fast Call KismetMathLibrary.Greater_DoubleDouble
+  A = speed
+  B = 10
+out TransitionResult
+  bCanEnterTransition = fast.ReturnValue
+```
+
+States, the entry and transitions are added in `Document`; their graphs then appear as sections.
+Naming an optional property in a pin line (`PlayRate = 2`) exposes it as a pin.
+
 Variables: `Health: float = 100 [EditAnywhere, Category="Stats"]`; types `bool int int64 float
 double string name text Vector Actor /Game/Path/BP_Door class<Actor> soft<Texture2D> T[] set<T>
 map<K, V>` (Blueprint classes, user structs and enums by asset path); flags `EditAnywhere BlueprintReadOnly ExposeOnSpawn Private Replicated RepNotify=Fn
@@ -92,12 +115,8 @@ through `call_function` on Unreal's scripting libraries or `run_python` with the
 `create_asset` `options` set factory properties: a BlendSpace needs `{"TargetSkeleton": path}`; a
 Blueprint interface is `class Blueprint`, `parent Interface`, `{"BlueprintType": "BPTYPE_Interface"}`.
 
-No text route yet; use these:
-- AnimGraph pose nodes, state pose graphs, transition rules: UE 5.8 Python
-  `unreal.BlueprintGraphEditor.get_graph_editor_by_name(abp, "AnimGraph").create_node_from_name(...)`
-  and `BlueprintGraphPinLibrary.try_create_connection`; states and transitions go through `Document`.
-- A Niagara lightweight emitter's own settings (loop, spawn rate): only its modules and renderers are
-  in `Document`.
+No text route yet: a Niagara lightweight emitter's own settings (loop, spawn rate); only its modules
+and renderers are in `Document`.
 
 A duplicated primary data asset shares its source's Primary Asset Id and the Asset Manager hands the
 id to the copy (engine behaviour): change the copy's id property at once; restart the editor if the
