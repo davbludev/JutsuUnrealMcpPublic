@@ -36,27 +36,36 @@ say Call KismetSystemLibrary.PrintString
 - Types: `Event Name`, `CustomEvent Name(P: type)`, `ComponentEvent Comp.Delegate`,
   `Call Class.Function` / `Call self.Function`, `Message Interface.Function`, `CallParent Function`,
   `Get Var`, `Set Var`, `Branch`, `Sequence`, `Cast Class`, `PureCast Class`, `Self`, `Reroute`,
-  `Macro ForEachLoop`, `MakeStruct S`, `BreakStruct S`, `FunctionEntry(P: type)`,
+  `Macro ForEachLoop`, `MakeStruct S`, `BreakStruct S`, `FunctionEntry(P: type)` (append
+  ` [Pure]` for a pure function),
   `FunctionResult(P: type)` (in a `Macro:` graph these are its tunnels; exec pins are type `exec`),
   `Comment "text"`, or a node class with JSON: `SpawnActorFromClass`,
   `SwitchEnum {"Enum":"/Script/Engine.ECollisionChannel"}`.
 - Literals: as read prints them; vectors and rotators also `1,2,3` or `(Pitch=0,Yaw=90,Roll=0)`,
-  enums by display name; string, name and text literals are quoted (an unquoted word is a link).
+  enums by display name, keys by name (`B = "Escape"`); string, name and text literals are quoted
+  (an unquoted word is a link).
   A rejected value fails the write and names the valid choices.
 - Split struct pins read as `Position_X = ...`; naming a member splits the pin, naming it whole
   (`Position = v.ReturnValue`) recombines it.
 - A new function: `write_asset(path, "Function:Open", "e FunctionEntry(Speed: float)\n  then -> ...")`;
-  a new event-graph page: any free section name, e.g. `write_asset(path, "Combat", ...)`.
+  `Function:OnKeyDown` (a parent function) creates the override, while an event-style parent
+  function is `Event Name` in the event graph; a new event-graph page: any free section name, e.g.
+  `write_asset(path, "Combat", ...)`.
 
 Variables: `Health: float = 100 [EditAnywhere, Category="Stats"]`; types `bool int int64 float
 double string name text Vector Actor /Game/Path/BP_Door class<Actor> soft<Texture2D> T[] set<T>
-map<K, V>` (Blueprint classes, user structs and enums by asset path; event dispatchers are not
-listed); flags `EditAnywhere BlueprintReadOnly ExposeOnSpawn Private Replicated RepNotify=Fn
+map<K, V>` (Blueprint classes, user structs and enums by asset path); flags `EditAnywhere BlueprintReadOnly ExposeOnSpawn Private Replicated RepNotify=Fn
 Transient SaveGame Config Category= Tooltip=`, and `was="OldName"` renames. Writing back what was
 read replies `No change.` and saves nothing.
 
 Components / WidgetTree: indented `Name: Class {"Prop":value}`; widget slots `@{"LayoutData":...}`;
-inherited components are marked `[inherited]` and keep their line.
+`[socket="hand_r"]` attaches a component to its parent's socket or bone; inherited components are
+marked `[inherited]` and keep their line. A changed default reaches placed instances that kept the
+old value.
+
+One line per item: `Dispatchers` `OnHit(Damage: float)`; `Interfaces` an interface path; user
+struct `Fields` `Count: int = 3`; user enum `Entries` a name; String Table `Entries`
+`Key = "Text"`; widget `Animations` a name (delete only: leave one out to delete it).
 
 Material `Graph`: `<id> Multiply` with `A = <id>.RGB` inputs, then an `Output` block of
 `BaseColor = <id>` lines. Material instance `Parameters`, `Defaults`, `Properties`: `Name = <json>`.
@@ -65,10 +74,26 @@ Material `Graph`: `<id> Multiply` with `A = <id>.RGB` inputs, then an `Output` b
 Blueprint state machines, maps): the JSON read returns. Copy a clause's shape to add an item
 (most domains write `"create": {...}`); a clause with an existing item's `authoringId` (or its name
 and type) updates it; items left out stay. Remove with `{"remove": {"authoringId": "..."},
-"destructive": true}`.
+"destructive": true}`. Leading `// ` lines of a read are notes (what it leaves out); writes skip them.
 
 Anything without a text section (sequencer keys, animation edits, editor utilities) is reachable
 through `call_function` on Unreal's scripting libraries or `run_python` with the full `unreal` API.
+`create_asset` `options` set factory properties: a BlendSpace needs `{"TargetSkeleton": path}`; a
+Blueprint interface is `class Blueprint`, `parent Interface`, `{"BlueprintType": "BPTYPE_Interface"}`.
+
+No text route yet; use these:
+- AnimGraph pose nodes, state pose graphs, transition rules: UE 5.8 Python
+  `unreal.BlueprintGraphEditor.get_graph_editor_by_name(abp, "AnimGraph").create_node_from_name(...)`
+  and `BlueprintGraphPinLibrary.try_create_connection`; states and transitions go through `Document`.
+- Sound Cue graphs: build a MetaSound source instead; Python-built cue nodes leave the cue editor empty.
+- MetaSound presets: `MetaSoundBuilderSubsystem.create_source_preset_builder` + `build_to_asset`
+  drops input defaults; set them afterwards through
+  `MetaSoundEditorSubsystem.find_or_begin_building(asset)` and save.
+- Niagara stateless (lightweight) emitters: their modules and renderers are absent from `Document`.
+
+A duplicated primary data asset shares its source's Primary Asset Id and the Asset Manager hands the
+id to the copy (engine behaviour): change the copy's id property at once; restart the editor if the
+source has dropped out of `get_primary_asset_id_list`.
 Pass `uv0` with one entry per vertex on every GeometryScript `append_buffers_to_mesh` call; a
 mesh saved without UVs by `create_new_static_mesh_asset_from_mesh` crashes the Editor.
 
