@@ -2,6 +2,64 @@
 
 Open this page only for Niagara work. The general rules of `SKILL.md` apply.
 
+## Sections of a system
+
+| Section | Holds |
+|---|---|
+| `Parameters` | `User.*` parameters, one per line; `System.*` ones the parameter panel declares |
+| `Emitters` | one line per emitter, in order |
+| `System` | the `SystemSpawn` and `SystemUpdate` stacks |
+| `Emitter:<Name>` | the emitter's `Properties`, `Parameters` (`Emitter.*`), four stacks, `Renderers` |
+| `ScratchPad:<Name>`, `ScratchPad:<Emitter>/<Name>` | one scratch-pad graph (below) |
+| `Properties` | the system's own settings, as for any asset |
+
+Each write makes the section match the text: what it leaves out is removed or reset. Build a system
+in this order: `Parameters`, `Emitters`, scratch pads, then `System` and `Emitter:` stacks.
+
+```
+User.TracerChannel: DataChannelRead {"Channel": "/Game/VFX/NDC_Tracers.NDC_Tracers"}
+User.TracerColor: LinearColor = (R=6,G=3,B=0.8,A=1)
+User.TracerWidth: float = 3
+```
+
+- Parameter lines are `Namespace.Name: type = value`; a data interface is its class without
+  `NiagaraDataInterface` and its changed properties as JSON. Types are those of scratch pads.
+  `System.*` and `Emitter.*` lines declare a parameter without a value (modules write it).
+- `Emitters` lines are `Name [flags]`. A new name takes `[from=<emitter asset>]` (a template under
+  `/Niagara/DefaultAssets/Templates/Emitters/`) or `[empty]` (Niagara's Minimal emitter); on an
+  existing name these are ignored. `[disabled]`
+  disables, leaving it out enables; `[was="Old"]` renames; a left-out line removes the emitter; the
+  order of lines is the emitter order. Reads add `[lightweight]` and `[parent=<asset>]`.
+  Lightweight emitters are not added or edited as text yet.
+
+```
+EmitterUpdate
+  EmitterState: /Niagara/Modules/Emitter/EmitterState
+    Life Cycle Mode = Self
+  SpawnFromChannel: ScratchPad:Tracers/SpawnFromChannel
+    DataChannel = User.TracerChannel
+
+ParticleSpawn
+  InitializeParticle: /Niagara/Modules/Spawn/Initialization/V2/InitializeParticle
+    Color = User.TracerColor
+
+Renderers
+  Sprite {"Alignment": "VelocityAligned"}
+```
+
+- A stack is its header (`SystemSpawn`, `SystemUpdate`, `EmitterSpawn`, `EmitterUpdate`,
+  `ParticleSpawn`, `ParticleUpdate`), then its modules in order: `<Name>: <module script path or
+  ScratchPad section> [disabled]`. A module keeps its name; a new one is named after its script.
+- Under a module, only overridden inputs, by the name Niagara shows (spaces included): a literal
+  (`2.5`, `true`, `(R=1,G=0,B=0,A=1)`, an enum entry's name) or a linked parameter
+  (`User.TracerColor`, `Particles.Gravity`). An input left out returns to the module default.
+  Reads also show `Call <script>` (a dynamic input, its inputs indented under it), `{json}` (a data
+  interface) and `Hlsl "..."`; keep those lines as read, they are not written yet.
+- `Properties` are `Name = <json>` lines of the emitter's settings (`SimTarget`, `bLocalSpace`,
+  `CalculateBoundsMode`, `FixedBounds`, ...). `Renderers` are `Class {json}` lines (`Sprite`,
+  `Ribbon`, `Mesh`, `Light`, ...); a renderer is known by its position. Its attribute bindings are
+  not text yet and stay as they are.
+
 ## Scratch pads
 
 A Niagara system's scratch-pad scripts are sections: `ScratchPad:<Name>` for the system's own,
@@ -68,12 +126,9 @@ out Output Module [Usage=ParticleSpawn]
 - Pin names match with or without spaces (`EmitterID` finds `Emitter ID`); reads print them as
   Niagara names them.
 
-Until stacks are text, a system scratch pad goes on a stack through `Document` with
-`"create": {"script": "/Game/VFX/NS_Tracers.NS_Tracers:ReadTracer"}`.
-
 ## Write reply
 
-A scratch-pad write waits for the whole compile, CPU and GPU, then replies like a Blueprint write:
+A write of any of these sections waits for the whole compile, CPU and GPU, then replies like a Blueprint write:
 `compile: ok`, `compile: ok with warnings` or `compile: N error(s)`, then `  error <where>: message`
 lines. `<where>` is the scratch pad and node id (`ScratchPad:ReadTracer read`), the section and stack
 module (`Emitter:Tracers SpawnRate`), or the section alone. Each renderer adds its missing particle
