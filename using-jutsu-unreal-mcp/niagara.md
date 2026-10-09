@@ -13,6 +13,14 @@ Open this page only for Niagara work. The general rules of `SKILL.md` apply.
 | `ScratchPad:<Name>`, `ScratchPad:<Emitter>/<Name>` | one scratch-pad graph (below) |
 | `Properties` | the system's own settings, as for any asset |
 
+An emitter asset (`create_asset` class `NiagaraEmitter`) has `Emitter`, the same text as
+`Emitter:<Name>` (`User.*` links are not checked there: the system using it declares them), and its
+own `ScratchPad:<Name>` sections. `[from=<that asset>]` adds it to a system as a child: its modules
+and scratch pads come from the parent (Niagara renames the pads, e.g. `ScratchPad:<Emitter>/<Name>_0`)
+and are edited in the emitter asset. A script asset (`create_asset` class `NiagaraScript`) has
+`Graph`, scratch-pad text (below); its `Output` line sets the kind. Stack lines name it by path;
+Niagara names the module after the asset. Epic's library scripts read as `Graph` too.
+
 Each write makes the section match the text: what it leaves out is removed or reset. Build a system
 in this order: `Parameters`, `Emitters`, scratch pads, then `System` and `Emitter:` stacks.
 
@@ -25,7 +33,7 @@ User.TracerWidth: float = 3
   `NiagaraDataInterface` and its changed properties as JSON. Types are those of scratch pads.
   `System.*` and `Emitter.*` lines declare a parameter without a value (modules write it).
 - `Emitters` lines are `Name [flags]`. A new name takes one origin: `[from=<emitter asset>]` (a
-  template under `/Niagara/DefaultAssets/Templates/Emitters/`), `[empty]` (Niagara's Minimal emitter)
+  template under `/Niagara/DefaultAssets/Templates/Emitters/` or any emitter asset), `[empty]` (Niagara's Minimal emitter)
   or `[lightweight]`; on an existing name these are ignored. `[disabled]`
   disables, leaving it out enables; `[was="Old"]` renames; a left-out line removes the emitter; the
   order of lines is the emitter order. Reads add `[lightweight]` and `[parent=<asset>]`.
