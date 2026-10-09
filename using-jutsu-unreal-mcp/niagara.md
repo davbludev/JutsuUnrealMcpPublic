@@ -169,12 +169,14 @@ A write of any of these sections waits for the whole compile, CPU and GPU, then 
 lines. `<where>` is the scratch pad and node id (`ScratchPad:ReadTracer read`), the section and stack
 module (`Emitter:Tracers SpawnRate`), or the section alone. Renderer issues (missing particle
 attributes, renderer feedback) follow as `renderer error|warning Emitter:Tracers 0 (Sprite): message`
-lines, not counted in the `compile:` verdict. The asset is saved even when the
+lines, and the module issues the Niagara editor shows on the system's and every enabled emitter's
+enabled modules (an unmet dependency, a deprecated script) as `stack error|warning Emitter:Motes AerodynamicDrag: message` lines with the fix
+the editor offers; neither is counted in the `compile:` verdict. The asset is saved even when the
 compile fails. A scratch pad no stack uses is not compiled, so its errors show once a stack runs it.
 
 ## Verify
 
-1. Read the `compile:` lines of the last write; fix every error before going on.
+1. Read the `compile:`, `renderer` and `stack` lines of the last write; fix every error before going on.
 2. `spawn_actor` a `NiagaraActor` in view and set its component's asset to the system.
 3. Feed what it reads: write Data Channel entries with `set_properties` or `run_python`, or set
    `User.*` parameters on the component.
