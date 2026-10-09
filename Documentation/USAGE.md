@@ -29,6 +29,8 @@ Values are plain JSON, converted to the target property's type: numbers, boolean
 | Material Instance | `Parameters` |
 | DataTable | `Rows` |
 | Niagara System | `Parameters`, `Emitters`, `System`, `Emitter:<Name>`, `ScratchPad:<Name>` |
+| Niagara Emitter | `Emitter`, `ScratchPad:<Name>` |
+| Niagara Script | `Graph` |
 | StateTree, Behavior Tree, PCG, MetaSound, Level Sequence, Control Rig, Animation Blueprint state machines, maps | `Document` (a JSON document) |
 | Other assets | `Properties`; some also a read-only `Details` |
 

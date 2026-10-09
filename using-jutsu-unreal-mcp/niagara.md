@@ -167,8 +167,9 @@ out Output Module [Usage=ParticleSpawn]
 A write of any of these sections waits for the whole compile, CPU and GPU, then replies like a Blueprint write:
 `compile: ok`, `compile: ok with warnings` or `compile: N error(s)`, then `  error <where>: message`
 lines. `<where>` is the scratch pad and node id (`ScratchPad:ReadTracer read`), the section and stack
-module (`Emitter:Tracers SpawnRate`), or the section alone. Each renderer adds its missing particle
-attributes and feedback (`Emitter:Tracers renderer 0 (Sprite)`). The asset is saved even when the
+module (`Emitter:Tracers SpawnRate`), or the section alone. Renderer issues (missing particle
+attributes, renderer feedback) follow as `renderer error|warning Emitter:Tracers 0 (Sprite): message`
+lines, not counted in the `compile:` verdict. The asset is saved even when the
 compile fails. A scratch pad no stack uses is not compiled, so its errors show once a stack runs it.
 
 ## Verify
