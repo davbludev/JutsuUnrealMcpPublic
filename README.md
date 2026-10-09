@@ -8,7 +8,7 @@ Python and console commands, places actors, and plays and captures PIE.
 
 | Requirement | Supported configuration |
 | --- | --- |
-| Plugin version | **5.0.0** |
+| Plugin version | **5.1.0** |
 | Unreal Engine | **5.5, 5.6, 5.7, 5.8** (a separate package per version) |
 | Platform | **Windows 64-bit Unreal Editor** |
 | Plugin type | Editor-only Code Plugin; not loaded in commandlets or packaged games |
