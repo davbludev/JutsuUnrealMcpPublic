@@ -130,6 +130,14 @@ input overrides as `{"find": {"kind": "input", "name": "Gain"}, "default": 0.25}
 
 Anything without a text section (sequencer keys, animation edits, editor utilities) is reachable
 through `call_function` on Unreal's scripting libraries or `run_python` with the full `unreal` API.
+`run_python` globals outlive the call: set every UObject they hold to `None` before deleting or
+moving its asset (or delete with `delete_assets`), or `EditorAssetLibrary.delete_asset` can crash
+the Editor.
+Right after a level opens, the editor world's navigation build stays locked until loading settles
+(at least 2 s, no assets still compiling): a `RebuildNavigation` then logs `navigation build is
+locked (flags: 0x20)`. `wait` a few seconds and run it again, or query paths in PIE.
+A headless `UnrealEditor-Cmd` run of the same project serves the MCP port too; `get_editor_state`
+`pid` tells which process answered.
 `create_asset` `options` set factory properties: a BlendSpace needs `{"TargetSkeleton": path}`; a
 Blueprint interface is `class Blueprint`, `parent Interface`, `{"BlueprintType": "BPTYPE_Interface"}`.
 
