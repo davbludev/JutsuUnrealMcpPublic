@@ -1,6 +1,6 @@
 ---
 name: using-jutsu-unreal-mcp
-description: Text formats of the Jutsu Unreal MCP server's read_asset / write_asset / edit_asset sections (Blueprint and anim graphs, variables, components, widget trees, materials, sound cues, Niagara systems, emitters, scripts and scratch pads) and how to report trouble. Use when editing Unreal assets through Jutsu as text, or when a Jutsu tool gave you trouble worth reporting.
+description: Text formats of the Jutsu Unreal MCP server's read_asset / write_asset / edit_asset sections (Blueprint and anim graphs, variables, components, widget trees, materials, sound cues, Niagara systems, emitters, scripts and scratch pads). Use when editing Unreal assets through Jutsu as text.
 ---
 
 # Using Jutsu Unreal MCP
@@ -146,10 +146,3 @@ id to the copy (engine behaviour): change the copy's id property at once; restar
 source has dropped out of `get_primary_asset_id_list`.
 Pass `uv0` with one entry per vertex on every GeometryScript `append_buffers_to_mesh` call; a
 mesh saved without UVs by `create_new_static_mesh_asset_from_mesh` crashes the Editor.
-
-## Reporting trouble
-
-If the server refused something that looked valid, gave an error that did not say what to do next,
-or forced hand work in the Editor, report it: exact call, exact response, no paraphrase, and say
-when you guessed, in a [GitHub Issue](https://github.com/davbludev/JutsuUnrealMcpPublic/issues).
-If nothing gave you trouble, write nothing.
