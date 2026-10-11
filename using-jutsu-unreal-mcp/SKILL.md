@@ -1,6 +1,6 @@
 ---
 name: using-jutsu-unreal-mcp
-description: Text formats of the Jutsu Unreal MCP server's read_asset / write_asset / edit_asset sections (Blueprint and anim graphs, variables, components, widget trees, materials, sound cues, Niagara systems, emitters, scripts and scratch pads). Use when editing Unreal assets through Jutsu as text.
+description: Text formats of the Jutsu Unreal MCP server's read_asset / write_asset / edit_asset sections (Blueprint and anim graphs, variables, components, widget trees, materials, sound cues, Niagara systems, emitters, scripts and scratch pads). Use when editing Unreal assets through Jutsu as text, or scripting the Editor or PIE through its run_python.
 ---
 
 # Using Jutsu Unreal MCP
@@ -41,6 +41,10 @@ say Call KismetSystemLibrary.PrintString
   `FunctionResult(P: type)` (in a `Macro:` graph these are its tunnels; exec pins are type `exec`),
   `Comment "text"`, or a node class with JSON: `SpawnActorFromClass`,
   `SwitchEnum {"Enum":"/Script/Engine.ECollisionChannel"}`.
+- Binding an event to another object's dispatcher: `bind AddDelegate {"DelegateReference":
+  {"MemberParent":"/Script/Game.Door","MemberName":"OnOpened"}}` with `self = <target>` and
+  `Delegate = <event>.OutputDelegate`, where `<event>` is a `CustomEvent` named unlike any parent
+  function.
 - Literals: as read prints them; vectors and rotators also `1,2,3` or `(Pitch=0,Yaw=90,Roll=0)`,
   enums by display name, keys by name (`B = "Escape"`); string, name and text literals are quoted
   (an unquoted word is a link).
@@ -126,18 +130,37 @@ Blueprint state machines, maps): the JSON read returns. Copy a clause's shape to
 and type) updates it; items left out stay. Remove with `{"remove": {"authoringId": "..."},
 "destructive": true}`. Leading `// ` lines of a read are notes (what it leaves out); writes skip them.
 A MetaSound preset: create the asset, then write `"preset": {"parent": "<same-kind MetaSound>"}` with
-input overrides as `{"find": {"kind": "input", "name": "Gain"}, "default": 0.25}` nodes.
+input overrides as `{"find": {"kind": "input", "name": "Gain"}, "default": 0.25}` nodes. A MetaSound input
+with a default: `{"create": {"kind": "input", "name": "Waves", "dataType": "WaveAsset:Array", "default": ["/Game/W.W"]}}` (`float`, lowercase).
 
 Anything without a text section (sequencer keys, animation edits, editor utilities) is reachable
 through `call_function` on Unreal's scripting libraries or `run_python` with the full `unreal` API.
 `run_python` globals outlive the call: set every UObject they hold to `None` before deleting or
 moving its asset (or delete with `delete_assets`), or `EditorAssetLibrary.delete_asset` can crash
-the Editor.
+the Editor. Switch levels with `open_level`, not Python or a console `open`: it sets the globals
+holding the old level to `None`, whose leftover package would otherwise crash the Editor.
 Right after a level opens, the editor world's navigation build stays locked until loading settles
 (at least 2 s, no assets still compiling): a `RebuildNavigation` then logs `navigation build is
 locked (flags: 0x20)`. `wait` a few seconds and run it again, or query paths in PIE.
 A headless `UnrealEditor-Cmd` run of the same project serves the MCP port too; `get_editor_state`
 `pid` tells which process answered.
+
+Scripting through `run_python`:
+- Each call runs inside one editor frame. To sample over time, register
+  `unreal.register_slate_post_tick_callback`, `wait`, then unregister and read the samples.
+- Python spawns and edits in the editor world, and its handles to PIE objects die with each PIE
+  session: spawn into PIE with `spawn_actor` `world: "pie"`, and fetch PIE objects again after every
+  `start_pie`.
+- Stop PIE before a script creates, duplicates or deletes assets: the editor refuses them in play
+  mode while the script carries on.
+- A struct or array from `get_editor_property` is a live view; build a new value and set it (or call
+  the class's setter), so the object hears the change.
+- `set_properties` writes `EditDefaultsOnly` properties that `set_editor_property` refuses on
+  instances.
+- On UE 5.8 with the experimental Toolset Registry plugin enabled, Epic's editor toolsets reach
+  further (Niagara stack modules and inputs, for one): list them with
+  `unreal.ToolsetRegistry.get_all_toolset_json_schemas()`, run one with
+  `unreal.ToolsetRegistry.execute_tool`.
 `create_asset` `options` set factory properties: a BlendSpace needs `{"TargetSkeleton": path}`; a
 Blueprint interface is `class Blueprint`, `parent Interface`, `{"BlueprintType": "BPTYPE_Interface"}`.
 
