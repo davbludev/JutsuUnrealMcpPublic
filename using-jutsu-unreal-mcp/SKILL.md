@@ -8,6 +8,14 @@ description: Text formats of the Jutsu Unreal MCP server's read_asset / write_as
 The tools describe themselves; this page only adds the asset-text formats, so writes are right the
 first time.
 
+Reach first for the plugin's own tools and asset text: they validate the input, compile, save and
+report what changed. Take `run_python` for what they do not cover (check the tool list and the
+asset's `read_asset` sections first) and for bulk work a script does more simply, such as a loop
+over many assets or actors.
+
+Editor-state calls (`start_pie`, `stop_pie`, `live_coding_compile`, `open_level`) go one per
+message, each after the previous one answered.
+
 ## Assets as text
 
 `read_asset(path)` lists an asset's sections; `read_asset(path, section)` returns one. Change a part
@@ -35,7 +43,7 @@ say Call KismetSystemLibrary.PrintString
 - Under a node: `Pin = literal`, `Pin = <id>.OutPin`, `ExecPin -> <id>` or `-> <id>.Pin`.
 - Types: `Event Name`, `CustomEvent Name(P: type)`, `ComponentEvent Comp.Delegate`,
   `Call Class.Function` / `Call self.Function`, `Message Interface.Function`, `CallParent Function`,
-  `Get Var`, `Set Var`, `Branch`, `Sequence`, `Cast Class`, `PureCast Class`, `Self`, `Reroute`,
+  `Get Var`, `Set Var` (another object's variable: `Get Class.Var` with `self` linked to it), `Branch`, `Sequence`, `Cast Class`, `PureCast Class`, `Self`, `Reroute`,
   `Macro ForEachLoop`, `MakeStruct S`, `BreakStruct S`, `FunctionEntry(P: type)` (append
   ` [Pure]` for a pure function),
   `FunctionResult(P: type)` (in a `Macro:` graph these are its tunnels; exec pins are type `exec`),
@@ -56,29 +64,6 @@ say Call KismetSystemLibrary.PrintString
   function is `Event Name` in the event graph; a new event-graph page: any free section name, e.g.
   `write_asset(path, "Combat", ...)`.
 
-Anim Blueprint graphs use the same text: `Function:AnimGraph`, a state's pose graph
-`State:Locomotion/Idle`, a transition rule `Transition:Locomotion/Idle->Run`. Anim nodes are their
-class without `AnimGraphNode_` (`SequencePlayer {"Node":{"Sequence":"/Game/A_Run.A_Run"}}`,
-`BlendListByBool`, `LocalRefPose`); poses link like values; `StateMachine Locomotion` is a machine
-(another name renames it). The result node (`Root`, `StateResult`, `TransitionResult`) stays:
-
-```
-sm StateMachine Locomotion
-out Root
-  Result = sm.Pose
-```
-```
-speed Get Speed
-fast Call KismetMathLibrary.Greater_DoubleDouble
-  A = speed
-  B = 10
-out TransitionResult
-  bCanEnterTransition = fast.ReturnValue
-```
-
-States, the entry and transitions are added in `Document`; their graphs then appear as sections.
-Naming an optional property in a pin line (`PlayRate = 2`) exposes it as a pin.
-
 Variables: `Health: float = 100 [EditAnywhere, Category="Stats"]`; types `bool int int64 float
 double string name text Vector Actor /Game/Path/BP_Door class<Actor> soft<Texture2D> T[] set<T>
 map<K, V>` (Blueprint classes, user structs and enums by asset path); flags `EditAnywhere BlueprintReadOnly ExposeOnSpawn Private Replicated RepNotify=Fn
@@ -87,38 +72,27 @@ read replies `No change.` and saves nothing.
 
 Components / WidgetTree: indented `Name: Class {"Prop":value}`; widget slots `@{"LayoutData":...}`;
 `[socket="hand_r"]` attaches a component to its parent's socket or bone; inherited components are
-marked `[inherited]` and keep their line. A changed default reaches placed instances that kept the
+marked `[inherited]` and keep their line, whose `{json}` overrides their properties. A changed default reaches placed instances that kept the
 old value.
 
 One line per item: `Dispatchers` `OnHit(Damage: float)`; `Interfaces` an interface path; user
 struct `Fields` `Count: int = 3`; user enum `Entries` a name; String Table `Entries`
 `Key = "Text"`.
 
+Anim Blueprint graphs, Montage `Sections`, `Notifies` and `Sockets`: read [animation.md](animation.md)
+before writing one.
+
 Widget `Animations`: `FadeIn [0-0.5]` (range in seconds, `[was="Old"]` renames), then per keyed
 channel `  Panel.RenderOpacity: 0=0 linear, 0.5=1` or `  Title.RenderTransform.Translation.X: 0=-200, 0.5=0`
 (`Translation.X/Y`, `Angle`, `Scale.X/Y`, `Shear.X/Y`; keys `seconds=value`, `constant`/`linear`,
 cubic when omitted). Left-out keys, channels and animations are removed; other tracks are kept.
 
-Montage `Sections`: `Loop @ 0.5 -> Loop` (seconds, optional next section). Montage and sequence
-`Notifies`: `Track: Name` lines, each followed by `  0.25 AnimNotify_PlaySound {"Sound":"..."}`,
-`  0.25-0.75 AnimNotifyState_Trail {...}` (a state's start-end) or `  0.5 "Footstep"` (skeleton
-notify); one notify per start time on a track; a notify matches by track, time and class. `Sockets`: skeleton `Grip: hand_r {"RelativeLocation":{"X":10}}`,
-Static Mesh `Grip {"Tag":"grip"}`. `[was="Old"]` renames a section or socket.
+Gameplay tags (path `GameplayTags`): read [gameplay-tags.md](gameplay-tags.md) before writing one.
 
-Gameplay tags: path `GameplayTags` (no asset). `Tags` (DefaultGameplayTags.ini) or
-`Tags:<File>.ini`: `Tag.Name [comment="..."]`, `[was="Old.Tag"]` renames with a redirect;
-`Redirects`: `Old.Tag -> New.Tag` (DefaultGameplayTags.ini only; redirects inside Config/Tags files
-are not shown). A write is usable at once, no restart; never edit the ini by hand.
+Material `Graph`, material instance `Parameters`, `Defaults` and `Properties`, and `Name = <json>`
+properties holding instanced subobjects: read [material.md](material.md) before writing one.
 
-Material `Graph`: `<id> Multiply` with `A = <id>.RGB` inputs, then an `Output` block of
-`BaseColor = <id>` lines. Material instance `Parameters`, `Defaults`, `Properties`: `Name = <json>`;
-an instanced subobject (input trigger, Blackboard key type) is `{"class": "InputTriggerPressed", ...}`;
-struct array elements list only changed members (`{}`: all default).
-
-Sound Cue `Graph`: `<id> WavePlayer {"SoundWaveAssetPtr":"/Game/S_Step.S_Step"}`, `<id> Random`,
-`Mixer`, `Attenuation`... (the SoundNode class without its prefix), inputs as `0 = <id>` (by index, or
-the input's name such as `True` on a Branch), then `Output = <id>`. ` [inputs=N]` keeps unlinked
-inputs; a Random node's `Weights` take one value per input (left out, each is 1). Writes keep the Sound Cue Editor's graph in step.
+Sound Cue `Graph`: read [sound-cue.md](sound-cue.md) before writing one.
 
 Niagara System, Emitter and Script assets (`Parameters`, `Emitters`, `System`, `Emitter`,
 `ScratchPad:` and `Graph` sections, and their compile reply): read [niagara.md](niagara.md) before
@@ -129,43 +103,17 @@ Blueprint state machines, maps): the JSON read returns. Copy a clause's shape to
 (most domains write `"create": {...}`); a clause with an existing item's `authoringId` (or its name
 and type) updates it; items left out stay. Remove with `{"remove": {"authoringId": "..."},
 "destructive": true}`. Leading `// ` lines of a read are notes (what it leaves out); writes skip them.
-A MetaSound preset: create the asset, then write `"preset": {"parent": "<same-kind MetaSound>"}` with
-input overrides as `{"find": {"kind": "input", "name": "Gain"}, "default": 0.25}` nodes. A MetaSound input
-with a default: `{"create": {"kind": "input", "name": "Waves", "dataType": "WaveAsset:Array", "default": ["/Game/W.W"]}}` (`float`, lowercase).
+
+MetaSound presets and inputs with defaults: read [metasound.md](metasound.md) before writing one.
+
+Control Rig hierarchies, control settings and Sequencer Control Rig tracks: read
+[control-rig.md](control-rig.md) before building a rig.
 
 Anything without a text section (sequencer keys, animation edits, editor utilities) is reachable
-through `call_function` on Unreal's scripting libraries or `run_python` with the full `unreal` API.
-`run_python` globals outlive the call: set every UObject they hold to `None` before deleting or
-moving its asset (or delete with `delete_assets`), or `EditorAssetLibrary.delete_asset` can crash
-the Editor. Switch levels with `open_level`, not Python or a console `open`: it sets the globals
-holding the old level to `None`, whose leftover package would otherwise crash the Editor.
-Right after a level opens, the editor world's navigation build stays locked until loading settles
-(at least 2 s, no assets still compiling): a `RebuildNavigation` then logs `navigation build is
-locked (flags: 0x20)`. `wait` a few seconds and run it again, or query paths in PIE.
-A headless `UnrealEditor-Cmd` run of the same project serves the MCP port too; `get_editor_state`
-`pid` tells which process answered.
-
-Scripting through `run_python`:
-- Each call runs inside one editor frame. To sample over time, register
-  `unreal.register_slate_post_tick_callback`, `wait`, then unregister and read the samples.
-- Python spawns and edits in the editor world, and its handles to PIE objects die with each PIE
-  session: spawn into PIE with `spawn_actor` `world: "pie"`, and fetch PIE objects again after every
-  `start_pie`.
-- Stop PIE before a script creates, duplicates or deletes assets: the editor refuses them in play
-  mode while the script carries on.
-- A struct or array from `get_editor_property` is a live view; build a new value and set it (or call
-  the class's setter), so the object hears the change.
-- `set_properties` writes `EditDefaultsOnly` properties that `set_editor_property` refuses on
-  instances.
-- On UE 5.8 with the experimental Toolset Registry plugin enabled, Epic's editor toolsets reach
-  further (Niagara stack modules and inputs, for one): list them with
-  `unreal.ToolsetRegistry.get_all_toolset_json_schemas()`, run one with
-  `unreal.ToolsetRegistry.execute_tool`.
+through `call_function` on Unreal's scripting libraries, and past that through `run_python`.
 `create_asset` `options` set factory properties: a BlendSpace needs `{"TargetSkeleton": path}`; a
 Blueprint interface is `class Blueprint`, `parent Interface`, `{"BlueprintType": "BPTYPE_Interface"}`.
 
-A duplicated primary data asset shares its source's Primary Asset Id and the Asset Manager hands the
-id to the copy (engine behaviour): change the copy's id property at once; restart the editor if the
-source has dropped out of `get_primary_asset_id_list`.
-Pass `uv0` with one entry per vertex on every GeometryScript `append_buffers_to_mesh` call; a
-mesh saved without UVs by `create_new_static_mesh_asset_from_mesh` crashes the Editor.
+`run_python` crash gotchas (globals that outlive a call, deleting assets, switching levels, GeometryScript
+UVs, duplicated primary data assets), frame and PIE rules, and navigation rebuilds: read
+[run-python.md](run-python.md) before scripting the Editor or PIE.
