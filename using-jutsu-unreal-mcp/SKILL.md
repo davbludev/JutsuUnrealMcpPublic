@@ -1,6 +1,6 @@
 ---
 name: using-jutsu-unreal-mcp
-description: Text formats of the Jutsu Unreal MCP server's read_asset / write_asset / edit_asset sections (Blueprint and anim graphs, variables, components, widget trees, materials, sound cues, Niagara systems, emitters, scripts and scratch pads). Use when editing Unreal assets through Jutsu as text, or scripting the Editor or PIE through its run_python.
+description: Text formats of the Jutsu Unreal MCP server's read_asset / write_asset / edit_asset sections (Blueprint and anim graphs, variables, components, widget trees, materials, sound cues, Niagara systems, emitters, scripts and scratch pads, Control Rig hierarchies and graphs). Use when editing Unreal assets through Jutsu as text, or scripting the Editor or PIE through its run_python.
 ---
 
 # Using Jutsu Unreal MCP
@@ -106,7 +106,8 @@ and type) updates it; items left out stay. Remove with `{"remove": {"authoringId
 
 MetaSound presets and inputs with defaults: read [metasound.md](metasound.md) before writing one.
 
-Control Rig hierarchies, control settings and Sequencer Control Rig tracks: read
+Control Rig `Hierarchy` (controls, nulls, their settings), `Rig` and `Function:` graphs,
+Sequencer Control Rig tracks, loading an animation onto them and baking: read
 [control-rig.md](control-rig.md) before building a rig.
 
 Anything without a text section (sequencer keys, animation edits, editor utilities) is reachable
