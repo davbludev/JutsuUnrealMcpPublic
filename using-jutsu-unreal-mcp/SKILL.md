@@ -100,9 +100,10 @@ writing one.
 
 `Document` (StateTree, Behavior Tree, PCG, MetaSound, Level Sequence, Control Rig, Anim
 Blueprint state machines, maps): the JSON read returns. Copy a clause's shape to add an item
-(most domains write `"create": {...}`); a clause with an existing item's `authoringId` (or its name
-and type) updates it; items left out stay. Remove with `{"remove": {"authoringId": "..."},
-"destructive": true}`. Leading `// ` lines of a read are notes (what it leaves out); writes skip them.
+(most domains write `"create": {...}`); a clause with an existing item's `authoringId`, the key the
+read printed for it (StateTree `state_19`, valid until the next write), or its name and type updates
+it; items left out stay. Remove with `{"remove": {"authoringId": "..."}, "destructive": true}`; a
+remove that matches nothing fails and lists what is there. Leading `// ` lines of a read are notes (what it leaves out); writes skip them.
 
 MetaSound presets and inputs with defaults: read [metasound.md](metasound.md) before writing one.
 
