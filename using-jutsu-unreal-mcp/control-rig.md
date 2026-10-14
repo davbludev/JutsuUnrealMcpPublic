@@ -38,12 +38,16 @@ SetBone Unit RigUnit_SetTransform
 
 - `<id>` is the node's name; a new node takes the name you write.
 - Types: `Unit <Struct>` (a rig unit or RigVM function, e.g. `RigVMFunction_MathFloatAdd`),
-  `Get Var`, `Set Var`, `Call <LocalFunction>`, `Comment "text"`, `Reroute`. Other nodes read as
-  `Node <Class>` and keep their line; their pins still take values and links.
+  `Template <Dispatch>(Pin: type)` (a dispatch such as `RigVMDispatch_ArrayMake(Values: float[])`;
+  the types given and a link resolve it), `Get Var`, `Set Var`, `Call <LocalFunction>`,
+  `Comment "text"`, `Reroute`. Other nodes read as `Node <Class>` and keep their line; their pins
+  still take values and links.
 - Values are RigVM text (`(X=1,Y=2,Z=3)`, `(Type=Bone,Name="hand_l")`); links and values may name
   sub-pins (`Value.Translation`); a pin takes a link or a value, not both.
-- Local functions are not created or deleted as text, and dispatch nodes not created; use
-  `run_python` (`rig.get_controller_by_name(graph)`, a `RigVMController`) for those.
+- Writing a `Function:<Name>` that does not exist creates that local function. Its signature is
+  `Entry FunctionEntry(Speed: float, Target: Transform)` (` [Pure]` appended for a pure one) and
+  `Return FunctionResult(Result: float)`; changing them changes the signature, and every Call node
+  follows it (the reply lists them). Empty text deletes the function, refused while anything calls it.
 
 The `Document` section writes the rig's member variables (and the same nodes as JSON). A new rig
 from a mesh:
