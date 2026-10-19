@@ -102,7 +102,7 @@ writing one.
 Blueprint state machines, maps): the JSON read returns. Copy a clause's shape to add an item
 (most domains write `"create": {...}`); a clause with an existing item's `authoringId`, the key the
 read printed for it (StateTree `state_19`, valid until the next write), or its name and type updates
-it; items left out stay. Remove with `{"remove": {"authoringId": "..."}, "destructive": true}`; a
+it; items left out stay. Remove with `{"remove": {"authoringId": "..."}, "destructive": true}` (MetaSound: no `destructive`); a
 remove that matches nothing fails and lists what is there. Leading `// ` lines of a read are notes (what it leaves out); writes skip them.
 
 StateTree `Tree` text and StateTree components with parameter overrides: read
@@ -119,6 +119,9 @@ Sequencer Control Rig tracks, loading an animation onto them and baking: read
 
 Anything without a text section (sequencer keys, animation edits, editor utilities) is reachable
 through `call_function` on Unreal's scripting libraries, and past that through `run_python`.
+A `CurveFloat`'s `Details` gives its key count and time range; write its keys by importing a CSV
+(`time,value` rows) over it (`AssetImportTask` with `CSVImportFactory`, `import_type`
+`ECSV_CURVE_FLOAT`), and check them with `get_float_value(t)`.
 `create_asset` `options` set factory properties: a BlendSpace needs `{"TargetSkeleton": path}`; a
 Blueprint interface is `class Blueprint`, `parent Interface`, `{"BlueprintType": "BPTYPE_Interface"}`.
 

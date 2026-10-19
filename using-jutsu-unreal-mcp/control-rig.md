@@ -42,6 +42,11 @@ SetBone Unit RigUnit_SetTransform
   the types given and a link resolve it), `Get Var`, `Set Var`, `Call <LocalFunction>`,
   `Comment "text"`, `Reroute`. Other nodes read as `Node <Class>` and keep their line; their pins
   still take values and links.
+- A node name read with a space in it (`To World Unit RigUnit_...`) blocks every text write of that
+  graph: rename it to one word first (`unreal.RigVMController.rename_node`).
+- Adding an aggregate pin (a fourth `Sequence` output) goes through `RigVMController`
+  (`add_aggregate_pin`): make the whole change, links included, through the controller, then
+  compile; a text write right after unsaved aggregate-pin edits has crashed the Editor.
 - Values are RigVM text (`(X=1,Y=2,Z=3)`, `(Type=Bone,Name="hand_l")`); links and values may name
   sub-pins (`Value.Translation`); a pin takes a link or a value, not both.
 - Writing a `Function:<Name>` that does not exist creates that local function. Its signature is
