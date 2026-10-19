@@ -7,6 +7,7 @@ with a default: `{"create": {"kind": "input", "name": "Waves", "dataType": "Wave
 
 A node's input defaults sit beside its `create`: `{"create": {...}, "defaults": {"Gain": 3}}`. To
 change one on an existing node, remove the node in one write, then create it again in the next with
-its `defaults` and its links under `connections`. An enum input takes the qualified entry name:
-`"Type": "Audio::EBiquadFilter::Highpass"`, `"Audio::EWaveShaperType::Tanh"`. A MetaSound `remove`
+its `defaults` and its links under `connections`. An enum input takes an entry's name, short,
+qualified or as displayed (`"Type": "Highpass"`); a wrong one fails listing the entries, and the
+value reads back as the entry's number. A MetaSound `remove`
 takes no `destructive`: `"X": {"remove": {"authoringId": "X"}}`.
