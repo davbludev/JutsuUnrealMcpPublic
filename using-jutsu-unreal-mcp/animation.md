@@ -21,12 +21,10 @@ out TransitionResult
 ```
 
 States, the entry and transitions are added in `Document`; their graphs then appear as sections.
-Every machine clause that is not a remove carries its `states` object (the states as the read prints
-them), even when it only changes transitions or machine settings. A transition, state or machine
-sets its settings in `properties`, one entry per setting: `{"member": {"kind": "property", "owner":
-"/Script/AnimGraph.AnimStateTransitionNode", "name": "CrossfadeDuration"}, "value": 0.15}`; for
-another supported setting of the same item, send it with `"owner": ""` and the error names its owner.
-Supported: transition `PriorityOrder`, `CrossfadeDuration`, `BlendMode`, `CustomBlendCurve`,
+A machine clause lists only what it changes: a transition's `from`/`to` name a state alias of the
+clause or an existing state's name, so `{"find": {"name": "Locomotion"}, "transitions": {"back":
+{"create": {"from": "Run", "to": "Idle"}}}}` needs no `states`. A transition, state or machine sets
+its settings in `properties`: `{"CrossfadeDuration": 0.15}`. Supported: transition `PriorityOrder`, `CrossfadeDuration`, `BlendMode`, `CustomBlendCurve`,
 `bAutomaticRuleBasedOnSequencePlayerInState`, `AutomaticRuleTriggerTime`, `MinTimeBeforeReentry`,
 `SyncGroupNameToRequireValidMarkersRule`, `LogicType`, `Bidirectional`, `bDisabled`,
 `bOnlyEvaluateWhenActive`; state `bAlwaysResetOnEntry`; machine `MaxTransitionsPerFrame`,
