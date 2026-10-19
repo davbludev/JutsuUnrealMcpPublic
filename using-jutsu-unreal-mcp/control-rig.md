@@ -36,14 +36,14 @@ SetBone Unit RigUnit_SetTransform
   Value.Translation = Offset.Result
 ```
 
-- `<id>` is the node's name; a new node takes the name you write.
+- `<id>` is the node's name; a new node takes the name you write. A name that is not letters, digits
+  and `_` is quoted, as id and as link target: `"To World" Unit RigUnit_ToWorldSpace_Transform`,
+  `Value = "To World".World`, `ExecutePin -> "To World"`.
 - Types: `Unit <Struct>` (a rig unit or RigVM function, e.g. `RigVMFunction_MathFloatAdd`),
   `Template <Dispatch>(Pin: type)` (a dispatch such as `RigVMDispatch_ArrayMake(Values: float[])`;
   the types given and a link resolve it), `Get Var`, `Set Var`, `Call <LocalFunction>`,
   `Comment "text"`, `Reroute`. Other nodes read as `Node <Class>` and keep their line; their pins
   still take values and links.
-- A node name read with a space in it (`To World Unit RigUnit_...`) blocks every text write of that
-  graph: rename it to one word first (`unreal.RigVMController.rename_node`).
 - Adding an aggregate pin (a fourth `Sequence` output) goes through `RigVMController`
   (`add_aggregate_pin`): make the whole change, links included, through the controller, then
   compile; a text write right after unsaved aggregate-pin edits has crashed the Editor.
