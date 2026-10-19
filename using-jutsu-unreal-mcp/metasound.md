@@ -1,9 +1,8 @@
 # MetaSound
 
-A MetaSound preset: create the asset, write `"preset": {"parent": "<same-kind MetaSound>"}`, then set
-input overrides in a second write (it may leave `preset` out) as
-`{"find": {"kind": "input", "name": "Gain"}, "default": 0.25}` nodes; an override sent in the write
-that sets the parent has been lost. A MetaSound input
+A MetaSound preset: create the asset, then write `"preset": {"parent": "<same-kind MetaSound>"}` with
+its input overrides as `{"find": {"kind": "input", "name": "Gain"}, "default": 0.25}` nodes, in one
+write or later ones (a later write may leave `preset` out). A MetaSound input
 with a default: `{"create": {"kind": "input", "name": "Waves", "dataType": "WaveAsset:Array", "default": ["/Game/W.W"]}}` (`float`, lowercase).
 
 A node's input defaults sit beside its `create`: `{"create": {...}, "defaults": {"Gain": 3}}`. To
