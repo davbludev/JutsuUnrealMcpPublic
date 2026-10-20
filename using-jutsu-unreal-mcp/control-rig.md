@@ -45,10 +45,12 @@ SetBone Unit RigUnit_SetTransform
   `Comment "text"`, `Reroute`. Other nodes read as `Node <Class>` and keep their line; their pins
   still take values and links.
 - Adding an aggregate pin (a fourth `Sequence` output) goes through `RigVMController`
-  (`add_aggregate_pin`): make the whole change, links included, through the controller, then
-  compile; a text write right after unsaved aggregate-pin edits has crashed the Editor.
+  (`add_aggregate_pin`); the text then links and sets the new pin.
 - Values are RigVM text (`(X=1,Y=2,Z=3)`, `(Type=Bone,Name="hand_l")`); links and values may name
-  sub-pins (`Value.Translation`); a pin takes a link or a value, not both.
+  sub-pins (`Value.Translation`, an array element's `Effectors.0.Bone`); a pin takes a link or a
+  value, not both, so a pin with a linked member takes values only on its other members, and an
+  array with a linked member grows or shrinks through `RigVMController.insert_array_pin` /
+  `remove_array_pin`.
 - Writing a `Function:<Name>` that does not exist creates that local function. Its signature is
   `Entry FunctionEntry(Speed: float, Target: Transform)` (` [Pure]` appended for a pure one) and
   `Return FunctionResult(Result: float)`; changing them changes the signature, and every Call node
