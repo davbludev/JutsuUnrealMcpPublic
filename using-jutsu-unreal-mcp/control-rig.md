@@ -44,8 +44,10 @@ SetBone Unit RigUnit_SetTransform
   the types given and a link resolve it), `Get Var`, `Set Var`, `Call <LocalFunction>`,
   `Comment "text"`, `Reroute`. Other nodes read as `Node <Class>` and keep their line; their pins
   still take values and links.
-- Adding an aggregate pin (a fourth `Sequence` output) goes through `RigVMController`
-  (`add_aggregate_pin`); the text then links and sets the new pin.
+- Aggregate pins (a `Sequence`'s outputs, an Add's inputs) are text: naming the node's next one
+  creates it (`C -> Next`, `C = 2`), in order (`F` before `C` fails naming `C`), and leaving one
+  out removes it. `D ->` is an execute output that links nothing. An aggregate node reads as its
+  unit (`Seq Unit RigVMFunction_Sequence`); its pins past the second always print a line.
 - Values are RigVM text (`(X=1,Y=2,Z=3)`, `(Type=Bone,Name="hand_l")`); links and values may name
   sub-pins (`Value.Translation`, an array element's `Effectors.0.Bone`); a pin takes a link or a
   value, not both, so a pin with a linked member takes values only on its other members, and an
