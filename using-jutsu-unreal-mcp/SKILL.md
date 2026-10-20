@@ -119,9 +119,11 @@ Sequencer Control Rig tracks, loading an animation onto them and baking: read
 
 Anything without a text section (sequencer keys, animation edits, editor utilities) is reachable
 through `call_function` on Unreal's scripting libraries, and past that through `run_python`.
-A `CurveFloat`'s `Details` gives its key count and time range; write its keys by importing a CSV
-(`time,value` rows) over it (`AssetImportTask` with `CSVImportFactory`, `import_type`
-`ECSV_CURVE_FLOAT`), and check them with `get_float_value(t)`.
+Curve assets (`CurveFloat`, `CurveVector`, `CurveLinearColor`) have a `Keys` section: one key per line,
+`0.5: 1 linear`, `1: 2 cubic user arrive=0.5 leave=0.5` (`constant`/`linear`/`cubic`; cubic may add
+`smart_auto`, or `user`/`break` with `arrive=` `leave=`, and `arrive_weight=` `leave_weight=`). Vector and
+colour curves put keys under `X:` / `R:` channel headers; a channel left out is cleared. Check values
+with `get_float_value(t)`.
 `create_asset` `options` set factory properties: a BlendSpace needs `{"TargetSkeleton": path}`; a
 Blueprint interface is `class Blueprint`, `parent Interface`, `{"BlueprintType": "BPTYPE_Interface"}`.
 
