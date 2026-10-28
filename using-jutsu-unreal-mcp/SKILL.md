@@ -87,7 +87,7 @@ channel `  Panel.RenderOpacity: 0=0 linear, 0.5=1` or `  Title.RenderTransform.T
 (`Translation.X/Y`, `Angle`, `Scale.X/Y`, `Shear.X/Y`; keys `seconds=value`, `constant`/`linear`,
 cubic when omitted). Left-out keys, channels and animations are removed; other tracks are kept.
 
-Gameplay tags (path `GameplayTags`): read [gameplay-tags.md](gameplay-tags.md) before writing one.
+Gameplay tags (path `GameplayTags`) and a GameplayEffect's tags: read [gameplay-tags.md](gameplay-tags.md) before writing one.
 
 Material `Graph`, material instance `Parameters`, `Defaults` and `Properties`, and `Name = <json>`
 properties holding instanced subobjects: read [material.md](material.md) before writing one.
