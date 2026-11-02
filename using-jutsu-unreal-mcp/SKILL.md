@@ -1,6 +1,6 @@
 ---
 name: using-jutsu-unreal-mcp
-description: Text formats of the Jutsu Unreal MCP server's read_asset / write_asset / edit_asset sections (Blueprint and anim graphs, variables, components, widget trees, materials, sound cues, Niagara systems, emitters, scripts and scratch pads, Control Rig hierarchies and graphs, StateTrees, Smart Objects, Mutable Customizable Object graphs, macros and instances). Use when editing Unreal assets through Jutsu as text, or scripting the Editor or PIE through its run_python.
+description: Text formats of the Jutsu Unreal MCP server's read_asset / write_asset / edit_asset sections (Blueprint and anim graphs, variables, components, widget trees, materials, sound cues, Niagara systems, emitters, scripts and scratch pads, Control Rig hierarchies and graphs, StateTrees, Smart Objects, Mutable Customizable Object graphs, macros and instances, Pose Search databases). Use when editing Unreal assets through Jutsu as text, or scripting the Editor or PIE through its run_python.
 ---
 
 # Using Jutsu Unreal MCP
@@ -125,6 +125,9 @@ components: read [smart-object.md](smart-object.md) before writing one.
 MetaSound presets and inputs with defaults: read [metasound.md](metasound.md) before writing one.
 
 Customizable Object (Mutable) `Graph`, Macro Library `Macro:Name` and instance `Parameters`: read [mutable.md](mutable.md) before writing one.
+
+Pose Search (Motion Matching) schemas and databases (`create_asset` parents, the database `Assets` list, index state): read
+[motion-matching.md](motion-matching.md) before writing one.
 
 Control Rig `Hierarchy` (controls, nulls, their settings), `Rig` and `Function:` graphs,
 Sequencer Control Rig tracks, loading an animation onto them and baking: read
