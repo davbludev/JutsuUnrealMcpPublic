@@ -73,7 +73,9 @@ Variables: `Health: float = 100 [EditAnywhere, Category="Stats"]`; types `bool i
 double string name text Vector Actor /Game/Path/BP_Door class<Actor> soft<Texture2D> T[] set<T>
 map<K, V>` (Blueprint classes, user structs and enums by asset path); flags `EditAnywhere BlueprintReadOnly ExposeOnSpawn Private Replicated RepNotify=Fn
 Transient SaveGame Config Category= Tooltip=`, and `was="OldName"` renames. Writing back what was
-read replies `No change.` and saves nothing.
+read replies `No change.` and saves nothing. When the asset stores a write differently (ids replaced,
+order normalised, defaults dropped), the reply ends with `--- stored text ... ---` and the section as
+stored: take the next `edit_asset` `old_text` from it. An `edit_asset` miss shows the nearest lines.
 
 Components / WidgetTree: indented `Name: Class {"Prop":value}`; widget slots `@{"LayoutData":...}`;
 `[socket="hand_r"]` attaches a component to its parent's socket or bone; inherited components are
