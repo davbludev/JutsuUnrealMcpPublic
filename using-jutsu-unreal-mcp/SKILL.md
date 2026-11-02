@@ -26,6 +26,11 @@ Writes are all or nothing, compile a Blueprint whose structure or graphs change,
 compiler's messages and save. The plugin lays out every graph it changes; node positions are not
 part of the text, so never try to place nodes.
 
+A read may end with `# note:` lines (`// note:` in `Document`) naming what it does not show;
+writes skip them, so keep or drop them freely. A refusal for an unknown name lists the valid names
+and the closest; when it names a read-only section `<Section>@<query>`, read that section for the
+full list (the query after `@` narrows it).
+
 Blueprint graph (`EventGraph`, `Function:Name`, `Macro:Name`):
 
 ```
