@@ -31,7 +31,23 @@ its settings in `properties`: `{"CrossfadeDuration": 0.15}`. Supported: transiti
 `MaxTransitionsRequests`, `bSkipFirstUpdateTransition`, `bReinitializeOnBecomingRelevant`,
 `bCreateNotifyMetaData`, `bAllowConduitEntryStates`. The read lists only
 settings changed from their defaults, so a fresh transition reads `"properties": []`.
-Naming an optional property in a pin line (`PlayRate = 2`) exposes it as a pin.
+Naming an optional property in a pin line (`PlayRate = 2`) exposes it as a pin; `PlayRate [hidden]`
+(a line with no value) hides it again; `hidden` stays an ordinary value and node id.
+
+Anim node properties show member by member; only instanced members (a Control Rig node's
+`Node.AssetUserData`, an IK Rig node's `Node.GoalCreators`) stay out of the text and unchanged by a write. A `ControlRig` node takes its
+rig in `{"Node":{"ControlRigClass":...}}` on UE 5.5-5.7 and `{"Node":{"ControlRigAssetReference":...}}`
+on 5.8, and its rig-variable pins by name (`Speed = 2`). `Pin = @Owner.Path` binds a pin to a
+property access path (a variable, a member chain, or a function as the last element); a bound pin
+reads the same way. Node settings like `UpdateFunction`, `InitialUpdateFunction`, `BecomeRelevantFunction`
+take a function reference; a `Function:` section whose entry is `FunctionEntry() [ThreadSafe]` is
+thread-safe (flags `[Pure] [Const] [ThreadSafe] [Category "x"] [Keywords "y"]`, after the parentheses).
+
+Cached poses: `SaveCachedPose Name` stores a pose, `UseCachedPose Name` links to it by that name
+(a rename of the save node keeps the links). Pose-list nodes (`LayeredBoneBlend`, `BlendListByInt`,
+`MultiWayBlend`) grow inputs when a pin line names one that does not exist yet (`BlendPoses_1 = x.Pose` and
+`BlendWeights_1 = 0.5` on `LayeredBoneBlend`, `BlendPose_2 = x.Pose` on `BlendListByInt`); a pose output
+holds one link, so each input takes its own node.
 
 Montage `Sections`: `Loop @ 0.5 -> Loop` (seconds, optional next section). Montage and sequence
 `Notifies`: `Track: Name` lines, each followed by `  0.25 AnimNotify_PlaySound {"Sound":"..."}`,

@@ -10,14 +10,18 @@ root_ctrl: Control {"ShapeName":"Circle_Thick","ShapeColor":{"R":1,"G":0,"B":0,"
   hips_space: Null {"Transform":{"Location":[0,0,90]}}
 ```
 
-- Null and Control lines are written; every other line (bones, curves, sockets) stays as read.
+- Null, Control, Curve (no json), Socket, Connector and user-made Bone lines are written; a bone
+  imported from a mesh and anything else stays as read. A curve, socket or connector has no children.
+- A rig made empty takes a mesh's bones with `@import /Game/SKM_Hero` as the whole text (a mesh or
+  skeleton path); read, then write the rest as lines. The same import again changes nothing.
+- `"ExtraParents":["space_b"]` in a transform line adds space-switch parents by line name.
 - A control's `{json}`: `FRigControlSettings` members by name (`ControlType` first), then `Offset`,
   `ShapeTransform` and the initial `Value`. `MinimumValue`, `MaximumValue` and `Value` are in the
   control's type: a bool, a number, `[x,y]`, `[x,y,z]`, `[pitch,yaw,roll]` or a transform.
   `LimitEnabled` has one entry per channel (3 for Position, 9 for Transform).
 - A transform is `{"Location":[x,y,z],"Rotation":[pitch,yaw,roll],"Scale":[x,y,z]}`.
-- Re-indent a line to move it (a move drops its extra space-switch parents); `[was="Old"]`
-  renames; a null or control left out is removed.
+- Re-indent a line to move it (the indent is the first parent only); `[was="Old"]` renames; a line
+  left out is removed.
 
 ## Graphs
 
@@ -42,8 +46,11 @@ SetBone Unit RigUnit_SetTransform
 - Types: `Unit <Struct>` (a rig unit or RigVM function, e.g. `RigVMFunction_MathFloatAdd`),
   `Template <Dispatch>(Pin: type)` (a dispatch such as `RigVMDispatch_ArrayMake(Values: float[])`;
   the types given and a link resolve it), `Get Var`, `Set Var`, `Call <LocalFunction>`,
-  `Comment "text"`, `Reroute`. Other nodes read as `Node <Class>` and keep their line; their pins
-  still take values and links.
+  `Call /Game/CR_Lib:Function` (a public function of another Control Rig), `Comment "text"`,
+  `Reroute`. Other nodes read as `Node <Class>` and keep their line; their pins still take values
+  and links. A collapse node reads `Node RigVMCollapseNode "Collapse:Name"`; its inner nodes are the
+  section `Collapse:Name`, written like `Rig`.
+- A link Unreal refuses fails the write with Unreal's own reason; nothing changes.
 - Aggregate pins (a `Sequence`'s outputs, an Add's inputs) are text: naming the node's next one
   creates it (`C -> Next`, `C = 2`), in order (`F` before `C` fails naming `C`), and leaving one
   out removes it. `D ->` is an execute output that links nothing. An aggregate node reads as its
@@ -58,9 +65,18 @@ SetBone Unit RigUnit_SetTransform
   `Return FunctionResult(Result: float)`; changing them changes the signature, and every Call node
   follows it (the reply lists them). Empty text deletes the function, refused while anything calls it.
 
-The `Document` section writes the rig's member variables (and the same nodes as JSON). A new rig
-from a mesh:
-`unreal.ControlRigBlueprintFactory.create_control_rig_from_skeletal_mesh_or_skeleton`.
+The rig's member variables are the `Variables` section (the `Document` section also holds them, with
+the same nodes as JSON). A new rig from a mesh:
+`unreal.ControlRigBlueprintFactory.create_control_rig_from_skeletal_mesh_or_skeleton`, or an empty
+rig and `@import`.
+
+## IK Rig and Retargeter
+
+An IK Rig has `Chains` (`Arm UpperArm Hand HandGoal`: name, start bone, end bone, optional goal),
+`Goals` (`HandGoal Hand solvers=0`) and `Solvers` (`set_transform disabled alpha=0.5`, in stack
+order), and a read-only `Bones` list (`Bones@arm` filters). Write Solvers before the Goals that
+connect to them. A Retargeter has `Chains`: `[Operation ]TargetChain SourceChain` (the operation
+column on UE 5.6 and later); a mapping changes, it is never left out.
 
 ## Sequencer
 

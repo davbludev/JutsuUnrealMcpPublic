@@ -26,6 +26,10 @@ Writes are all or nothing, compile a Blueprint whose structure or graphs change,
 compiler's messages and save. The plugin lays out every graph it changes; node positions are not
 part of the text, so never try to place nodes.
 
+`set_properties`, `Properties` and `Defaults` writes run the same class rules (an unregistered
+collision profile name, a `RefPoseSeq` from another skeleton, a Behavior Tree key the blackboard
+lacks): a refusal names the property, the rule and the valid choices, and leaves the asset as it was.
+
 A read may end with `# note:` lines (`// note:` in `Document`) naming what it does not show;
 writes skip them, so keep or drop them freely. A refusal for an unknown name lists the valid names
 and the closest; when it names a read-only section `<Section>@<query>`, read that section for the
@@ -50,7 +54,7 @@ say Call KismetSystemLibrary.PrintString
   `Call Class.Function` / `Call self.Function`, `Message Interface.Function`, `CallParent Function`,
   `Get Var`, `Set Var` (another object's variable: `Get Class.Var` with `self` linked to it), `Branch`, `Sequence`, `Cast Class`, `PureCast Class`, `Self`, `Reroute`,
   `Macro ForEachLoop`, `MakeStruct S`, `BreakStruct S`, `FunctionEntry(P: type)` (append
-  ` [Pure]` for a pure function),
+  ` [Pure]` for a pure function; also `[Const] [ThreadSafe] [Category "x"] [Keywords "y"]`),
   `FunctionResult(P: type)` (in a `Macro:` graph these are its tunnels; exec pins are type `exec`),
   `Comment "text"`, or a node class with JSON: `SpawnActorFromClass`,
   `SwitchEnum {"Enum":"/Script/Engine.ECollisionChannel"}`.
