@@ -49,6 +49,24 @@ Cached poses: `SaveCachedPose Name` stores a pose, `UseCachedPose Name` links to
 `BlendWeights_1 = 0.5` on `LayeredBoneBlend`, `BlendPose_2 = x.Pose` on `BlendListByInt`); a pose output
 holds one link, so each input takes its own node.
 
+Anim layers: writing a `Function:<Layer>` that does not exist makes an anim layer (an animation graph
+with its own `Root`) in an Anim Layer Interface, and in an Anim Blueprint when the text has a `Root` or
+`LinkedInputPose` line; without one it is a plain function. Layers an Anim Blueprint implements from an interface are `Function:` sections too. Put
+`LinkedInputPose` nodes on it for its inputs. A layer's machines, and machines nested in a state's
+graph, are read in the Document with `"graph": "<Layer or State graph name>"`; name it in a `create`
+clause to place the machine there. Cached-pose workflow: `SaveCachedPose Name` in one graph (usually the
+AnimGraph), `UseCachedPose Name` in a layer or state graph of the same Blueprint.
+
+In the Document a machine clause also takes `conduits` and `aliases` beside `states` (one key
+namespace; a conduit's rule is its `State:` section; an alias takes `global: true` or `states: [keys]`).
+Transitions to and from them are ordinary clauses. A transition with `"LogicType": "TLT_Custom"` gets a
+section `Blend:Machine/From->To` (`TransitionPoseEvaluator` nodes `from`/`to` feed `out
+CustomTransitionResult`); another logic type removes it. Settings the engine lane lacks are refused
+with the list the lane has (`BlendProfile` on 5.5, `BlendProfileWrapper` from 5.6,
+`bAllowInertializationForSelfTransitions` from 5.7). A `// note:` line in a Document read names
+what it cannot show (a transition with an end that links to no state, conduit or alias). Not authorable here:
+shared transition rules, anim notify events, and linked-layer slot setup; use `run_python` for those.
+
 Montage `Sections`: `Loop @ 0.5 -> Loop` (seconds, optional next section). Montage and sequence
 `Notifies`: `Track: Name` lines, each followed by `  0.25 AnimNotify_PlaySound {"Sound":"..."}`,
 `  0.25-0.75 AnimNotifyState_Trail {...}` (a state's start-end) or `  0.5 "Footstep"` (skeleton
