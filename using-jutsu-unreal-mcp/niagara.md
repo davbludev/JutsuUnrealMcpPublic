@@ -11,6 +11,7 @@ Open this page only for Niagara work. The general rules of `SKILL.md` apply.
 | `System` | the `SystemSpawn` and `SystemUpdate` stacks |
 | `Emitter:<Name>` | the emitter's `Properties`, `Parameters` (`Emitter.*`), four stacks, event handlers, simulation stages, `Renderers`; a lightweight one's `Properties`, `Modules`, `Renderers` |
 | `ScratchPad:<Name>`, `ScratchPad:<Emitter>/<Name>` | one scratch-pad graph (below) |
+| `Inputs@<module>` | read-only: a module's inputs, their types, values and what hides them (below) |
 | `Properties` | the system's own settings, as for any asset |
 
 An emitter asset (`create_asset` class `NiagaraEmitter`) has `Emitter`, the same text as
@@ -69,13 +70,42 @@ Renderers
   (`User.TracerColor`, `Particles.Gravity`), `Call <dynamic input script or ScratchPad section>` with
   its own inputs indented under it, a data interface's changed properties as `{json}` (`{}` for its
   defaults), or `Hlsl "<expression>"`. An input left out returns to the module default.
+- Input lines are stored in the module's own order, and an input equal to its default is not listed:
+  the text you wrote is not the text stored. `edit_asset` `old_text` must come from a fresh
+  `read_asset` (the reply of a write ends with the stored text when it differs).
+- `read_asset` `Inputs@<module>` lists a module's inputs, one `Name - type, ...` line each: a static
+  switch with the values it takes (`switch, one of Uniform Curve, Non-Uniform`), an enum's entries, the
+  `default` or the `value` set, and for an input that is off `inactive: shows when <Switch> = <value>
+  (now <current>)`. Name the module by where it is, `Inputs@Emitter:Smoke/ParticleUpdate/GravityForce`
+  (`System/SystemUpdate/<Module>` for a system stack; `Inputs@Emitter/<Stack>/<Module>` on an
+  emitter asset), or by script before you add it, `Inputs@/Niagara/Modules/Update/Forces/GravityForce`
+  (a `ScratchPad:` section too). Read it instead of provoking an error to get the list.
+- Writing an input the switches hide is refused with the one switch that shows it, the value that
+  shows it and the value it has now: `Scale Factor` is inactive; it shows when `Scale Sprite Size Mode =
+  Non-Uniform`. Set the switch in the same lines (any order) or first. Typical causes: `InitializeParticle`
+  `Color` needs `Color Mode = Direct Set`; `AddVelocity` `Velocity Speed` needs a `Velocity Mode` that
+  uses it (From Point, In Cone).
+- A `SetParameters` module sets stack parameters. Its inputs are its targets: `Particles.CameraOffset =
+  55`. A target the engine knows takes its type; another is typed once, `Particles.Gain: float = 2`
+  (later reads list `Particles.Gain = 2`). A target left out is removed, the module stays.
+
+```
+ParticleUpdate
+  CamOffset: SetParameters
+    Particles.CameraOffset = 55
+    Particles.Gain: float = 2
+```
 - A Data Channel read takes its channel as the module input's `{json}` value: linked to a `User.*`
   data interface it never spawns (engine behaviour). Read the spawned particle's entry by
   `Op Util::ExecIndex`, not `GetNDCSpawnData`, which only the spawning module's interface answers.
 - `Properties` are `Name = <json>` lines of the emitter's settings (`SimTarget`, `bLocalSpace`,
   `CalculateBoundsMode`, `FixedBounds`, ...). `Renderers` are `Class {json}` lines (`Sprite`,
-  `Ribbon`, `Mesh`, `Light`, ...); a renderer is known by its position. Its attribute bindings are
-  not text yet and stay as they are.
+  `Ribbon`, `Mesh`, `Light`, ...); a renderer is known by its position. Its attribute and User
+  parameter bindings are names in the same json: `Ribbon {"RibbonWidthBinding": "Particles.Mass",
+  "MaterialUserParamBinding": "User.Mat"}`. A binding that is the renderer's own is not listed, and
+  one left out goes back to it. A `User.` name must be declared in `Parameters` first, with the type the
+  binding takes (a material binding takes `/Script/Engine.MaterialInterface`, written there as
+  `User.Mat: /Script/Engine.MaterialInterface` or with the asset as a quoted path).
 
 ```
 Properties
