@@ -115,6 +115,11 @@ Blueprint state machines, maps): the JSON read returns. Copy a clause's shape to
 read printed for it (StateTree `state_19`, valid until the next write), or its name and type updates
 it; items left out stay. Remove with `{"remove": {"authoringId": "..."}, "destructive": true}`; a
 remove that matches nothing fails and lists what is there. Leading `// ` lines of a read are notes (what it leaves out); writes skip them.
+A Behavior Tree `Document` is `root` plus `decorators`, `services` and `children` arrays of `{"class": ..., "name": ..., "properties": {...}}`
+(a class path, a Blueprint asset path or a name like `BTTask_Wait`): a clause finds its node by `authoringId`, else by class and name, else by its
+place, so inserting before others keeps their settings; a `remove` names its node by `name`, `class` or `authoringId` and takes no place. `properties` are
+plain values by path, a key binding included: `{"BlackboardKey.SelectedKeyName": "Target", "WaitTime.DefaultValue": 5}`; the read lists the ones that differ from the defaults.
+`create_asset` gives a tree its graph; no editor needs opening.
 
 StateTree `Tree` text and StateTree components with parameter overrides: read
 [state-tree.md](state-tree.md) before writing one.
