@@ -82,17 +82,16 @@ Components / WidgetTree: indented `Name: Class {"Prop":value}`; widget slots `@{
 marked `[inherited]` and keep their line, whose `{json}` overrides their properties. A changed default reaches placed instances that kept the
 old value.
 
+Widget Blueprints (`WidgetTree` canvas slots and `bIsVariable`, `[bind ...]` property bindings,
+`Animations`, widget events, showing a widget and pressing its buttons in PIE): read
+[widget.md](widget.md) before writing one.
+
 One line per item: `Dispatchers` `OnHit(Damage: float)`; `Interfaces` an interface path; user
 struct `Fields` `Count: int = 3`; user enum `Entries` a name; String Table `Entries`
 `Key = "Text"`.
 
 Anim Blueprint graphs, Montage `Sections`, `Notifies` and `Sockets`, Anim Sequence, Montage and Blend
 Space data: read [animation.md](animation.md) before writing one.
-
-Widget `Animations`: `FadeIn [0-0.5]` (range in seconds, `[was="Old"]` renames), then per keyed
-channel `  Panel.RenderOpacity: 0=0 linear, 0.5=1` or `  Title.RenderTransform.Translation.X: 0=-200, 0.5=0`
-(`Translation.X/Y`, `Angle`, `Scale.X/Y`, `Shear.X/Y`; keys `seconds=value`, `constant`/`linear`,
-cubic when omitted). Left-out keys, channels and animations are removed; other tracks are kept.
 
 Gameplay tags (path `GameplayTags`): read [gameplay-tags.md](gameplay-tags.md) before writing one.
 
