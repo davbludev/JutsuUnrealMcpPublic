@@ -51,10 +51,6 @@ Assets 3
 Index idle: no build is running (the last one finished; get_log names a failure)
 ```
 
-`idle` means no build runs; Pose Search does not say whether a finished build worked, so a database
-that never searches well after `idle` has its failure in `get_log`. `Details` is read-only. `Schema not finalized` (and `Index none`) means the schema could not be set up,
-usually because the skeleton lacks a bone a channel names; fix the schema first, there is nothing to index.
-
 ## Chooser tables: `Table`
 
 Needs the Chooser plugin. A Chooser Table picks an animation (or any asset) from rows by testing the

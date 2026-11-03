@@ -56,12 +56,11 @@ A function write recompiles the loaded materials that use it and lists their err
 calls itself is refused. Material Layer and Material Layer Blend are functions: a layer's output takes
 `MakeMaterialAttributes`, a blend's inputs are `FunctionInput_MaterialAttributes` (`Top`, `Bottom`).
 
-### Limits
+### Other nodes
 
-Composite (collapsed subgraph) materials read but do not write. Expression kinds of the new material
-translator read only with `r.Material.Translator.EnableNew` on. Named Reroute usages link
-`Declaration = <declaration id>`; `CustomPrimitiveData` is a `ScalarParameter` or `VectorParameter`
-with `"bUseCustomPrimitiveData":true`.
+Named Reroute usages link `Declaration = <declaration id>`; `CustomPrimitiveData` is a `ScalarParameter` or
+`VectorParameter` with `"bUseCustomPrimitiveData":true`. `Kinds:Graph` reads even on a material
+holding new-translator nodes, where `Graph` is refused (the refusal says why).
 
 ## Properties
 
@@ -70,7 +69,7 @@ Settings live in `Properties` (`BlendMode`, `ShadingModel`, `MaterialDomain`, `T
 default, engine-set `bUsedWith...` flags included, so read, change the lines, write all of them back.
 A change recompiles the material and reports `compile: ok` or each error; a function's change
 recompiles its users. An open Material Editor shows the change on 5.8; on 5.5-5.7 the editor window is
-closed (it declines when it has unsaved edits). `set_properties` on the live material recompiles too, without a report; read the compile from a `Properties` write or `Graph` write.
+closed (it declines when it has unsaved edits). `set_properties` on the live material recompiles once per call; its reply's `followUps` carries the compile line.
 
 ## Instance `Parameters`
 

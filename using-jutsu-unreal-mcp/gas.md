@@ -74,12 +74,9 @@ computes `CombinedTags`. Tags must exist: write them in the `GameplayTags` secti
 
 ### Mirror fields are read-only
 
-The old top-level fields (`InheritableGameplayEffectTags`, `InheritableOwnedTagsContainer`,
-`InheritableBlockedAbilityTagsContainer`, `*TagRequirements`, `RemoveGameplayEffectsWithTags`,
-`GrantedApplicationImmunityTags`, `GrantedAbilities`, `ConditionalGameplayEffects`,
-`PrematureExpirationEffectClasses`, `RoutineExpirationEffectClasses`, and their query twins) are derived from
-`GEComponents` or ignored by the engine. A `Defaults` read leaves them out and a write that names one is
-refused with the component and member to write instead.
+The old top-level tag, requirement, immunity, ability and additional-effect fields (for example
+`InheritableGameplayEffectTags`) are derived from `GEComponents` or ignored by the engine. A `Defaults` read leaves
+them out and a write that names one is refused with the component and member to write instead.
 
 ## Gameplay Ability
 

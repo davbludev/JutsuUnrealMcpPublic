@@ -1,6 +1,6 @@
 ---
 name: using-jutsu-unreal-mcp
-description: Text formats of the Jutsu Unreal MCP server's read_asset / write_asset / edit_asset sections (Blueprint and anim graphs, variables, components, widget trees, materials, sound cues, Niagara systems, emitters, scripts and scratch pads, Control Rig hierarchies and graphs, StateTrees, Smart Objects, Gameplay Effects, Abilities and Cues (Gameplay Ability System), Mutable Customizable Object graphs, macros and instances, Pose Search databases, Chooser and Proxy tables). Use when editing Unreal assets through Jutsu as text, or scripting the Editor or PIE through its run_python.
+description: Text formats of the Jutsu Unreal MCP server's read_asset / write_asset / edit_asset sections (Blueprint and anim graphs, variables, components, widget trees, materials, sound cues, Niagara systems, emitters, scripts and scratch pads, Control Rig hierarchies and graphs, StateTrees, Smart Objects, Gameplay Effects, Abilities and Cues (Gameplay Ability System), Mutable Customizable Object graphs, macros and instances, Pose Search databases, Chooser and Proxy tables, Behavior Trees and Blackboards, MetaSound graphs, IK Rigs and IK Retargeters). Use when editing Unreal assets through Jutsu as text, or scripting the Editor or PIE through its run_python.
 ---
 
 # Using Jutsu Unreal MCP
@@ -22,22 +22,14 @@ message, each after the previous one answered.
 with `edit_asset(path, section, old_text, new_text)` (exact, unique match, like a file edit), or
 replace a section with `write_asset`. The written text is the whole resulting section: what it leaves
 out is removed (in a `Document` section, listed items are created or updated and the rest stay).
-Writes are all or nothing, compile a Blueprint whose structure or graphs change, report the
-compiler's messages and save. The plugin lays out every graph it changes; node positions are not
-part of the text, so never try to place nodes.
-
-`set_properties`, `Properties` and `Defaults` writes run the same class rules (an unregistered
-collision profile name, a `RefPoseSeq` from another skeleton, a Behavior Tree key the blackboard
-lacks): a refusal names the property, the rule and the valid choices, and leaves the asset as it was.
+Node positions are not part of the text, so never try to place nodes.
 
 `Properties`, `Defaults` and `Parameters` lines are `Name = <json>`. An instanced subobject (input trigger,
 Blackboard key type) is `{"class": "InputTriggerPressed", ...}`; struct array elements list only changed members
 (`{}`: all default).
 
-A read may end with `# note:` lines (`// note:` in `Document`) naming what it does not show;
-writes skip them, so keep or drop them freely. A refusal for an unknown name lists the valid names
-and the closest; when it names a read-only section `<Section>@<query>`, read that section for the
-full list (the query after `@` narrows it).
+A read's `# note:` lines (`// note:` in `Document`) name what it does not show; writes skip them. A refusal
+that names a read-only section `<Section>@<query>` points at the full list of valid names.
 
 Blueprint graph (`EventGraph`, `Function:Name`, `Macro:Name`):
 
@@ -102,7 +94,7 @@ channel `  Panel.RenderOpacity: 0=0 linear, 0.5=1` or `  Title.RenderTransform.T
 (`Translation.X/Y`, `Angle`, `Scale.X/Y`, `Shear.X/Y`; keys `seconds=value`, `constant`/`linear`,
 cubic when omitted). Left-out keys, channels and animations are removed; other tracks are kept.
 
-Gameplay tags (path `GameplayTags`) and a GameplayEffect's tags: read [gameplay-tags.md](gameplay-tags.md) before writing one.
+Gameplay tags (path `GameplayTags`): read [gameplay-tags.md](gameplay-tags.md) before writing one.
 
 Gameplay Ability System (Gameplay Effect modifiers, magnitudes, executions and components; Gameplay Ability
 defaults; Gameplay Cues; attribute references): read [gas.md](gas.md) before writing one.
@@ -121,12 +113,7 @@ Blueprint state machines, maps): the JSON read returns. Copy a clause's shape to
 (most domains write `"create": {...}`); a clause with an existing item's `authoringId`, the key the
 read printed for it (StateTree `state_19`, valid until the next write), or its name and type updates
 it; items left out stay. Remove with `{"remove": {"authoringId": "..."}, "destructive": true}`; a
-remove that matches nothing fails and lists what is there. Leading `// ` lines of a read are notes (what it leaves out); writes skip them.
-A Behavior Tree `Document` is `root` plus `decorators`, `services` and `children` arrays of `{"class": ..., "name": ..., "properties": {...}}`
-(a class path, a Blueprint asset path or a name like `BTTask_Wait`): a clause finds its node by `authoringId`, else by class and name, else by its
-place, so inserting before others keeps their settings; a `remove` names its node by `name`, `class` or `authoringId` and takes no place. `properties` are
-plain values by path, a key binding included: `{"BlackboardKey.SelectedKeyName": "Target", "WaitTime.DefaultValue": 5}`; the read lists the ones that differ from the defaults.
-`create_asset` gives a tree its graph; no editor needs opening.
+remove that matches nothing fails and lists what is there.
 
 Behavior Tree `Tree` text (indented node lines, `decorator`/`service` lines, `Kinds:Tree`) and Blackboard `Keys`
 (`Name: Type<Class> [flags]`, `was=` renames and repairs the trees): read [behavior-tree.md](behavior-tree.md)
@@ -146,7 +133,7 @@ Pose Search (Motion Matching) schemas and databases (`create_asset` parents, the
 [motion-matching.md](motion-matching.md) before writing one.
 
 Control Rig `Hierarchy` (controls, nulls, their settings), `Rig` and `Function:` graphs,
-Sequencer Control Rig tracks, loading an animation onto them and baking: read
+Sequencer Control Rig tracks, loading an animation onto them and baking; IK Rig and IK Retargeter: read
 [control-rig.md](control-rig.md) before building a rig.
 
 Anything without a text section (sequencer keys, animation edits, editor utilities) is reachable

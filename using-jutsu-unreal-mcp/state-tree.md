@@ -34,11 +34,8 @@ Subtree Shared
   A line reads what the engine lets its target read, as the editor does: `Parameters.<name>` (the
   nearest bag: the state's, its parents', then the root's), `Context.Actor`, `Event.Tag` (in an `If`
   under a `Transition OnEvent`), `<node id>.Output` for the evaluators, global tasks, parent states'
-  tasks and the nodes above it in its own state. A node never reads itself or a node below it. From UE 5.6 the engine's console variable
-  `StateTree.Compiler.EnableBindingSelectionNodeToInstanceData` (on by default) decides whether an enter
-  condition, a consideration or a state parameter may read a task's data; with it off they cannot.
-  A refusal names why and lists the sources in reach. An input property of a node (a condition's
-  `Left`) is bound, not given in `{values}`.
+  tasks and the nodes above it in its own state. A refusal names why and lists the sources in reach.
+  An input property of a node (a condition's `Left`) is bound, not given in `{values}`.
 - Transitions: `Transition <Trigger> -> <state | Next | Succeeded | Failed | None>` with
   `Priority=`, `Delay=`, `Variance=`, `Event="Tag"`; conditions are `If` lines under it. UE 5.8 adds
   the targets `Parent`, `NextParent`, `NextSelectableParent`.

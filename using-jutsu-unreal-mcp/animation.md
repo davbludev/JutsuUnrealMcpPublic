@@ -36,12 +36,13 @@ Naming an optional property in a pin line (`PlayRate = 2`) exposes it as a pin; 
 
 Anim node properties show member by member; only instanced members (a Control Rig node's
 `Node.AssetUserData`, an IK Rig node's `Node.GoalCreators`) stay out of the text and unchanged by a write. A `ControlRig` node takes its
-rig in `{"Node":{"ControlRigClass":...}}` on UE 5.5-5.7 and `{"Node":{"ControlRigAssetReference":...}}`
-on 5.8, and its rig-variable pins by name (`Speed = 2`). `Pin = @Owner.Path` binds a pin to a
+rig in `{"Node":{"ControlRigClass":"/Game/CR_Arms.CR_Arms_C"}}` on UE 5.5-5.7 and
+`{"Node":{"ControlRigAssetReference":{"BlueprintRigClass":"/Game/CR_Arms.CR_Arms_C"}}}` on 5.8; setting the rig
+turns its public variables into pins named like them (`Speed = 2`). `Pin = @Owner.Path` binds a pin to a
 property access path (a variable, a member chain, or a function as the last element); a bound pin
 reads the same way. Node settings like `UpdateFunction`, `InitialUpdateFunction`, `BecomeRelevantFunction`
 take a function reference; a `Function:` section whose entry is `FunctionEntry() [ThreadSafe]` is
-thread-safe (flags `[Pure] [Const] [ThreadSafe] [Category "x"] [Keywords "y"]`, after the parentheses).
+thread-safe (`FunctionEntry` flags: [SKILL.md](SKILL.md)).
 
 Cached poses: `SaveCachedPose Name` stores a pose, `UseCachedPose Name` links to it by that name
 (a rename of the save node keeps the links). Pose-list nodes (`LayeredBoneBlend`, `BlendListByInt`,
@@ -54,25 +55,21 @@ with its own `Root`) in an Anim Layer Interface, and in an Anim Blueprint when t
 `LinkedInputPose` line; without one it is a plain function. Layers an Anim Blueprint implements from an interface are `Function:` sections too. Put
 `LinkedInputPose` nodes on it for its inputs. A layer's machines, and machines nested in a state's
 graph, are read in the Document with `"graph": "<Layer or State graph name>"` (`"<Machine>/<State>"` when another graph has the state's name; the read gives it); name it in a `create`
-clause to place the machine there. Cached-pose workflow: `SaveCachedPose Name` in one graph (usually the
-AnimGraph), `UseCachedPose Name` in a layer or state graph of the same Blueprint.
+clause to place the machine there.
 
 In the Document a machine clause also takes `conduits` and `aliases` beside `states` (one key
 namespace; a conduit's rule is its `State:` section; an alias takes `global: true` or `states: [keys]`).
 Transitions to and from them are ordinary clauses. A transition with `"LogicType": "TLT_Custom"` gets a
 section `Blend:Machine/From->To` (`TransitionPoseEvaluator` nodes `from`/`to` feed `out
-CustomTransitionResult`); another logic type removes it. Settings the engine lane lacks are refused
-with the list the lane has (`BlendProfile` on 5.5, `BlendProfileWrapper` from 5.6,
-`bAllowInertializationForSelfTransitions` from 5.7). A `// note:` line in a Document read names
+CustomTransitionResult`); another logic type removes it. A `// note:` line in a Document read names
 what it cannot show (a transition with an end that links to no state, conduit or alias). Not authorable here:
-shared transition rules, anim notify events, and linked-layer slot setup; use `run_python` for those.
+a transition's own shared rule (`bSharedRules`), anim notify events, and linked-layer slot setup; use `run_python` for those.
 
 Montage `Sections`: `Loop @ 0.5 -> Loop` (seconds, optional next section). Montage and sequence
 `Notifies`: `Track: Name` lines, each followed by `  0.25 AnimNotify_PlaySound {"Sound":"..."}`,
 `  0.25-0.75 AnimNotifyState_Trail {...}` (a state's start-end) or `  0.5 "Footstep"` (skeleton
 notify); one notify per start time on a track; a notify matches by track, time and class. `Sockets`: skeleton `Grip: hand_r {"RelativeLocation":{"X":10}}`,
-Static Mesh `Grip {"Tag":"grip"}`. `[was="Old"]` renames a section or socket. A montage needs at least
-one section and its first at 0; text that has none, or whose first is later, is refused.
+Static Mesh `Grip {"Tag":"grip"}`. `[was="Old"]` renames a section or socket.
 
 ## Anim Sequence, Montage and Blend Space data
 

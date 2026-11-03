@@ -72,10 +72,7 @@ rig and `@import`.
 
 ## Control Rig in an Anim Blueprint
 
-A `ControlRig` node in an anim graph takes its rig as `{"Node":{"ControlRigClass":"/Game/CR_Arms.CR_Arms_C"}}`
-on UE 5.5-5.7 and `{"Node":{"ControlRigAssetReference":{"BlueprintRigClass":"/Game/CR_Arms.CR_Arms_C"}}}`
-on 5.8. Setting the rig turns the rig's public variables into pins named like them (`Speed = 2`); the
-node's instanced members stay as they are. See `animation.md` for the graph text.
+A `ControlRig` node in an anim graph, and the lane's spelling of its rig: see [animation.md](animation.md).
 
 ## IK Rig and Retargeter
 
