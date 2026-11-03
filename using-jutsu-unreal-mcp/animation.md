@@ -71,4 +71,37 @@ Montage `Sections`: `Loop @ 0.5 -> Loop` (seconds, optional next section). Monta
 `Notifies`: `Track: Name` lines, each followed by `  0.25 AnimNotify_PlaySound {"Sound":"..."}`,
 `  0.25-0.75 AnimNotifyState_Trail {...}` (a state's start-end) or `  0.5 "Footstep"` (skeleton
 notify); one notify per start time on a track; a notify matches by track, time and class. `Sockets`: skeleton `Grip: hand_r {"RelativeLocation":{"X":10}}`,
-Static Mesh `Grip {"Tag":"grip"}`. `[was="Old"]` renames a section or socket.
+Static Mesh `Grip {"Tag":"grip"}`. `[was="Old"]` renames a section or socket. A montage needs at least
+one section and its first at 0; text that has none, or whose first is later, is refused.
+
+## Anim Sequence, Montage and Blend Space data
+
+Event settings go on the notify line in one bracket after the properties, only what differs from the
+defaults: `0.25 AnimNotify_PlaySound [tick=BranchingPoint, chance=0.5]`, `0.5-0.75
+AnimNotifyState_MotionWarping {"RootMotionModifier":{"class":"RootMotionModifier_Scale"}} [lod=2]`,
+`0.875 "Footstep" [server=false, follower=true]`. A flag left off puts its default back. `tick` matters in a montage only; `lod=N` drops the notify on meshes at LOD N and above. Moving a
+notify's time (`0.5-0.75` to `0.4-0.75`) retimes the same event when it is the only unmatched one of its class on
+the track, so its settings and subobject stay.
+
+The rest is a `Properties` / `set_properties` write, `call_function` on `AnimationBlueprintLibrary`, or
+`run_python` (`unreal.AnimationLibrary`):
+
+- Create: `create_asset` `AnimSequence` / `AnimMontage` with `options {"TargetSkeleton": "...",
+  "SourceAnimation": "..."}`. A sequence's frames and rate come from its controller in `run_python`
+  (`get_editor_property('controller')`: `set_frame_rate`, `set_number_of_frames`).
+- Root motion, additive type, compression, `RetargetSource`, `RateScale`: `Properties` of the sequence, or
+  `SetRootMotionEnabled`, `SetRootMotionLockType`, `SetAdditiveAnimationType`.
+- Montage slots and segments are the `SlotAnimTracks` property: `set_properties values
+  {"SlotAnimTracks[0].AnimTrack.AnimSegments[0].AnimEndTime": 0.5}`. The write recomputes the montage's
+  length (`SequenceLength`) and linkable elements, so `Sections` and `Notifies` check the new length.
+- Sync markers: `AddAnimationSyncMarker(sequence, "LeftFoot", 0.5, "Feet")` (the notify track must exist:
+  list it in `Notifies` first), `GetAnimationSyncMarkersForTrack`, `RemoveAnimationSyncMarkersByName` and
+  `ByTrack`. The `Notifies` text does not list markers; a `Notifies` write keeps each on its track by name.
+- Curves: `AddCurve`, `AddFloatCurveKey` / `AddFloatCurveKeys`, `RemoveCurve`. Curve metadata sits on the
+  skeleton: `AddCurveMetaData`, `SetCurveMetaDataMaterial`, `SetCurveMetaDataMorphTarget`.
+- Virtual bones: `AddVirtualBone(sequence, "pelvis", "hand_r")`, `RemoveVirtualBone`.
+- Sequence length: `GetSequenceLength`; it follows the controller's frame count and rate.
+- Skeleton slot names and groups have no property or Python route (the skeleton's slot functions are not
+  Blueprint-callable); a montage slot needs one the skeleton already lists.
+- A Blend Space's `SampleData` and axes are `Properties` (or `set_properties`); the write validates and
+  resamples the blend data.
