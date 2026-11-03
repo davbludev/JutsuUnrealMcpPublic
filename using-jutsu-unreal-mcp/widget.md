@@ -94,14 +94,16 @@ Make and show a widget with `call_function`, each call after `start_pie` answere
    It stays valid until PIE stops (or until 256 newer returned objects push it out).
 3. `call_function(object=<widget>, function="AddToViewport")`.
 
-- Live values: `set_properties(object=<widget>, values={"Health": 0.25})` sets a widget variable;
-  `get_properties(object=<widget>, properties=["HealthBar"])` gives a variable child's path. `get_properties` on a bound
+- Live values: `set_properties(object=<widget>, values={"Health": 0.25})` sets a widget variable.
+  A child widget's path is `<widget>.WidgetTree_0.<ChildName>` (`get_properties` on the child's name
+  returns its properties, not its path). `get_properties` on a bound
   property returns `bindings`, which names the call that reads the shown value (on a live widget,
   `call_function` on the source function), since the stored value is not what shows.
 - Play an animation: `call_function(object=<widget>, function="PlayAnimation", args={"InAnimation":
   <path from get_properties(object=<widget>, properties=["Toast"])>})`.
 - Press a button with the keyboard: focus it with `call_function(object="WidgetBlueprintLibrary",
   function="SetInputMode_UIOnlyEx", args={"PlayerController": <controller>, "InWidgetToFocus":
-  <button path>})`, or move focus with `send_input(key="Tab")`; then `send_input(key="Enter")` clicks
-  the focused button.
+  <widget>.WidgetTree_0.<ButtonName>})`; then `send_input(key="Enter")` clicks the focused button.
+- Make plain item objects (list view items, data objects) with `GameplayStatics.SpawnObject` from
+  `call_function`, or with a `GenericCreateObject` node in a graph.
 - In `run_python` the library is `unreal.WidgetLibrary` (`unreal.WidgetLibrary.get_all_widgets_of_class`).
