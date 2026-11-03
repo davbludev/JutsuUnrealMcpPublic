@@ -121,6 +121,10 @@ place, so inserting before others keeps their settings; a `remove` names its nod
 plain values by path, a key binding included: `{"BlackboardKey.SelectedKeyName": "Target", "WaitTime.DefaultValue": 5}`; the read lists the ones that differ from the defaults.
 `create_asset` gives a tree its graph; no editor needs opening.
 
+Behavior Tree `Tree` text (indented node lines, `decorator`/`service` lines, `Kinds:Tree`) and Blackboard `Keys`
+(`Name: Type<Class> [flags]`, `was=` renames and repairs the trees): read [behavior-tree.md](behavior-tree.md)
+before writing one.
+
 StateTree `Tree` text and StateTree components with parameter overrides: read
 [state-tree.md](state-tree.md) before writing one.
 
