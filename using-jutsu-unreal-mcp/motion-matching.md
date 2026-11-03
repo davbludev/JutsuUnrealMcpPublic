@@ -55,8 +55,48 @@ Index idle: no build is running (the last one finished; get_log names a failure)
 that never searches well after `idle` has its failure in `get_log`. `Details` is read-only. `Schema not finalized` (and `Index none`) means the schema could not be set up,
 usually because the skeleton lacks a bone a channel names; fix the schema first, there is nothing to index.
 
+## Chooser tables: `Table`
+
+Needs the Chooser plugin. A Chooser Table picks an animation (or any asset) from rows by testing the
+columns. `create_asset(path, class="ChooserTable")` makes an empty one; `read_asset(table, "Table")` and
+`write_asset` do the rest. Its results, fallback and disabled flags are not editable properties, so
+`Properties` (and `get_properties` without names) never show them; use `Table`:
+
+```
+Column /Script/Chooser.FloatRangeColumn {"InputValue":{"struct":"/Script/Chooser.FloatContextProperty","Binding":{"PropertyBindingChain":["Speed"]}}}
+Column /Script/Chooser.BoolColumn
+Row /Game/Anim/A_Idle.A_Idle {"cells":[{"Min":0,"Max":1},null]}
+Row /Game/Anim/A_Walk.A_Walk {"disabled":true,"cells":[{"Min":1,"Max":5},null]}
+Row evaluate /Game/Anim/CT_Run.CT_Run {"cells":[{"Min":5,"bNoMax":true},null]}
+Fallback /Game/Anim/A_Idle.A_Idle
+```
+
+- A column is its struct plus the settings that differ (the input binding is `InputValue`; read a table you
+  built in the editor to see the binding shape). Its cells are not on the column line: each row's `cells`
+  holds one value per column, `null` for the column's default.
+- A row's result is an asset path, `soft <path>`, `evaluate <chooser path>`, `nested <name>` or `None`.
+  `nested Branch` makes a chooser inside the table; its own columns and rows are section `Table:Branch`.
+- The text is the whole table: write back what you read to change nothing (`No change.`); remove a row by
+  leaving its line out; every column is resized with the rows. Rows are told apart by position.
+- Do not write `ColumnsStructs` through `Properties`: it leaves the rows out of step. `Properties` stays
+  for the result type, result class and parameters (context objects). On UE 5.8 the write validates the table
+  (compiling input bindings) and lists what it finds as `validation:` lines.
+
+## Proxy tables: `Entries`
+
+A Proxy Asset is a name an animation graph looks up; a Proxy Table maps it to a result. Make
+`ProxyAsset`s and a `ProxyTable` with `create_asset`, then:
+
+```
+Entry /Game/Anim/PA_Locomotion.PA_Locomotion evaluate /Game/Anim/CT_Run.CT_Run
+Entry /Game/Anim/PA_Idle.PA_Idle /Game/Anim/A_Idle.A_Idle
+```
+
+One entry per proxy asset; results are written as in a row (no `nested`); options `{"key":...,"outputs":[...]}`
+follow the result. The write rebuilds the table's runtime lookup.
+
 ## Not covered here
 
-Chooser tables and the Motion Matching anim nodes of an Anim Blueprint are not described here. The
+The Motion Matching anim nodes of an Anim Blueprint are not described here. The
 trajectory functions differ by engine: UE 5.5 `PoseSearchGenerateTrajectory` / `GetTrajectorySampleAtTime`; UE 5.8
 `PoseSearchGenerateTransformTrajectory` / `GetTransformTrajectorySampleAtTime` (UE 5.7 has both).
