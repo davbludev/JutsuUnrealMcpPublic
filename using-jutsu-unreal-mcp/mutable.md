@@ -31,16 +31,17 @@ pick Switch {"PinType":"float"}
 - `<id> <Type> {json}`. Existing ids are what read printed; a new node takes any unused name that
   is not `n` plus hex digits (those name existing nodes), and the reply says which id it got.
 - Types are the node class without `CustomizableObjectNode` / `CONode`; a class outside the palette
-  (kept for older assets) reads under its full class name. A write with a type the
-  palette lacks fails and lists every type, with the values keyed types take
-  (`Switch (PinType: ...)`, `ExposePin`, `ExternalPin`, `FloatArithmeticOp (Operation: ...)`); put
-  that key first in the JSON. A `Switch`'s `PinType` is the type it switches (`float`, `mesh`, ...).
+  (kept for older assets) reads under its full class name. `Kinds:Graph` (read-only) lists the
+  palette's types, keyed ones with the values they take; `Kinds:Graph@Switch` one type with its pins,
+  `Kinds:Graph@<id>` a node's. Put a keyed type's key first in the JSON (`Switch {"PinType":"float"}`,
+  the type it switches: `float`, `mesh`, ...).
 - JSON holds the node's editable properties that differ from a new node of its type, and the names
   the Mutable editor renames on the node itself: `ObjectName`, `ComponentName`, a `StaticString`'s
   `Value`.
 - Inputs: `Pin = <id>`, or `<id>.<Output>` when the source has several outputs; a multi-link input
   (`Components`) lists its sources in order: `Components = a, b`. Pin names are Mutable's internal
   names (`Mesh_Input_Pin`, `"LOD 0"`); quote names with spaces. A failed write lists a node's pins.
+  Input lines take links only; a node's values go in its JSON.
 - Pins that follow other links come by themselves: link `"Switch Parameter"` to an enum, and the
   switch gets one input per enum value (`Small`, `Big`) in the same write.
 - Per-pin data: `Pin {json}` under the node (`Pin [out] {json}` for an output), for pins such as a

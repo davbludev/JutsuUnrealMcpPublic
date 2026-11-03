@@ -165,7 +165,8 @@ out Output Module [Usage=ParticleSpawn]
   writes them; both take the map on `Source`, and `MapSet` passes it on as `Dest`.
 - Map pins are `Namespace.Name: type` lines. On `MapGet`, `= literal` is a module input's default
   and `[Tooltip="...", Default=User.X]` its tooltip and default binding; link from it by its full
-  name, `get.Module.MaxRange`. On `MapSet`, `= <id>.Pin` or `= literal` is the value written.
+  name, `get.Module.MaxRange`; a `MapGet` pin holds a default, never a link. On `MapSet`,
+  `= <id>.Pin` or `= literal` is the value written.
   On the stack a module input drops `Module.`: `MaxRange`.
 - `Output Module [Usage=EmitterUpdate|ParticleSpawn]`: the module's end, input `Output`, and the
   stack groups it may run in (`SystemSpawn`, `SystemUpdate`, `EmitterSpawn`, `EmitterUpdate`,
@@ -183,6 +184,8 @@ out Output Module [Usage=ParticleSpawn]
   `Numeric::Clamp`, `Util::ExecIndex`; pins `A`, `B` (`C` the alpha of Lerp) to `Result`.
 - `CustomHlsl(<inputs> -> <outputs>)` with its code as `Hlsl = """ ... """`.
 - Any other node: its class without `NiagaraNode`, with `{json}` properties.
+- `Kinds:<section>` (read-only: `Kinds:ScratchPad:<Name>`, `Kinds:Graph` on a script asset) lists
+  these node types; `@CustomHlsl` shows one, `@<id>` a node's type and pins.
 - Types: `bool int float Vector Vector2D Vector4 Position LinearColor Quat Matrix ID`, a data
   interface without `NiagaraDataInterface` (`DataChannelRead`), a Niagara struct without `Niagara`
   (`EmitterID`), an enum by path.
