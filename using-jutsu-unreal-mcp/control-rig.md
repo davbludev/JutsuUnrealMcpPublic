@@ -77,10 +77,15 @@ A `ControlRig` node in an anim graph, and the lane's spelling of its rig: see [a
 ## IK Rig and Retargeter
 
 An IK Rig has `Chains` (`Arm UpperArm Hand HandGoal`: name, start bone, end bone, optional goal),
-`Goals` (`HandGoal Hand solvers=0`) and `Solvers` (`set_transform disabled alpha=0.5`, in stack
-order), and a read-only `Bones` list (`Bones@arm` filters). Write Solvers before the Goals that
-connect to them. A Retargeter has `Chains`: `[Operation ]TargetChain SourceChain` (the operation
-column on UE 5.6 and later); a mapping changes, it is never left out.
+`Goals` (`HandGoal Hand solvers=0`) and `Solvers`, one line per solver in stack order:
+`set_transform disabled alpha=0.5`, or any other type with its bones and settings,
+`full_body_ik start=pelvis {"MassMultiplier":2,"goals":{"HandGoal":{"StrengthAlpha":0.5}},"bones":{"spine_01":{}}}`
+(`goals` holds per-goal settings, `bones` the bones that carry settings). A read-only `Bones` list
+(`Bones@arm` filters). Write Solvers before the Goals that connect to them.
+
+A Retargeter has `Chains`: `[Operation ]TargetChain SourceChain` (the operation column on UE 5.6 and
+later; `-` or a line left out maps to nothing), and `Ops`, its stack in order:
+`Name type [parent=Op] [disabled] [{settings}]` (`parent=` on UE 5.6 and later).
 
 ## Sequencer
 
