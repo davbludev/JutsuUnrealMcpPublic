@@ -30,6 +30,10 @@ part of the text, so never try to place nodes.
 collision profile name, a `RefPoseSeq` from another skeleton, a Behavior Tree key the blackboard
 lacks): a refusal names the property, the rule and the valid choices, and leaves the asset as it was.
 
+`Properties`, `Defaults` and `Parameters` lines are `Name = <json>`. An instanced subobject (input trigger,
+Blackboard key type) is `{"class": "InputTriggerPressed", ...}`; struct array elements list only changed members
+(`{}`: all default).
+
 A read may end with `# note:` lines (`// note:` in `Document`) naming what it does not show;
 writes skip them, so keep or drop them freely. A refusal for an unknown name lists the valid names
 and the closest; when it names a read-only section `<Section>@<query>`, read that section for the
@@ -103,8 +107,8 @@ Gameplay tags (path `GameplayTags`) and a GameplayEffect's tags: read [gameplay-
 Gameplay Ability System (Gameplay Effect modifiers, magnitudes, executions and components; Gameplay Ability
 defaults; Gameplay Cues; attribute references): read [gas.md](gas.md) before writing one.
 
-Material `Graph`, material instance `Parameters`, `Defaults` and `Properties`, and `Name = <json>`
-properties holding instanced subobjects: read [material.md](material.md) before writing one.
+Material and Material Function `Graph` and `Properties`, Material Instance `Parameters`: read [material.md](material.md)
+before writing one.
 
 Sound Cue `Graph`: read [sound-cue.md](sound-cue.md) before writing one.
 

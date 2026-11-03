@@ -53,7 +53,7 @@ Anim layers: writing a `Function:<Layer>` that does not exist makes an anim laye
 with its own `Root`) in an Anim Layer Interface, and in an Anim Blueprint when the text has a `Root` or
 `LinkedInputPose` line; without one it is a plain function. Layers an Anim Blueprint implements from an interface are `Function:` sections too. Put
 `LinkedInputPose` nodes on it for its inputs. A layer's machines, and machines nested in a state's
-graph, are read in the Document with `"graph": "<Layer or State graph name>"`; name it in a `create`
+graph, are read in the Document with `"graph": "<Layer or State graph name>"` (`"<Machine>/<State>"` when another graph has the state's name; the read gives it); name it in a `create`
 clause to place the machine there. Cached-pose workflow: `SaveCachedPose Name` in one graph (usually the
 AnimGraph), `UseCachedPose Name` in a layer or state graph of the same Blueprint.
 

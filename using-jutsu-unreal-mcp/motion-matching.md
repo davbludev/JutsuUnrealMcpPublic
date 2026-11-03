@@ -93,10 +93,28 @@ Entry /Game/Anim/PA_Idle.PA_Idle /Game/Anim/A_Idle.A_Idle
 ```
 
 One entry per proxy asset; results are written as in a row (no `nested`); options `{"key":...,"outputs":[...]}`
-follow the result. The write rebuilds the table's runtime lookup.
+follow the result. The write rebuilds the table's runtime lookup and that of every loaded table inheriting from it.
 
-## Not covered here
+## Anim Blueprint nodes
 
-The Motion Matching anim nodes of an Anim Blueprint are not described here. The
-trajectory functions differ by engine: UE 5.5 `PoseSearchGenerateTrajectory` / `GetTrajectorySampleAtTime`; UE 5.8
-`PoseSearchGenerateTransformTrajectory` / `GetTransformTrajectorySampleAtTime` (UE 5.7 has both).
+The nodes are ordinary anim graph text ([animation.md](animation.md)): `MotionMatching`,
+`PoseSearchHistoryCollector` (Pose History), `ChooserPlayer`; `MotionMatchingInteraction` exists on UE 5.5-5.7 only. A node
+of a plugin that is off is refused with the plugin to enable. A pose chain with a thread-safe function and a
+property access pin, compiling clean:
+
+```
+mm MotionMatching {"Node":{"OnMotionMatchingStateUpdated":{"FunctionName":"UpdateMatching"}}}
+  Database = /Game/MM/PSD_Locomotion.PSD_Locomotion
+  BlendTime = @Speed
+hist PoseSearchHistoryCollector
+  Source = mm.Pose
+out Root
+  Result = hist.Pose
+```
+
+- `Function:UpdateMatching` is `e FunctionEntry() [ThreadSafe]` (node functions run on worker
+  threads); the node takes it as `"OnMotionMatchingStateUpdated":{"FunctionName":"UpdateMatching"}`. `Database` is a pin: set it on its pin line.
+- `Speed: float` is an Anim Blueprint variable (`Variables` section); `BlendTime = @Speed` binds the pin to it.
+- The history collector generates the trajectory itself; a trajectory you supply comes from engine functions
+  that differ by lane: UE 5.5 `PoseSearchGenerateTrajectory` / `GetTrajectorySampleAtTime`; UE 5.8
+  `PoseSearchGenerateTransformTrajectory` / `GetTransformTrajectorySampleAtTime` (UE 5.7 has both).
