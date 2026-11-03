@@ -48,7 +48,7 @@ A database builds its search index in the background. A changing write requests 
 Schema /Game/MM/PSS_Locomotion.PSS_Locomotion
 Schema cardinality 36
 Assets 3
-Index idle: no build is running (the last one finished; get_log names a failure)
+Index idle: no build is running (the last one finished; if it failed, get_log says why)
 ```
 
 ## Chooser tables: `Table`
