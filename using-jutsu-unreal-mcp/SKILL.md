@@ -1,6 +1,6 @@
 ---
 name: using-jutsu-unreal-mcp
-description: Text formats of the Jutsu Unreal MCP server's read_asset / write_asset / edit_asset sections (Blueprint and anim graphs, variables, components, widget trees, materials, sound cues, Niagara systems, emitters, scripts and scratch pads, Control Rig hierarchies and graphs, StateTrees, Smart Objects, Mutable Customizable Object graphs, macros and instances, Pose Search databases, Chooser and Proxy tables). Use when editing Unreal assets through Jutsu as text, or scripting the Editor or PIE through its run_python.
+description: Text formats of the Jutsu Unreal MCP server's read_asset / write_asset / edit_asset sections (Blueprint and anim graphs, variables, components, widget trees, materials, sound cues, Niagara systems, emitters, scripts and scratch pads, Control Rig hierarchies and graphs, StateTrees, Smart Objects, Gameplay Effects, Abilities and Cues (Gameplay Ability System), Mutable Customizable Object graphs, macros and instances, Pose Search databases, Chooser and Proxy tables). Use when editing Unreal assets through Jutsu as text, or scripting the Editor or PIE through its run_python.
 ---
 
 # Using Jutsu Unreal MCP
@@ -99,6 +99,9 @@ channel `  Panel.RenderOpacity: 0=0 linear, 0.5=1` or `  Title.RenderTransform.T
 cubic when omitted). Left-out keys, channels and animations are removed; other tracks are kept.
 
 Gameplay tags (path `GameplayTags`) and a GameplayEffect's tags: read [gameplay-tags.md](gameplay-tags.md) before writing one.
+
+Gameplay Ability System (Gameplay Effect modifiers, magnitudes, executions and components; Gameplay Ability
+defaults; Gameplay Cues; attribute references): read [gas.md](gas.md) before writing one.
 
 Material `Graph`, material instance `Parameters`, `Defaults` and `Properties`, and `Name = <json>`
 properties holding instanced subobjects: read [material.md](material.md) before writing one.

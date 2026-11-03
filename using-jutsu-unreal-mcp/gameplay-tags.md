@@ -19,4 +19,5 @@ tags. `GEComponents` is written whole: read it with `get_properties` first and s
 the effect keeps, with the change. Granted tags: `TargetTagsGameplayEffectComponent`
 (`InheritableGrantedTagsContainer`); tag requirements: `TargetTagRequirementsGameplayEffectComponent`;
 blocked ability tags: `BlockAbilityTagsGameplayEffectComponent`. A `set_properties` reply with
-`warnings` names each value the engine did not keep, and where a mirrored field's data lives.
+`warnings` names each value the engine did not keep. A write that names a mirror field itself is
+refused and says where its data lives. Modifiers, executions and the rest of a GameplayEffect: [gas.md](gas.md).
