@@ -86,8 +86,8 @@ One line per item: `Dispatchers` `OnHit(Damage: float)`; `Interfaces` an interfa
 struct `Fields` `Count: int = 3`; user enum `Entries` a name; String Table `Entries`
 `Key = "Text"`.
 
-Anim Blueprint graphs, Montage `Sections`, `Notifies` and `Sockets`: read [animation.md](animation.md)
-before writing one.
+Anim Blueprint graphs, Montage `Sections`, `Notifies` and `Sockets`, Anim Sequence, Montage and Blend
+Space data: read [animation.md](animation.md) before writing one.
 
 Widget `Animations`: `FadeIn [0-0.5]` (range in seconds, `[was="Old"]` renames), then per keyed
 channel `  Panel.RenderOpacity: 0=0 linear, 0.5=1` or `  Title.RenderTransform.Translation.X: 0=-200, 0.5=0`
@@ -115,9 +115,8 @@ read printed for it (StateTree `state_19`, valid until the next write), or its n
 it; items left out stay. Remove with `{"remove": {"authoringId": "..."}, "destructive": true}`; a
 remove that matches nothing fails and lists what is there.
 
-Behavior Tree `Tree` text (indented node lines, `decorator`/`service` lines, `Kinds:Tree`) and Blackboard `Keys`
-(`Name: Type<Class> [flags]`, `was=` renames and repairs the trees): read [behavior-tree.md](behavior-tree.md)
-before writing one.
+Behavior Tree `Tree` text (indented node lines, `decorator`/`service` lines) and Blackboard `Keys`
+(`Name: Type<Class> [flags]`): read [behavior-tree.md](behavior-tree.md) before writing one.
 
 StateTree `Tree` text and StateTree components with parameter overrides: read
 [state-tree.md](state-tree.md) before writing one.
@@ -129,14 +128,14 @@ MetaSound `Graph` (classes, wiring, interfaces) and `Document` presets: read [me
 
 Customizable Object (Mutable) `Graph`, Macro Library `Macro:Name` and instance `Parameters`: read [mutable.md](mutable.md) before writing one.
 
-Pose Search (Motion Matching) schemas and databases (`create_asset` parents, the database `Assets` list, index state), Chooser Tables (`Table`) and Proxy Tables (`Entries`): read
+Pose Search (Motion Matching) schemas and databases (`create_asset` parents, the database `Assets` list), Chooser Tables (`Table`) and Proxy Tables (`Entries`): read
 [motion-matching.md](motion-matching.md) before writing one.
 
 Control Rig `Hierarchy` (controls, nulls, their settings), `Rig` and `Function:` graphs,
 Sequencer Control Rig tracks, loading an animation onto them and baking; IK Rig and IK Retargeter: read
 [control-rig.md](control-rig.md) before building a rig.
 
-Anything without a text section (sequencer keys, animation edits, editor utilities) is reachable
+Anything without a text section (animation curves and sync markers, editor utilities) is reachable
 through `call_function` on Unreal's scripting libraries, and past that through `run_python`.
 Curve assets (`CurveFloat`, `CurveVector`, `CurveLinearColor`) have a `Keys` section: one key per line,
 `0.5: 1 linear`, `1: 2 cubic user arrive=0.5 leave=0.5` (`constant`/`linear`/`cubic`; cubic may add
@@ -146,6 +145,6 @@ with `get_float_value(t)`.
 `create_asset` `options` set factory properties: a BlendSpace needs `{"TargetSkeleton": path}`; a
 Blueprint interface is `class Blueprint`, `parent Interface`, `{"BlueprintType": "BPTYPE_Interface"}`.
 
-`run_python` crash gotchas (globals that outlive a call, deleting assets, switching levels, GeometryScript
-UVs, duplicated primary data assets), frame and PIE rules, and navigation rebuilds: read
+`run_python` crash gotchas (deleting assets, switching levels, GeometryScript UVs, primary data
+assets copied in Python), frame and PIE rules, and navigation rebuilds: read
 [run-python.md](run-python.md) before scripting the Editor or PIE.

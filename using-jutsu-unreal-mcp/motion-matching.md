@@ -10,12 +10,11 @@ create_asset(path="/Game/MM/PSD_Locomotion", class="PoseSearchDatabase", parent=
 ```
 
 - A schema's `parent` is its skeleton; the factory adds the default channels. A database's `parent` is
-  its schema (`options` {"TargetSchema": path} does the same). Without them the factory makes nothing
-  and the refusal names the setting that is unset.
+  its schema (`options` {"TargetSchema": path} does the same).
 - A schema is plain properties. `read_asset(schema, "Properties")` shows `Channels` as instanced
   objects (`{"class": "...", members}`), `SampleRate`, the mirror table and the rest; `write_asset`
   with that text changes them, and Pose Search recomputes the schema. Remove or reorder a channel by
-  editing the `Channels` array; writing back what was read is `No change.`
+  editing the `Channels` array.
 
 ## Database animation list: `Assets`
 
@@ -37,26 +36,12 @@ write it as section `Assets`, one line per entry:
   back to the defaults. Animation sequences, blend spaces, composites, montages and multi anim assets
   all take the same line; the plugin picks the entry kind from the asset's class on every engine.
 - `edit_asset(db, "Assets", old_text, new_text)` changes one line's settings.
-- Unknown setting names are refused with the valid ones listed.
-
-## Indexing
-
-A database builds its search index in the background. A changing write requests a build; read
-`Details` to see `Index building` turn into `Index idle`:
-
-```
-Schema /Game/MM/PSS_Locomotion.PSS_Locomotion
-Schema cardinality 36
-Assets 3
-Index idle: no build is running (the last one finished; if it failed, get_log says why)
-```
 
 ## Chooser tables: `Table`
 
 Needs the Chooser plugin. A Chooser Table picks an animation (or any asset) from rows by testing the
 columns. `create_asset(path, class="ChooserTable")` makes an empty one; `read_asset(table, "Table")` and
-`write_asset` do the rest. Its results, fallback and disabled flags are not editable properties, so
-`Properties` (and `get_properties` without names) never show them; use `Table`:
+`write_asset` do the rest:
 
 ```
 Column /Script/Chooser.FloatRangeColumn {"InputValue":{"struct":"/Script/Chooser.FloatContextProperty","Binding":{"PropertyBindingChain":["Speed"]}}}
@@ -72,11 +57,9 @@ Fallback /Game/Anim/A_Idle.A_Idle
   holds one value per column, `null` for the column's default.
 - A row's result is an asset path, `soft <path>`, `evaluate <chooser path>`, `nested <name>` or `None`.
   `nested Branch` makes a chooser inside the table; its own columns and rows are section `Table:Branch`.
-- The text is the whole table: write back what you read to change nothing (`No change.`); remove a row by
-  leaving its line out; every column is resized with the rows. Rows are told apart by position.
-- Do not write `ColumnsStructs` through `Properties`: it leaves the rows out of step. `Properties` stays
-  for the result type, result class and parameters (context objects). On UE 5.8 the write validates the table
-  (compiling input bindings) and lists what it finds as `validation:` lines.
+- Remove a row by leaving its line out; every column is resized with the rows. Rows are told apart by
+  position.
+- `Properties` holds the result type, result class and parameters (context objects).
 
 ## Proxy tables: `Entries`
 
@@ -88,14 +71,12 @@ Entry /Game/Anim/PA_Locomotion.PA_Locomotion evaluate /Game/Anim/CT_Run.CT_Run
 Entry /Game/Anim/PA_Idle.PA_Idle /Game/Anim/A_Idle.A_Idle
 ```
 
-One entry per proxy asset; results are written as in a row (no `nested`); options `{"key":...,"outputs":[...]}`
-follow the result. The write rebuilds the table's runtime lookup and that of every loaded table inheriting from it.
+Results are written as in a row, except `nested`; options `{"key":...,"outputs":[...]}` follow the result.
 
 ## Anim Blueprint nodes
 
 The nodes are ordinary anim graph text ([animation.md](animation.md)): `MotionMatching`,
-`PoseSearchHistoryCollector` (Pose History), `ChooserPlayer`; `MotionMatchingInteraction` exists on UE 5.5-5.7 only. A node
-of a plugin that is off is refused with the plugin to enable. A pose chain with a thread-safe function and a
+`PoseSearchHistoryCollector` (Pose History), `ChooserPlayer`; `MotionMatchingInteraction` exists on UE 5.5-5.7 only. A pose chain with a thread-safe function and a
 property access pin, compiling clean:
 
 ```
@@ -109,7 +90,7 @@ out Root
 ```
 
 - `Function:UpdateMatching` is `e FunctionEntry() [ThreadSafe]` (node functions run on worker
-  threads); the node takes it as `"OnMotionMatchingStateUpdated":{"FunctionName":"UpdateMatching"}`. `Database` is a pin: set it on its pin line.
+  threads).
 - `Speed: float` is an Anim Blueprint variable (`Variables` section); `BlendTime = @Speed` binds the pin to it.
 - The history collector generates the trajectory itself; a trajectory you supply comes from engine functions
   that differ by lane: UE 5.5 `PoseSearchGenerateTrajectory` / `GetTrajectorySampleAtTime`; UE 5.8

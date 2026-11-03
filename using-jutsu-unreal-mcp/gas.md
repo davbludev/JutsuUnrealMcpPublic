@@ -13,11 +13,10 @@ with `create_asset` (`class` `GameplayEffect`, `GameplayAbility`, or a cue paren
   (`Modifiers[0].ModifierOp`). Take `Defaults` to write several at once and to copy a read back; take
   `set_properties` for one member.
 
-A `Defaults` write is the whole text: a line you leave out is reset to the parent's value. Read first,
-change the lines, write the whole text back. Writing a read back unchanged answers `No change.`
+In a `Defaults` write a line you leave out is reset to the parent's value.
 
-Attribute Sets are C++ classes (or Blueprint classes with float variables); this plugin does not
-create their attributes. Everything below references an attribute set that already exists.
+Attribute Sets are C++ classes or Blueprints: `create_asset` `class` `Blueprint`, `parent`
+`/Script/GameplayAbilities.AttributeSet`, then `Variables` lines such as `Stamina: GameplayAttributeData`.
 
 ## Attribute references
 
@@ -27,9 +26,8 @@ Every attribute value (a modifier's `Attribute`, a capture's `AttributeToCapture
     "Attr"                                  when exactly one loaded attribute set has it
     "/Script/MyGame.MyAttributeSet:Attr"    the full path
 
-A read prints `Set.Attr`. A reference that matches nothing, or several sets, is refused with the forms
-and the matching or known attributes. The cached name and owner the engine keeps beside the path are
-filled for you; do not write the old `{AttributeName, Attribute, AttributeOwner}` triple.
+A read prints `Set.Attr` (the full path when two sets share a name). The cached name and owner the
+engine keeps beside the path are filled for you: write the one string.
 
 ## Gameplay Effect
 
@@ -71,12 +69,6 @@ Classes: `AssetTagsGameplayEffectComponent`, `TargetTagsGameplayEffectComponent`
 `OnCompleteNormal`, `OnCompletePrematurely`). Send `Added` and `Removed` for a tag container; the engine
 computes `CombinedTags`. Tags must exist: write them in the `GameplayTags` section first
 ([gameplay-tags.md](gameplay-tags.md)); an unregistered tag is dropped.
-
-### Mirror fields are read-only
-
-The old top-level tag, requirement, immunity, ability and additional-effect fields (for example
-`InheritableGameplayEffectTags`) are derived from `GEComponents` or ignored by the engine. A `Defaults` read leaves
-them out and a write that names one is refused with the component and member to write instead.
 
 ## Gameplay Ability
 

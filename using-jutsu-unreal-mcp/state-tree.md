@@ -21,7 +21,7 @@ Subtree Shared
 
 - States: `State|Group|Linked|LinkedAsset|Subtree Name [markers]`, children two spaces in; line
   order is sibling order (move a line to reorder). Markers: `Selection=`, `Tag="A.B"`,
-  `Enabled=false`, `Weight=N`, UE 5.6+ `Description="..."`, `TasksCompletion=All`;
+  `Enabled=false`, `Weight=N`, from UE 5.6 `Description="..."` and `TasksCompletion=All`;
   `[was="Old"]` renames. Re-indent a line to move a state, with its children and data, under
   another parent; same-named siblings read as `Name #2`.
 - Nodes: `Enter|Task|Consideration|Evaluator|GlobalTask <id>: <type> {values}`. The id is the
@@ -34,8 +34,7 @@ Subtree Shared
   A line reads what the engine lets its target read, as the editor does: `Parameters.<name>` (the
   nearest bag: the state's, its parents', then the root's), `Context.Actor`, `Event.Tag` (in an `If`
   under a `Transition OnEvent`), `<node id>.Output` for the evaluators, global tasks, parent states'
-  tasks and the nodes above it in its own state. A refusal names why and lists the sources in reach.
-  An input property of a node (a condition's `Left`) is bound, not given in `{values}`.
+  tasks and the nodes above it in its own state.
 - Transitions: `Transition <Trigger> -> <state | Next | Succeeded | Failed | None>` with
   `Priority=`, `Delay=`, `Variance=`, `Event="Tag"`; conditions are `If` lines under it. UE 5.8 adds
   the targets `Parent`, `NextParent`, `NextSelectableParent`.
@@ -43,9 +42,7 @@ Subtree Shared
   `{"struct": "...", members}`, a parameter bag `{"Speed": 2}`.
 
 `Tree` is the editor's data as lines and the one that carries state parameters; `Document` is the
-same tree as JSON. State colors, required enter events, tick rates, the prerequisites flag, event payloads,
-output bindings and property functions are not lines and stay as they are; a read ends with a
-`# note:` line for each state, transition or binding that keeps one (a write ignores notes).
+same tree as JSON. What the lines do not carry stays as it is.
 
 A Blueprint's StateTree component takes the tree and its parameter overrides in `Components`:
 `Brain: StateTreeComponent {"StateTreeRef":{"StateTree":"/Game/AI/ST_Guard.ST_Guard","Parameters":{"Speed":3}}}`.

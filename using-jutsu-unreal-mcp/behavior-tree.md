@@ -1,8 +1,6 @@
 # Behavior Tree and Blackboard
 
-A tree is `read_asset(tree, "Tree")` text; its keys are `read_asset(blackboard, "Keys")` text. Edit them
-with `edit_asset` or write the whole text back; a write makes the asset match the text, so a line you
-leave out is removed.
+A tree is `read_asset(tree, "Tree")` text; its keys are `read_asset(blackboard, "Keys")` text.
 
 ```
 blackboard: /Game/AI/BB_Guard.BB_Guard
@@ -29,7 +27,6 @@ Workflow for a new AI:
 
 Rules worth knowing before the first write:
 
-- `read_asset(tree, "Kinds:Tree@Wait")` lists the node classes that exist.
 - Settings are plain JSON by path. Bind a key with `{"BlackboardKey.SelectedKeyName": "Target"}`; a value that is a
   literal or a key is `{"WaitTime.DefaultValue": 5}` or `{"WaitTime.Key": "WaitFor"}`.
 - To insert a node in front of others keep their lines as they are and add yours; to move a node, move its line.
@@ -40,7 +37,7 @@ Rules worth knowing before the first write:
 Destination: Vector [was="Goal"]
 ```
 
-- Key settings: `[synced, useDefault, category="Combat", description="..."]`; `Enum<ENetRole>` takes a C++ enum
-  name or an Enum asset path, `Struct<Vector>` a struct. Everything else about a key type (a default value) is `Properties`.
+- `Enum<ENetRole>` takes a C++ enum name or an Enum asset path, `Struct<Vector>` a struct. Everything else
+  about a key type (a default value) is `Properties`.
 - `Document` is the same tree as JSON; it keeps nodes it does not list unless `"exact": true`. Use `Tree` unless you
   need the JSON.

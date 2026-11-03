@@ -1,7 +1,7 @@
 # Materials
 
 Sections: Material and Material Function `Graph` and `Properties`; Material Instance `Parameters` and
-`Properties`. Read first; the written text is the whole section.
+`Properties`.
 
 ## Graph
 
@@ -17,19 +17,15 @@ Output
   Roughness = rough
 ```
 
-- **Class names**, not palette captions: `LinearInterpolate` (not `Lerp`), `ShadowReplace`; a one-word
-  search keyword or caption also resolves where it is unique. `Kinds:Graph` lists what the asset takes
-  and `Kinds:Graph@<kind or node id>` one kind's inputs, values and outputs.
+- **Node types** are expression class names (`LinearInterpolate`, `ShadowReplace`); a palette caption
+  or one-word keyword (`Lerp`, `ShadowPassSwitch`) also resolves where it is unique, and reads print
+  the class. `Kinds:Graph@<kind or node id>` gives one kind's inputs, values and outputs.
 - **Constants vs links.** `Input = <id>` links; `B = 0.5` sets the value an unlinked input takes
   (Multiply's `ConstB`), only where `Kinds:Graph@<kind>` shows a value. Everywhere else, and in the
   `Output` block, link a `Constant` or `Constant3Vector` node.
 - **Outputs.** `<id>` is the node's first output; name another as `<id>.R`, `<id>.RGB`, `<id>.Result`.
   A texture sample's pins are `RGB`, `R`, `G`, `B`, `A`, `RGBA`.
 - **Input names** are the editor label or the property name (Noise `Position`), whichever you read.
-- **Ids.** New nodes are renamed on write: the reply lists `written as` and ends with the section as
-  stored. Take the next `edit_asset` text from it, or read again; positions never reorder the text.
-- A write recompiles and reports `compile: ok` or each error. A texture node whose `SamplerType` does not
-  fit its texture is refused, naming the type to set.
 
 ### Function
 
@@ -52,23 +48,20 @@ Output
   Roughness = call.Result
 ```
 
-A function write recompiles the loaded materials that use it and lists their errors. A function that
-calls itself is refused. Material Layer and Material Layer Blend are functions: a layer's output takes
+A function write recompiles the loaded materials that use it and lists their errors. Material Layer and Material Layer Blend are functions: a layer's output takes
 `MakeMaterialAttributes`, a blend's inputs are `FunctionInput_MaterialAttributes` (`Top`, `Bottom`).
 
 ### Other nodes
 
 Named Reroute usages link `Declaration = <declaration id>`; `CustomPrimitiveData` is a `ScalarParameter` or
-`VectorParameter` with `"bUseCustomPrimitiveData":true`. `Kinds:Graph` reads even on a material
-holding new-translator nodes, where `Graph` is refused (the refusal says why).
+`VectorParameter` with `"bUseCustomPrimitiveData":true`.
 
 ## Properties
 
 Settings live in `Properties` (`BlendMode`, `ShadingModel`, `MaterialDomain`, `TwoSided`,
 `bUseMaterialAttributes`, usage flags). The section is whole: a setting you leave out returns to its
 default, engine-set `bUsedWith...` flags included, so read, change the lines, write all of them back.
-A change recompiles the material and reports `compile: ok` or each error; a function's change
-recompiles its users. An open Material Editor shows the change on 5.8; on 5.5-5.7 the editor window is
+An open Material Editor shows the change on 5.8; on 5.5-5.7 the editor window is
 closed (it declines when it has unsaved edits). `set_properties` on the live material recompiles once per call; its reply's `followUps` carries the compile line.
 
 ## Instance `Parameters`

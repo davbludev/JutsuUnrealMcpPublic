@@ -11,14 +11,14 @@ root_ctrl: Control {"ShapeName":"Circle_Thick","ShapeColor":{"R":1,"G":0,"B":0,"
 ```
 
 - Null, Control, Curve (no json), Socket, Connector and user-made Bone lines are written; a bone
-  imported from a mesh and anything else stays as read. A curve, socket or connector has no children.
+  imported from a mesh and anything else stays as read. A curve or connector stands at the root.
 - A rig made empty takes a mesh's bones with `@import /Game/SKM_Hero` as the whole text (a mesh or
-  skeleton path); read, then write the rest as lines. The same import again changes nothing.
+  skeleton path); read, then write the rest as lines.
 - `"ExtraParents":["space_b"]` in a transform line adds space-switch parents by line name.
 - A control's `{json}`: `FRigControlSettings` members by name (`ControlType` first), then `Offset`,
   `ShapeTransform` and the initial `Value`. `MinimumValue`, `MaximumValue` and `Value` are in the
   control's type: a bool, a number, `[x,y]`, `[x,y,z]`, `[pitch,yaw,roll]` or a transform.
-  `LimitEnabled` has one entry per channel (3 for Position, 9 for Transform).
+  `LimitEnabled` has one entry per channel.
 - A transform is `{"Location":[x,y,z],"Rotation":[pitch,yaw,roll],"Scale":[x,y,z]}`.
 - Re-indent a line to move it (the indent is the first parent only); `[was="Old"]` renames; a line
   left out is removed.
@@ -50,25 +50,18 @@ SetBone Unit RigUnit_SetTransform
   `Reroute`. Other nodes read as `Node <Class>` and keep their line; their pins still take values
   and links. A collapse node reads `Node RigVMCollapseNode "Collapse:Name"`; its inner nodes are the
   section `Collapse:Name`, written like `Rig`.
-- A link Unreal refuses fails the write with Unreal's own reason; nothing changes.
 - Aggregate pins (a `Sequence`'s outputs, an Add's inputs) are text: naming the node's next one
-  creates it (`C -> Next`, `C = 2`), in order (`F` before `C` fails naming `C`), and leaving one
-  out removes it. `D ->` is an execute output that links nothing. An aggregate node reads as its
+  creates it (`C -> Next`, `C = 2`), in order, and leaving one out removes it. `D ->` is an execute output that links nothing. An aggregate node reads as its
   unit (`Seq Unit RigVMFunction_Sequence`); its pins past the second always print a line.
 - Values are RigVM text (`(X=1,Y=2,Z=3)`, `(Type=Bone,Name="hand_l")`); links and values may name
-  sub-pins (`Value.Translation`, an array element's `Effectors.0.Bone`); a pin takes a link or a
-  value, not both, so a pin with a linked member takes values only on its other members, and an
-  array with a linked member grows or shrinks through `RigVMController.insert_array_pin` /
-  `remove_array_pin`.
+  sub-pins (`Value.Translation`, an array element's `Effectors.0.Bone`).
 - Writing a `Function:<Name>` that does not exist creates that local function. Its signature is
   `Entry FunctionEntry(Speed: float, Target: Transform)` (` [Pure]` appended for a pure one) and
   `Return FunctionResult(Result: float)`; changing them changes the signature, and every Call node
-  follows it (the reply lists them). Empty text deletes the function, refused while anything calls it.
+  follows it. Empty text deletes the function.
 
 The rig's member variables are the `Variables` section (the `Document` section also holds them, with
-the same nodes as JSON). A new rig from a mesh:
-`unreal.ControlRigBlueprintFactory.create_control_rig_from_skeletal_mesh_or_skeleton`, or an empty
-rig and `@import`.
+the same nodes as JSON). A new rig from a mesh: `create_asset` class `ControlRig`, then `@import`.
 
 ## Control Rig in an Anim Blueprint
 
@@ -80,11 +73,11 @@ An IK Rig has `Chains` (`Arm UpperArm Hand HandGoal`: name, start bone, end bone
 `Goals` (`HandGoal Hand solvers=0`) and `Solvers`, one line per solver in stack order:
 `set_transform disabled alpha=0.5`, or any other type with its bones and settings,
 `full_body_ik start=pelvis {"MassMultiplier":2,"goals":{"HandGoal":{"StrengthAlpha":0.5}},"bones":{"spine_01":{}}}`
-(`goals` holds per-goal settings, `bones` the bones that carry settings). A read-only `Bones` list
-(`Bones@arm` filters). Write Solvers before the Goals that connect to them.
+(`goals` holds per-goal settings, `bones` the bones that carry settings). Write Solvers before the
+Goals that connect to them.
 
 A Retargeter has `Chains`: `[Operation ]TargetChain SourceChain` (the operation column on UE 5.6 and
-later; `-` or a line left out maps to nothing), and `Ops`, its stack in order:
+later), and `Ops`, its stack in order:
 `Name type [parent=Op] [disabled] [{settings}]` (`parent=` on UE 5.6 and later).
 
 ## Sequencer

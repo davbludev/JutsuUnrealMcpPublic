@@ -30,7 +30,8 @@ mix UE.Add.Audio
 
 - Node ids you choose (`wave`, `tone`) are kept; a node made in the editor reads as `n` plus a GUID prefix.
 - `<id>` alone links a node's first output (a read names it: `tone.Audio`); `<id>.<output>` another; quote a name with spaces or dots (`wave."Out Mono"`, `"UE.Source.OnPlay"`).
-- To rewire an input, write its new source; a line left out unlinks it or resets its value.
+- To rewire an input, write its new source; a line left out unlinks it or resets its value. An enum
+  input takes an entry's name (`Type = Highpass`).
 - Your own graph members: `Gain Input float` with `  Default = 0.5`, then link `Gain` into an input;
   `Level Output float` with `  Value = <id>.<output>`.
 - Stereo: replace `"UE.OutputFormat.Mono" Interface` by `"UE.OutputFormat.Stereo" Interface` and its
@@ -46,18 +47,11 @@ now VariableGet Level
 late VariableGetDelayed Level
 ```
 
-  Link `now` (or `late`, the value before this block's set) where the value is read. One `VariableSet`
-  per variable; to remove a variable, leave out its line with its node lines.
+  Link `now` (or `late`, the value before this block's set) where the value is read.
 
 ## Document and presets
 
 A MetaSound preset: create the asset, then write the `Document` section with
 `"preset": {"parent": "<same-kind MetaSound>"}` and its input overrides as
 `{"find": {"kind": "input", "name": "Gain"}, "default": 0.25}` nodes, in one write or later ones (a
-later write may leave `preset` out). The Document's other fields may be left out. A MetaSound input
-with a default: `{"create": {"kind": "input", "name": "Waves", "dataType": "WaveAsset:Array", "default": ["/Game/W.W"]}}` (`float`, lowercase).
-
-A node's input defaults sit beside its `create` or `find`: `{"create": {...}, "defaults": {"Gain": 3}}`,
-`{"find": {"authoringId": "Biquad1"}, "defaults": {"Gain": 3}}` on an existing node. An enum input
-takes an entry's name, short, qualified or as displayed (`"Type": "Highpass"`); a wrong one fails
-listing the entries, and the value reads back as the entry's number.
+later write may leave `preset` out). The Document's other fields may be left out.

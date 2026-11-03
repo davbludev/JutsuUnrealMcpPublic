@@ -1,7 +1,5 @@
 # Niagara as text
 
-Open this page only for Niagara work. The general rules of `SKILL.md` apply.
-
 ## Sections of a system
 
 | Section | Holds |
@@ -22,8 +20,7 @@ and are edited in the emitter asset. A script asset (`create_asset` class `Niaga
 `Graph`, scratch-pad text (below); its `Output` line sets the kind. Stack lines name it by path;
 Niagara names the module after the asset. Epic's library scripts read as `Graph` too.
 
-Each write makes the section match the text: what it leaves out is removed or reset. Build a system
-in this order: `Parameters`, `Emitters`, scratch pads, then `System` and `Emitter:` stacks.
+Build a system in this order: `Parameters`, `Emitters`, scratch pads, then `System` and `Emitter:` stacks.
 
 ```
 User.TracerColor: LinearColor = (R=6,G=3,B=0.8,A=1)
@@ -70,9 +67,7 @@ Renderers
   (`User.TracerColor`, `Particles.Gravity`), `Call <dynamic input script or ScratchPad section>` with
   its own inputs indented under it, a data interface's changed properties as `{json}` (`{}` for its
   defaults), or `Hlsl "<expression>"`. An input left out returns to the module default.
-- Input lines are stored in the module's own order, and an input equal to its default is not listed:
-  the text you wrote is not the text stored. `edit_asset` `old_text` must come from a fresh
-  `read_asset` (the reply of a write ends with the stored text when it differs).
+- Input lines are stored in the module's own order, and an input equal to its default is not listed.
 - `read_asset` `Inputs@<module>` lists a module's inputs, one `Name - type, ...` line each: a static
   switch with the values it takes (`switch, one of Uniform Curve, Non-Uniform`), an enum's entries, the
   `default` or the `value` set, and for an input that is off `inactive: shows when <Switch> = <value>
@@ -80,11 +75,8 @@ Renderers
   (`System/SystemUpdate/<Module>` for a system stack; `Inputs@Emitter/<Stack>/<Module>` on an
   emitter asset), or by script before you add it, `Inputs@/Niagara/Modules/Update/Forces/GravityForce`
   (a `ScratchPad:` section too). Read it instead of provoking an error to get the list.
-- Writing an input the switches hide is refused with the one switch that shows it, the value that
-  shows it and the value it has now: `Scale Factor` is inactive; it shows when `Scale Sprite Size Mode =
-  Non-Uniform`. Set the switch in the same lines (any order) or first. Typical causes: `InitializeParticle`
-  `Color` needs `Color Mode = Direct Set`; `AddVelocity` `Velocity Speed` needs a `Velocity Mode` that
-  uses it (From Point, In Cone).
+- An input the switches hide takes a value once its switch shows it: set the switch in the same
+  lines (any order) or first.
 - A `SetParameters` module sets stack parameters. Its inputs are its targets: `Particles.CameraOffset =
   55`. A target the engine knows takes its type; another is typed once, `Particles.Gain: float = 2`
   (later reads list `Particles.Gain = 2`). A target left out is removed, the module stays.
@@ -174,7 +166,7 @@ out Output Module [Usage=ParticleSpawn]
 - `Output DynamicInput` (one result) and `Output Function` declare results like map pins:
   `Result: float = sum.Result`. A dynamic input reads its inputs as a module does (`Module.Base` on a
   `MapGet`) and is used on the stack as `Input = Call ScratchPad:<Name>`; a function is called from a
-  graph. The kind is fixed when the scratch pad is first written.
+  graph.
 - `Call <script path>` calls a Niagara function script (or `Call ScratchPad:<Name>`).
 - `CallDI <DataInterface>.<Function>`: a data interface function. Its interface pin is `Target`; a
   function that takes the parameter map has `Map` in and out. In parentheses, the outputs you add
@@ -197,14 +189,9 @@ out Output Module [Usage=ParticleSpawn]
 
 ## Write reply
 
-A write of any of these sections waits for the whole compile, CPU and GPU, then replies like a Blueprint write:
-`compile: ok`, `compile: ok with warnings` or `compile: N error(s)`, then `  error <where>: message`
-lines. `<where>` is the scratch pad and node id (`ScratchPad:ReadTracer read`), the section and stack
-module (`Emitter:Tracers SpawnRate`), or the section alone. Renderer issues (missing particle
-attributes, renderer feedback) follow as `renderer error|warning Emitter:Tracers 0 (Sprite): message`
-lines, and the module issues the Niagara editor shows on the system's and every enabled emitter's
-enabled modules (an unmet dependency, a deprecated script) as `stack error|warning Emitter:Motes AerodynamicDrag: message` lines with the fix
-the editor offers; neither is counted in the `compile:` verdict. The asset is saved even when the
+A write of any of these sections waits for the whole compile, CPU and GPU, and replies with
+`compile:`, then `renderer` and `stack` lines (the issues the Niagara editor shows, with the fix it
+offers); those two are not counted in the `compile:` verdict. The asset is saved even when the
 compile fails. A scratch pad no stack uses is not compiled, so its errors show once a stack runs it.
 
 ## Verify

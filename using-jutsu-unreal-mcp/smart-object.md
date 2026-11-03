@@ -25,7 +25,5 @@ Slot Right {"bEnabled":false}
   adds annotations; a slot reference is the other slot's name.
 - `Bind <path> = Parameters.<name>` under the item it targets.
 
-A write is validated like the Smart Object editor does; the reply ends with `validate:` lines.
-
 An actor Blueprint's Smart Object component names the definition in `Components`:
 `SO: SmartObjectComponent {"DefinitionRef":{"SmartObjectDefinition":"/Game/SO_Bench.SO_Bench","Parameters":{"Height":30}}}`.

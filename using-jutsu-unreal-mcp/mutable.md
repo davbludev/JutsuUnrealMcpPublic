@@ -33,21 +33,18 @@ pick Switch {"PinType":"float"}
 - Types are the node class without `CustomizableObjectNode` / `CONode`; a class outside the palette
   (kept for older assets) reads under its full class name. `Kinds:Graph` (read-only) lists the
   palette's types, keyed ones with the values they take; `Kinds:Graph@Switch` one type with its pins,
-  `Kinds:Graph@<id>` a node's. Put a keyed type's key first in the JSON (`Switch {"PinType":"float"}`,
-  the type it switches: `float`, `mesh`, ...).
+  `Kinds:Graph@<id>` a node's. A keyed type's key is in its JSON (`Switch {"PinType":"float"}`, the
+  type it switches: `float`, `mesh`, ...).
 - JSON holds the node's editable properties that differ from a new node of its type, and the names
   the Mutable editor renames on the node itself: `ObjectName`, `ComponentName`, a `StaticString`'s
   `Value`.
 - Inputs: `Pin = <id>`, or `<id>.<Output>` when the source has several outputs; a multi-link input
   (`Components`) lists its sources in order: `Components = a, b`. Pin names are Mutable's internal
-  names (`Mesh_Input_Pin`, `"LOD 0"`); quote names with spaces. A failed write lists a node's pins.
-  Input lines take links only; a node's values go in its JSON.
+  names (`Mesh_Input_Pin`, `"LOD 0"`); quote names with spaces.
 - Pins that follow other links come by themselves: link `"Switch Parameter"` to an enum, and the
   switch gets one input per enum value (`Small`, `Big`) in the same write.
 - Per-pin data: `Pin {json}` under the node (`Pin [out] {json}` for an output), for pins such as a
   section's material texture parameters (`Base` above, from the material's `Base` parameter).
-  A linked image pin's `PinMode` comes from its link: leave it out or write the value the read shows.
-- The base `Object` node stays: keep its line and id.
 - A node of another asset is `"<package>:<node id>"`, the id that asset's read prints.
 - `Comment {"NodeComment":"..."}` and `Reroute` round-trip. The plugin lays out the graph; never place
   nodes.
@@ -143,11 +140,8 @@ n679599 Object {"ObjectName":"Cap","ParentObjectGroupId":"/Game/CO_Body:n0f7f32"
 - An `ExternalPin` imports what an `ExposePin` of another object of the same hierarchy exposes:
   `imported ExternalPin {"PinType":"mesh","ExternalObjectNodeId":"/Game/CO_Body:nab778d"}`. Both
   take the same `PinType`.
-- A reference to an existing node must name one of its kind (a group, an `ExposePin`); the write
-  fails otherwise.
-- A write that removes or replaces a group or `ExposePin` still succeeds, and warns:
-  `warning: /Game/CO_Cap, /Game/CO_Helmet reference /Game/CO_Body and may point at a removed node`.
-  Read those objects' `Graph` and write their references again.
+- A write that removes or replaces a group or `ExposePin` still succeeds and warns with the objects
+  that reference it: read their `Graph` and write their references again.
 
 ## Macros
 
@@ -176,9 +170,8 @@ out Outputs(Component: component)
   inputs, link one as `<inputs id>.<Name>`.
 - An object runs a macro through `use MacroInstance {"ParentMacro":"/Game/ML_Parts:Body"}`; its
   pins are the macro's variable names (`Mesh = mesh`, `Components = use`).
-- A library write compiles nothing and warns with the objects using it. Write their `Graph` back
-  (read, then write) to give their `MacroInstance` nodes the macro's new pins and compile them.
-  Renaming a variable drops the links to it.
+- A library write compiles nothing and warns with the objects using it. Renaming a variable drops
+  the links to it.
 
 ## Compile
 
@@ -192,10 +185,9 @@ compile: 1 error(s), 1 warning(s)
 saved
 ```
 
-- `compile: ok`, `compile: ok with M warning(s)` or `compile: N error(s), M warning(s)`, then one
-  line per Mutable message, starting with the ids of the nodes it names (`<package>:<id>` for a node
-  of another asset).
-- The write is kept and saved with compile errors too: fix the named nodes and write again.
+- Each Mutable message starts with the ids of the nodes it names (`<package>:<id>` for a node of
+  another asset). The write is kept and saved with compile errors too: fix the named nodes and write
+  again.
 - Inputs a node can do without stay unlinked without a message; a node that needs one (a clip
   modifier's clip mesh) reports an error naming it.
 - `compile_assets` with a Customizable Object path compiles it again and returns the same lines.
@@ -215,25 +207,16 @@ n90974d Object
   "/Script/HairStrandsMutable.Default__HairStrandsMutableExtension__Grooms" = groom
 ```
 
-- An `ExternalOperation` or `ExternalTypeParameter` (UE 5.8 only) is chosen by its `struct` (a failed write lists
-  them); the struct's other fields (`Seed`, a sphere's `W`) are that node's values, and a field left
-  out goes back to its default.
+- An `ExternalOperation` or `ExternalTypeParameter` (UE 5.8 only) is chosen by its `struct`; the
+  struct's other fields (`Seed`, a sphere's `W`) are that node's values, and a field left out goes
+  back to its default.
 - Give an external operation a parameter upstream of at least one input (as `Factor` above): Mutable
-  on UE 5.8 crashes the editor compiling one whose inputs are all constants, so while any external
-  operation has none (linked into the object or not) the write is kept and saved but not compiled,
-  and the reply says why:
-
-  ```
-  compile: skipped
-    warning n4b3852: Mutable on UE 5.8 crashes the editor compiling an external operation no parameter feeds; link a parameter into one of its inputs (upstream) to compile
-  ```
-- Inputs an add-on adds to the base `Object` node (HairStrandsMutable's grooms) have long pin names;
-  a failed write lists them.
+  on UE 5.8 crashes the editor compiling one whose inputs are all constants, so until each has one the
+  write is saved with `compile: skipped`.
 - RigLogicMutable (UE 5.5-5.7): a `DNAConstant` on the base `Object` node's
-  `"/Script/RigLogicMutable.Default__RigLogicMutableExtension__DNA"` input. Give its `SkeletalMesh` a
-  mesh that holds DNA, or none: on 5.6 and 5.7 a mesh without DNA crashes the editor's compile, so the
-  write is kept and saved but `compile: skipped` with a warning naming the node. It picks its
-  component by `ComponentName`, on 5.5 by `ComponentIndex`.
+  `"/Script/RigLogicMutable.Default__RigLogicMutableExtension__DNA"` input. On 5.6 and 5.7 a
+  `SkeletalMesh` without DNA crashes the editor's compile, so such a write is saved with
+  `compile: skipped`. It picks its component by `ComponentName`, on 5.5 by `ComponentIndex`.
 - MutablePopulation's Population and Population Class assets have no graph: write their `Properties`.
 
 ## Instances
@@ -253,8 +236,6 @@ Tint = {"R":1,"G":0.5,"B":0,"A":1}
   bool as JSON, a colour as `{"R","G","B","A"}`, a mesh, texture or material by asset path, a
   projector or transform as a JSON object of its fields.
 - A parameter left out goes back to its default; `State` left out goes back to the first state.
-- An unknown name, an option the enum lacks, an unknown state or a value of the wrong type fails the
-  whole write and lists the valid names, options or states.
 - A parameter named `State` is written `"State" = ...`.
 - Only parameters the object's compiled data has are listed: a parameter node that feeds nothing the
   object builds is not one. Reading compiles an object never compiled.

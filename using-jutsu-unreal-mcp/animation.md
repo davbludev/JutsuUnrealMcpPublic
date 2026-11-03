@@ -24,24 +24,18 @@ States, the entry and transitions are added in `Document`; their graphs then app
 A machine clause lists only what it changes: a transition's `from`/`to` name a state alias of the
 clause or an existing state's name, so `{"find": {"name": "Locomotion"}, "transitions": {"back":
 {"create": {"from": "Run", "to": "Idle"}}}}` needs no `states`. A transition, state or machine sets
-its settings in `properties`: `{"CrossfadeDuration": 0.15}`. Supported: transition `PriorityOrder`, `CrossfadeDuration`, `BlendMode`, `CustomBlendCurve`,
-`bAutomaticRuleBasedOnSequencePlayerInState`, `AutomaticRuleTriggerTime`, `MinTimeBeforeReentry`,
-`SyncGroupNameToRequireValidMarkersRule`, `LogicType`, `Bidirectional`, `bDisabled`,
-`bOnlyEvaluateWhenActive`; state `bAlwaysResetOnEntry`; machine `MaxTransitionsPerFrame`,
-`MaxTransitionsRequests`, `bSkipFirstUpdateTransition`, `bReinitializeOnBecomingRelevant`,
-`bCreateNotifyMetaData`, `bAllowConduitEntryStates`. The read lists only
-settings changed from their defaults, so a fresh transition reads `"properties": []`.
+its settings in `properties` by their property names: `{"CrossfadeDuration": 0.15}`. The read lists
+only settings changed from their defaults, so a fresh transition reads `"properties": []`.
 Naming an optional property in a pin line (`PlayRate = 2`) exposes it as a pin; `PlayRate [hidden]`
 (a line with no value) hides it again; `hidden` stays an ordinary value and node id.
 
-Anim node properties show member by member; only instanced members (a Control Rig node's
-`Node.AssetUserData`, an IK Rig node's `Node.GoalCreators`) stay out of the text and unchanged by a write. A `ControlRig` node takes its
+Anim node properties show member by member. A `ControlRig` node takes its
 rig in `{"Node":{"ControlRigClass":"/Game/CR_Arms.CR_Arms_C"}}` on UE 5.5-5.7 and
 `{"Node":{"ControlRigAssetReference":{"BlueprintRigClass":"/Game/CR_Arms.CR_Arms_C"}}}` on 5.8; setting the rig
 turns its public variables into pins named like them (`Speed = 2`). `Pin = @Owner.Path` binds a pin to a
 property access path (a variable, a member chain, or a function as the last element); a bound pin
-reads the same way. Node settings like `UpdateFunction`, `InitialUpdateFunction`, `BecomeRelevantFunction`
-take a function reference; a `Function:` section whose entry is `FunctionEntry() [ThreadSafe]` is
+reads the same way. A node's `UpdateFunction`, `InitialUpdateFunction` and `BecomeRelevantFunction` sit
+beside `Node`, not in it: `{"Node":{...},"UpdateFunction":{"MemberName":"UpdateSpeed"}}`; a `Function:` section whose entry is `FunctionEntry() [ThreadSafe]` is
 thread-safe (`FunctionEntry` flags: [SKILL.md](SKILL.md)).
 
 Cached poses: `SaveCachedPose Name` stores a pose, `UseCachedPose Name` links to it by that name
@@ -61,14 +55,14 @@ In the Document a machine clause also takes `conduits` and `aliases` beside `sta
 namespace; a conduit's rule is its `State:` section; an alias takes `global: true` or `states: [keys]`).
 Transitions to and from them are ordinary clauses. A transition with `"LogicType": "TLT_Custom"` gets a
 section `Blend:Machine/From->To` (`TransitionPoseEvaluator` nodes `from`/`to` feed `out
-CustomTransitionResult`); another logic type removes it. A `// note:` line in a Document read names
-what it cannot show (a transition with an end that links to no state, conduit or alias). Not authorable here:
-a transition's own shared rule (`bSharedRules`), anim notify events, and linked-layer slot setup; use `run_python` for those.
+CustomTransitionResult`); another logic type removes it. Not authorable here: a transition's shared
+rule (`bSharedRules`), state and transition notify events, and linked-layer slot setup; use
+`run_python` for those.
 
 Montage `Sections`: `Loop @ 0.5 -> Loop` (seconds, optional next section). Montage and sequence
 `Notifies`: `Track: Name` lines, each followed by `  0.25 AnimNotify_PlaySound {"Sound":"..."}`,
 `  0.25-0.75 AnimNotifyState_Trail {...}` (a state's start-end) or `  0.5 "Footstep"` (skeleton
-notify); one notify per start time on a track; a notify matches by track, time and class. `Sockets`: skeleton `Grip: hand_r {"RelativeLocation":{"X":10}}`,
+notify); a notify matches by track, time and class. `Sockets`: skeleton `Grip: hand_r {"RelativeLocation":{"X":10}}`,
 Static Mesh `Grip {"Tag":"grip"}`. `[was="Old"]` renames a section or socket.
 
 ## Anim Sequence, Montage and Blend Space data
@@ -93,11 +87,10 @@ The rest is a `Properties` / `set_properties` write, `call_function` on `Animati
   length (`SequenceLength`) and linkable elements, so `Sections` and `Notifies` check the new length.
 - Sync markers: `AddAnimationSyncMarker(sequence, "LeftFoot", 0.5, "Feet")` (the notify track must exist:
   list it in `Notifies` first), `GetAnimationSyncMarkersForTrack`, `RemoveAnimationSyncMarkersByName` and
-  `ByTrack`. The `Notifies` text does not list markers; a `Notifies` write keeps each on its track by name.
+  `ByTrack`.
 - Curves: `AddCurve`, `AddFloatCurveKey` / `AddFloatCurveKeys`, `RemoveCurve`. Curve metadata sits on the
   skeleton: `AddCurveMetaData`, `SetCurveMetaDataMaterial`, `SetCurveMetaDataMorphTarget`.
 - Virtual bones: `AddVirtualBone(sequence, "pelvis", "hand_r")`, `RemoveVirtualBone`.
-- Sequence length: `GetSequenceLength`; it follows the controller's frame count and rate.
 - Skeleton slot names and groups have no property or Python route (the skeleton's slot functions are not
   Blueprint-callable); a montage slot needs one the skeleton already lists.
 - A Blend Space's `SampleData` and axes are `Properties` (or `set_properties`); the write validates and
