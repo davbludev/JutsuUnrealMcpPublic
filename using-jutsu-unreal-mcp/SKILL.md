@@ -138,7 +138,7 @@ StateTree `Tree` text and StateTree components with parameter overrides: read
 Smart Object `Definition` text (slots, behaviors, annotations, parameters) and Smart Object
 components: read [smart-object.md](smart-object.md) before writing one.
 
-MetaSound presets and inputs with defaults: read [metasound.md](metasound.md) before writing one.
+MetaSound `Graph` (classes, wiring, interfaces) and `Document` presets: read [metasound.md](metasound.md) before writing one.
 
 Customizable Object (Mutable) `Graph`, Macro Library `Macro:Name` and instance `Parameters`: read [mutable.md](mutable.md) before writing one.
 
