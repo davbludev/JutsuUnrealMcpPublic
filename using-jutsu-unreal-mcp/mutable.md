@@ -48,12 +48,26 @@ pick Switch {"PinType":"float"}
 - A node of another asset is `"<package>:<node id>"`, the id that asset's read prints.
 - `Comment {"NodeComment":"..."}` and `Reroute` round-trip. The plugin lays out the graph; never place
   nodes.
-- A node's **Add pin** button pins (another LOD, material slots) come from the Mutable editor; link
-  to them once they exist.
+- Other **Add pin** button pins (material slots, Break and Modify node pins) come from the Mutable
+  editor; link to them once they exist.
 
 A mesh reaches the object through SkeletalMesh -> SkeletalMeshSection -> SkeletalMeshMake_V2 ->
 SkeletalMeshObjectMake -> ComponentSkeletalMesh -> `Object.Components`. Give the section a
 `Material` to compile without warnings.
+
+More LODs: `"LODs":N` on the Make node (1-8, its `"LOD <n>"` inputs) and `NumLODs` on the object
+node; the object gets the smaller of the two. Link the section into `"LOD 0"` alone: Mutable takes
+each LOD of the section's mesh by itself, and LOD n also gets every section linked into
+`"LOD 0"`-`"LOD n"`, so a link into `"LOD n"` adds sections from that LOD on.
+
+```
+make SkeletalMeshMake_V2 {"LODs":3}
+  "LOD 0" = section
+object SkeletalMeshObjectMake {"NumLODs":3}
+  "Skeletal Mesh" = make
+```
+
+Without `LODs`, the node gets the inputs up to the highest one the text links.
 
 ### UE 5.5-5.7
 
