@@ -66,6 +66,9 @@ say Call KismetSystemLibrary.PrintString
 - Nodes with an **Add pin** button (`Sequence`, `K2Node_MakeArray`, `K2Node_DoOnceMultiInput`, ...)
   add the pins a line names, up to the node's limit; write the pin name bare: `-> d.C In`. A name
   the node cannot grow to fails the write and lists its pins.
+- `FormatText`: a literal `Format = "{a} {b}"` makes the argument pins `a` and `b` in the same write
+  (link them: `a = count`; a literal text comes from a linked `MakeLiteralText`); a changed format
+  drops the pins it no longer names. A linked Format keeps its arguments in `{"PinNames":["a"]}`.
 - Binding an event to another object's dispatcher: `bind AddDelegate {"DelegateReference":
   {"MemberParent":"/Script/Game.Door","MemberName":"OnOpened"}}` with `self = <target>` and
   `Delegate = <event>.OutputDelegate`, where `<event>` is a `CustomEvent` named unlike any parent
