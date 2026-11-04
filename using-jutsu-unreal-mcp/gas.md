@@ -69,7 +69,7 @@ Classes: `AssetTagsGameplayEffectComponent`, `TargetTagsGameplayEffectComponent`
 `AdditionalEffectsGameplayEffectComponent` (`OnApplicationGameplayEffects`, `OnCompleteAlways`,
 `OnCompleteNormal`, `OnCompletePrematurely`). Send `Added` and `Removed` for a tag container; the engine
 computes `CombinedTags`. Tags must exist: write them in the `GameplayTags` section first
-([gameplay-tags.md](gameplay-tags.md)); an unregistered tag is dropped.
+([gameplay-tags.md](gameplay-tags.md)); a write naming an unregistered tag is refused.
 
 ## Gameplay Ability
 

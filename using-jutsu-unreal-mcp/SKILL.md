@@ -56,9 +56,10 @@ say Call KismetSystemLibrary.PrintString
   `SwitchEnum {"Enum":"/Script/Engine.ECollisionChannel"}`.
 - Switch cases: `SwitchInteger` (optionally `{"StartIndex":1}`) takes `0 -> a`, `2 -> c`; naming
   a case adds it and any before it, and unnamed cases stay. `SwitchString`/`SwitchName` take
-  their cases from `{"PinNames":["A","B"]}`, then `A -> a`. A Gameplay Tag multi-compare
-  (`GameplayTagsK2Node_MultiCompareGameplayTagContainer`) adds `TagCase_<n>` and `Case_<n> True`
-  when named.
+  their cases from `{"PinNames":["A","B"]}`, then `A -> a`. `SwitchGameplayTag` takes
+  `{"PinTags":["A.B"]}`, then `A.B -> a`. A Gameplay Tag multi-compare
+  (`MultiCompareGameplayTagContainer`) adds `TagCase_<n>` and `Case_<n> True` when named. Tags in
+  node JSON and pin values must be registered first ([gameplay-tags.md](gameplay-tags.md)).
 - Binding an event to another object's dispatcher: `bind AddDelegate {"DelegateReference":
   {"MemberParent":"/Script/Game.Door","MemberName":"OnOpened"}}` with `self = <target>` and
   `Delegate = <event>.OutputDelegate`, where `<event>` is a `CustomEvent` named unlike any parent
