@@ -77,8 +77,10 @@ Toast [0-1]
   integer, byte and enum keys hold their value until the next key and take only `constant`; enum keys
   are names, bools `true`/`false`.
 - Channel lines key widgets of the `WidgetTree` and their slots. The user widget's own tracks read as
-  channel lines named by its preview widget (`WBP_Menu_C_0.RenderOpacity`); key more of its properties
-  under that name. Other tracks (events, materials) are kept and named by a `# note:` line.
+  channel lines named by its preview widget (`WBP_Menu_C_0.RenderOpacity`); in an animation that
+  already has them, key more of its properties under that name. To fade or move the whole widget in a
+  new animation, key its root panel (`Root.RenderOpacity`). Other tracks (events, materials) are kept
+  and named by a `# note:` line.
 - Left-out keys, channels and animations are removed.
 
 React to an animation's end with `Event OnAnimationFinished` in the `EventGraph`.
