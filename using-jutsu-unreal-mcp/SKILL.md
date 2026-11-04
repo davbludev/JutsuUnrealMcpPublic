@@ -46,7 +46,9 @@ say Call KismetSystemLibrary.PrintString
 
 - `<id> <type>`; existing ids are GUID prefixes, new nodes take any unused name.
 - Under a node: `Pin = literal`, `Pin = <id>.OutPin`, `ExecPin -> <id>` or `-> <id>.Pin`.
-- Types: `Event Name`, `CustomEvent Name(P: type)`, `ComponentEvent Comp.Delegate`,
+- Types: `Event Name`, `CustomEvent Name(P: type)` (an RPC: append `[Server]`, `[Client]` or `[Multicast]`, plus
+  `[Reliable]`, or `[Server, Reliable]`; no flags clears it; a `{...}` on a node kind that takes none is refused),
+  `ComponentEvent Comp.Delegate`,
   `Call Class.Function` / `Call self.Function`, `Message Interface.Function`, `CallParent Function`,
   `Get Var`, `Set Var` (another object's variable: `Get Class.Var` with `self` linked to it), `Branch`, `Sequence`, `Cast Class`, `PureCast Class`, `Self`, `Reroute`,
   `Macro ForEachLoop`, `MakeStruct S`, `BreakStruct S`, `FunctionEntry(P: type)` (append
