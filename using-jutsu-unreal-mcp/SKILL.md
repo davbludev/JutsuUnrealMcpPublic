@@ -14,7 +14,8 @@ asset's `read_asset` sections first) and for bulk work a script does more simply
 over many assets or actors.
 
 Editor-state calls (`start_pie`, `stop_pie`, `live_coding_compile`, `open_level`) go one per
-message, each after the previous one answered.
+message, each after the previous one answered. `write_asset`, `edit_asset` and `compile_assets` on a
+Blueprint of any kind (Actor, Widget, Anim, Control Rig) are refused while PIE runs: `stop_pie` first, write, then `start_pie`.
 
 ## Assets as text
 
