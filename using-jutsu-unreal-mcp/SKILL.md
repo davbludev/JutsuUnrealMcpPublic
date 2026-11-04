@@ -60,6 +60,9 @@ say Call KismetSystemLibrary.PrintString
   `{"PinTags":["A.B"]}`, then `A.B -> a`. A Gameplay Tag multi-compare
   (`MultiCompareGameplayTagContainer`) adds `TagCase_<n>` and `Case_<n> True` when named. Tags in
   node JSON and pin values must be registered first ([gameplay-tags.md](gameplay-tags.md)).
+- Nodes with an **Add pin** button (`Sequence`, `K2Node_MakeArray`, `K2Node_DoOnceMultiInput`, ...)
+  add the pins a line names, up to the node's limit; write the pin name bare: `-> d.C In`. A name
+  the node cannot grow to fails the write and lists its pins.
 - Binding an event to another object's dispatcher: `bind AddDelegate {"DelegateReference":
   {"MemberParent":"/Script/Game.Door","MemberName":"OnOpened"}}` with `self = <target>` and
   `Delegate = <event>.OutputDelegate`, where `<event>` is a `CustomEvent` named unlike any parent
