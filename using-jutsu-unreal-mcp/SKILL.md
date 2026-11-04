@@ -132,6 +132,11 @@ read printed for it (StateTree `state_19`, valid until the next write), or its n
 it; items left out stay. Remove with `{"remove": {"authoringId": "..."}, "destructive": true}`; a
 remove that matches nothing fails and lists what is there.
 
+PCG `Document`: a connection to a dynamic input its node lacks adds the inputs up to it, as the Add pin button does:
+Merge `In2`, `In3`, Gather, Union, Merge Attributes (UE 5.6+), Outer Intersection `Source2` (all lanes). A node with
+dynamic inputs reads `"dynamicInputs": N` (unconnected ones too); writing it grows the node to at least N and never
+removes a pin. An unknown label is refused with the node's pins and the next dynamic input.
+
 Behavior Tree `Tree` text (indented node lines, `decorator`/`service` lines) and Blackboard `Keys`
 (`Name: Type<Class> [flags]`): read [behavior-tree.md](behavior-tree.md) before writing one.
 
