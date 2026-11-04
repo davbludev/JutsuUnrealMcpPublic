@@ -60,7 +60,7 @@ say Call KismetSystemLibrary.PrintString
   function.
 - Literals: as read prints them; vectors and rotators also `1,2,3` or `(Pitch=0,Yaw=90,Roll=0)`,
   enums by display name, keys by name (`B = "Escape"`); string, name and text literals are quoted
-  (an unquoted word is a link).
+  (an unquoted word is a link, except a name of the pin's enum).
   A rejected value fails the write and names the valid choices.
 - Split struct pins read as `Position_X = ...`; naming a member splits the pin, naming it whole
   (`Position = v.ReturnValue`) recombines it.
