@@ -48,8 +48,40 @@ pick Switch {"PinType":"float"}
 - A node of another asset is `"<package>:<node id>"`, the id that asset's read prints.
 - `Comment {"NodeComment":"..."}` and `Reroute` round-trip. The plugin lays out the graph; never place
   nodes.
-- Other **Add pin** button pins (material slots, Break and Modify node pins) come from the Mutable
-  editor; link to them once they exist.
+- **Add pin** button pins are made by naming them (UE 5.8). Such a node's pins share one name, so the
+  text names the first `Slot` and the next `"Slot #2"`, `"Slot #3"` ..., by a link or a data line; the
+  write makes the pins up to the highest one named, before it links. Per-pin data goes on the
+  pin's data line (`Pin {json}`, `Pin [out] {json}` for an output). Nodes: `ComponentSkeletalMesh`
+  `"Overlay-or-Override"` inputs (`TargetMaterialSlotName`, Override slots), `SkeletalMeshBreak_V2`
+  and `SkeletalMeshObjectBreak` `"Material Slot"` outputs (`TargetMaterialSlotName`),
+  `SkeletalMeshModify` `Slot` inputs (`SlotName`), `MaterialBreak` `Parameter` outputs and
+  `MaterialModify` `Parameter` inputs (`ParameterName`, `LayerIndex`), `MeshMorphStackDefinition`
+  `Target` inputs (`TargetMorphName`). A Break or Modify pin takes the type of the pin it links
+  (float, color, image, passthrough image), a pin with no link is a float.
+  A name is needed for the compile: Mutable reports a slot or parameter pin without one. A write keeps
+  pins the text does not name (their data goes back to defaults); remove a pin in the Mutable editor.
+  A Break with one output is referenced bare (`brk`), with more `brk."Parameter #2"`.
+  UE 5.8.4: a `SkeletalMeshBreak_V2` with a linked `"Material Slot"` output crashed the editor
+  compiling (into a component slot); while the graph holds one, a write is saved but the reply says
+  `compile: skipped` with a warning naming it. Unlink its outputs to compile.
+
+A Modify feeding a component's override slot:
+
+```
+component ComponentSkeletalMesh {"ReferenceSkeletalMesh":"/Engine/EngineMeshes/SkeletalCube.SkeletalCube"}
+  "Passthrough Skeletal Mesh" = object
+  "Overlay-or-Override" = mod
+  "Overlay-or-Override" {"TargetMaterialSlotName":"MaterialSlot"}
+brk MaterialBreak
+  Material = matc
+  Parameter [out] {"ParameterName":"Gloss"}
+mod MaterialModify
+  Material = matc
+  Parameter = brk
+  Parameter {"ParameterName":"Gloss"}
+  "Parameter #2" = tint
+  "Parameter #2" {"ParameterName":"Tint"}
+```
 
 A mesh reaches the object through SkeletalMesh -> SkeletalMeshSection -> SkeletalMeshMake_V2 ->
 SkeletalMeshObjectMake -> ComponentSkeletalMesh -> `Object.Components`. Give the section a
