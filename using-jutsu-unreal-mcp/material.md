@@ -53,6 +53,20 @@ A function write recompiles the loaded materials that use it and lists their err
 
 ### Other nodes
 
+`SetMaterialAttributes` and `GetMaterialAttributes` get the attribute pins you name, as the editor's "+" does:
+`BaseColor = tint` on a Set links (and adds) its input, `get.Roughness` adds the Get's output. An unknown name is
+refused with the valid ones; pins stay once added, and their GUID arrays are not JSON.
+
+```
+set SetMaterialAttributes
+  MaterialAttributes = make
+  BaseColor = tint
+get GetMaterialAttributes
+  MaterialAttributes = set
+Output
+  Roughness = get.Roughness
+```
+
 Named Reroute usages link `Declaration = <declaration id>`; `CustomPrimitiveData` is a `ScalarParameter` or
 `VectorParameter` with `"bUseCustomPrimitiveData":true`.
 
