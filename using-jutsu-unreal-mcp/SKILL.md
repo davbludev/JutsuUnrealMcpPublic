@@ -25,7 +25,7 @@ out is removed (in a `Document` section, listed items are created or updated and
 Node positions are not part of the text, so never try to place nodes.
 
 `Properties`, `Defaults` and `Parameters` lines are `Name = <json>`. An instanced subobject (input trigger,
-Blackboard key type) is `{"class": "InputTriggerPressed", ...}`; struct array elements list only changed members
+Blackboard key type) is `{"class": "InputTriggerPressed", ...}` (`get_properties` adds its `path`, which writes ignore); struct array elements list only changed members
 (`{}`: all default).
 
 A read's `# note:` lines (`// note:` in `Document`) name what it does not show; writes skip them. A refusal
