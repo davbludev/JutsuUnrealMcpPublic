@@ -43,6 +43,10 @@ Cached poses: `SaveCachedPose Name` stores a pose, `UseCachedPose Name` links to
 `MultiWayBlend`) grow inputs when a pin line names one that does not exist yet (`BlendPoses_1 = x.Pose` and
 `BlendWeights_1 = 0.5` on `LayeredBoneBlend`, `BlendPose_2 = x.Pose` on `BlendListByInt`); a pose output
 holds one link, so each input takes its own node.
+`BlendListByEnum {"BoundEnum":"/Script/Engine.EMovementMode"}` gets one pose input per enum entry a pin line names
+(`BlendPose_MOVE_Walking = x.Pose`, `BlendTime_MOVE_Walking = 0.5`; the entry by its name, C++ short name or display name; the
+read prints `BlendPose_<Entry>`; `BlendPose_0` is the Default pose). An entry the enum lacks is refused listing its entries; an
+exposed entry the text stops naming stays on the node (a new `BoundEnum` is a new node).
 
 Anim layers: writing a `Function:<Layer>` that does not exist makes an anim layer (an animation graph
 with its own `Root`) in an Anim Layer Interface, and in an Anim Blueprint when the text has a `Root` or
