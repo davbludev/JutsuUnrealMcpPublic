@@ -15,6 +15,15 @@ Scripting through `run_python`:
 - Python spawns and edits in the editor world, and its handles to PIE objects die with each PIE
   session: spawn into PIE with `spawn_actor` `world: "pie"`, and fetch PIE objects again after every
   `start_pie`.
+- Multiplayer PIE: `start_pie` with `netMode` `listen` (the first player hosts) or `client` (a hidden dedicated server) and
+  `players` runs every player in the editor process and lists them as `pie:0`, `pie:1`, ... (`pie:<n>` is the `UEDPIE_<n>_` of
+  that player's object paths; `pie` means the one in the level viewport). Pass `world: "pie:<n>"` to `get_properties`,
+  `set_properties`, `call_function`, `list_actors`, `run_console_command`, `send_input` and `take_screenshot` to act in
+  that player's game: set a replicated property on the server's actor (`pie:0`), `wait` a second or two, then read it on a
+  client's with that client's `world`. Find an actor in each world by `list_actors` `class`, since a replicated actor's name
+  can differ between worlds. Place fixtures in the level before `start_pie`. Drive a client with `send_input` and its
+  `world` (a key or an Enhanced Input action), not by calling its gameplay functions from `run_python`. Log lines carry
+  `pie:<n>` while several instances run.
 - Stop PIE before a script creates, duplicates or deletes assets: the editor refuses them in play
   mode while the script carries on.
 - A struct or array from `get_editor_property` is a live view; build a new value and set it (or call

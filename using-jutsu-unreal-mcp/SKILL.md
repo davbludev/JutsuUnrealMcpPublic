@@ -16,6 +16,7 @@ over many assets or actors.
 Editor-state calls (`start_pie`, `stop_pie`, `live_coding_compile`, `open_level`) go one per
 message, each after the previous one answered. `write_asset`, `edit_asset` and `compile_assets` on a
 Blueprint of any kind (Actor, Widget, Anim, Control Rig) are refused while PIE runs: `stop_pie` first, write, then `start_pie`.
+A multiplayer session (`start_pie` `netMode` `listen` or `client`, `players`) lists its instances as `pie:0`, `pie:1`, ...; pass `world: "pie:<n>"` to act in one ([run-python.md](run-python.md)).
 
 ## Assets as text
 
