@@ -20,7 +20,8 @@ Attribute Sets are C++ classes or Blueprints: `create_asset` `class` `Blueprint`
 
 ## Attribute references
 
-Every attribute value (a modifier's `Attribute`, a capture's `AttributeToCapture`) takes one string:
+Every attribute value (a modifier's `Attribute`, a capture's `AttributeToCapture`, a graph pin such as
+`GetFloatAttribute`'s `Attribute = "MyAttributeSet.Health"`) takes one string:
 
     "Set.Attr"                              the attribute set class's name (a subclass of the declaring set works), then the attribute
     "Attr"                                  when exactly one loaded attribute set has it
