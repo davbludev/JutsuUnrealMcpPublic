@@ -69,7 +69,10 @@ say Call KismetSystemLibrary.PrintString
 - Binding an event to another object's dispatcher: `bind AddDelegate {"DelegateReference":
   {"MemberParent":"/Script/Game.Door","MemberName":"OnOpened"}}` with `self = <target>` and
   `Delegate = <event>.OutputDelegate`, where `<event>` is a `CustomEvent` named unlike any parent
-  function.
+  function. The event takes the delegate's parameters, so write them as the delegate has them, by
+  reference included: `ev CustomEvent OnDone(Context: ref const UpdateContext)`; other text is refused
+  with the line that fits.
+- A parameter passed by reference is `Name: ref Type` or `ref const Type`; `T&` and `const T&` also work.
 - Literals: as read prints them; vectors and rotators also `1,2,3` or `(Pitch=0,Yaw=90,Roll=0)`,
   enums by display name, keys by name (`B = "Escape"`); string, name and text literals are quoted
   (an unquoted word is a link, except a name of the pin's enum).
