@@ -1,19 +1,30 @@
 # Control Rig
 
-`Hierarchy` is one `Name: Type {json}` line per element, indented two spaces under its first parent:
+`Hierarchy` is an optional `Preview` line, then one `Name: Type {json} [flags]` line per element, indented two
+spaces under its first parent:
 
 ```
+Preview /Game/Characters/SK_Hero
 root: Bone
   pelvis: Bone {"Transform":{"Location":[0,0,95]}}
     hips_ctrl: Control {"ControlType":"Position","LimitEnabled":[{"bMinimum":true,"bMaximum":true},{},{}],"MinimumValue":[-5,0,0],"MaximumValue":[5,0,0],"Offset":{"Location":[10,0,0]}}
+    grip: Socket [color=(R=1,G=0.5,B=0,A=1), description="Hand grip"]
 root_ctrl: Control {"ShapeName":"Circle_Thick","ShapeColor":{"R":1,"G":0,"B":0,"A":1}}
   hips_space: Null {"Transform":{"Location":[0,0,90]}}
+weight: Curve [value=0.5]
+arm: Connector [description="Left arm", type=Secondary, optional]
 ```
 
-- Null, Control, Curve (no json), Socket, Connector and user-made Bone lines are written; a bone
+- Null, Control, Curve, Socket, Connector and user-made Bone lines are written; a bone
   imported from a mesh and anything else stays as read. A curve or connector stands at the root.
+- `Preview /Game/SK_Hero` sets the preview mesh; a write without the line clears it. A rig whose bones
+  were imported only takes a mesh of that skeleton or a compatible one (the refusal names the skeleton it expects); the mesh it has already always writes back.
 - A rig made empty takes a mesh's bones with `@import /Game/SKM_Hero` as the whole text (a mesh or
-  skeleton path); read, then write the rest as lines.
+  skeleton path, with a `Preview` line beside it if you want one); read, then write the rest as lines.
+- `[flags]`: a Socket takes `color=(R=..,G=..,B=..,A=..)` and `description="..."`; a Connector takes
+  `description`, `type=Primary|Secondary`, `optional`, `array` (UE 5.6+), `postConstruction` (UE 5.7+), `rules`; a Curve takes
+  `value=0.5`. Only a `Secondary` connector is `optional`, an `array` or `postConstruction`; name one `Primary` connector (the default type) at most. Flags are the whole state: one left out goes back to its default. `[was="Old"]` goes in the
+  same block.
 - `"ExtraParents":["space_b"]` in a transform line adds space-switch parents by line name.
 - A control's `{json}`: `FRigControlSettings` members by name (`ControlType` first), then `Offset`,
   `ShapeTransform` and the initial `Value`. `MinimumValue`, `MaximumValue` and `Value` are in the
@@ -47,21 +58,23 @@ SetBone Unit RigUnit_SetTransform
   `Template <Dispatch>(Pin: type)` (a dispatch such as `RigVMDispatch_ArrayMake(Values: float[])`;
   the types given and a link resolve it), `Get Var`, `Set Var`, `Call <LocalFunction>`,
   `Call /Game/CR_Lib:Function` (a public function of another Control Rig), `Comment "text"`,
-  `Reroute`. Other nodes read as `Node <Class>` and keep their line; their pins still take values
-  and links. A collapse node reads `Node RigVMCollapseNode "Collapse:Name"`; its inner nodes are the
-  section `Collapse:Name`, written like `Rig`.
+  `Reroute`, `Collapse(A, B)`. Other nodes read as `Node <Class>` and keep their line; their pins still take values
+  and links.
+- A collapse node reads `Pair Collapse`; its inner nodes are the section `Collapse:Pair`, written like `Rig`. Make one by
+  writing the nodes and a `Pair Collapse(A, B)` line naming them in the same text (the text is the graph before the collapse;
+  links to outside nodes follow into the new node). The new node's pins exist only after the write: read, then write them.
+  Leave its line out to delete it with its inner graph; to expand it, write its inner nodes' lines in its place and relink them.
 - Aggregate pins (a `Sequence`'s outputs, an Add's inputs) are text: naming the node's next one
   creates it (`C -> Next`, `C = 2`), in order, and leaving one out removes it. `D ->` is an execute output that links nothing. An aggregate node reads as its
   unit (`Seq Unit RigVMFunction_Sequence`); its pins past the second always print a line.
 - Values are RigVM text (`(X=1,Y=2,Z=3)`, `(Type=Bone,Name="hand_l")`); links and values may name
   sub-pins (`Value.Translation`, an array element's `Effectors.0.Bone`).
 - Writing a `Function:<Name>` that does not exist creates that local function. Its signature is
-  `Entry FunctionEntry(Speed: float, Target: Transform)` (` [Pure]` appended for a pure one) and
+  `Entry FunctionEntry(Speed: float, Target: Transform)` (` [Pure]` appended for a pure one, ` [Public]` for one other rigs may call, both ` [Pure, Public]`) and
   `Return FunctionResult(Result: float)`; changing them changes the signature, and every Call node
-  follows it. Empty text deletes the function.
+  follows it. Empty text deletes the function. Dropping `[Public]` is refused while other assets call it.
 
-The rig's member variables are the `Variables` section (the `Document` section also holds them, with
-the same nodes as JSON). A new rig from a mesh: `create_asset` class `ControlRig`, then `@import`.
+The rig's member variables are the `Variables` section. A new rig from a mesh: `create_asset` class `ControlRig`, then `@import`.
 
 ## Control Rig in an Anim Blueprint
 
@@ -82,9 +95,24 @@ later), and `Ops`, its stack in order:
 
 ## Sequencer
 
-In a Level Sequence `Document`, a skeletal mesh actor's binding takes a track
-`{"create": {"kind": "control_rig", "controlRig": "/Game/CR_Hero"}}`; its section is
-`{"find": {}}` and keys go on control channels such as `root_ctrl.Location.X`.
+A Level Sequence takes a rig as a `control_rig` track line in section `Binding:<Name>` of a binding
+whose actor has a skeletal mesh component (bindings and the track grammar: [level-sequence.md](level-sequence.md)).
+The line names the Control Rig Blueprint by asset path; `layered` follows it for a rig that layers over
+the animation below it (that rig needs a Backwards Solve event). The track has one section, unbounded
+unless the line gives a range, and its channels are named after the controls, so a control's
+keys are `<control>.Location.X`, `.Rotation.Y`, `.Scale.Z` for a transform control and the bare control name for a
+float control:
+
+```
+control_rig /Game/CR_Hero [0-60]
+  root_ctrl.Location.X: 0=25, 10=40 linear
+  weight_ctrl: 0=0.5
+```
+
+A mistyped rig or control is refused with the right names; a binding holds one track per rig, switched
+between plain and `layered` by rewriting its line. A loaded animation reads back as keys on every
+control channel and writes back as `No change.`; space and constraint keys the channels do not name read as
+a `# note:` and stay.
 
 Loading an animation into the section and baking go through `call_function`, each step using the
 previous step's result:
@@ -98,7 +126,8 @@ previous step's result:
    "InStartFrame": {"Value": 0}, "bUseCustomAnimRange": false, "AnimStartRange": {"Value": 0},
    "AnimEndRange": {"Value": 0}}` (UE 5.5: `LoadAnimSequenceIntoControlRigSection` with
    `InStartFrame` only). It returns false unless the rig has a Backwards Solve
-   (`RigUnit_InverseExecution`) event.
+   (`RigUnit_InverseExecution`) event. Before UE 5.7 it adds its keys beside the section's own, so write
+   the track line without channels first (`control_rig <rig>`), which clears its keys.
 4. Bake: create the target AnimSequence first, then `SequencerToolsFunctionLibrary.ExportAnimSequence`
    `{"World": <editor world path>, "Sequence": <sequence>, "AnimSequence": <anim>,
    "ExportOptions": {"class": "AnimSeqExportOption"}, "Binding": <step 1 ReturnValue>, "bCreateLink": false}`

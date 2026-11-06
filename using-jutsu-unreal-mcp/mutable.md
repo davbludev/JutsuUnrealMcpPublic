@@ -29,7 +29,7 @@ pick Switch {"PinType":"float"}
 ```
 
 - `<id> <Type> {json}`. Existing ids are what read printed; a new node takes any unused name that
-  is not `n` plus hex digits (those name existing nodes), and the reply says which id it got.
+  is not `n` plus hex digits (those name existing nodes), and the reply's `ids:` line says which id it got.
 - Types are the node class without `CustomizableObjectNode` / `CONode`; a class outside the palette
   (kept for older assets) reads under its full class name. `Kinds:Graph` (read-only) lists the
   palette's types, keyed ones with the values they take; `Kinds:Graph@Switch` one type with its pins,
@@ -125,7 +125,7 @@ Without `LODs`, the node gets the inputs up to the highest one the text links.
 
 A child object is its own Customizable Object attached to a group of its parent. Its base `Object`
 node names the group, and its `ObjectName` is the option's name. Write the parent's group first:
-the reply's `added:` line gives the group's id, which the children name.
+the reply's `ids: <written>=<stored>` line gives the group's id, which the children name.
 
 Parent `/Game/CO_Body` (its group read back as `n0f7f32`):
 
@@ -222,13 +222,12 @@ out Outputs(Component: component)
 ## Compile
 
 Every write that changes the graph compiles the object (a child object from its root) and the reply
-ends with its result before `saved`:
+ends with its result when it was not clean (a clean compile prints nothing):
 
 ```
 compile: 1 error(s), 1 warning(s)
   warning n4ceffd: Could not generate a mesh section because it didn't have a material selected. Please assign one and recompile.
   error n1fc235: The clip mesh with mesh node requires an input clip mesh.
-saved
 ```
 
 - Each Mutable message starts with the ids of the nodes it names (`<package>:<id>` for a node of

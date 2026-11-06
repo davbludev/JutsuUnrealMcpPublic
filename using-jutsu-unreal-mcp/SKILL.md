@@ -1,36 +1,77 @@
 ---
 name: using-jutsu-unreal-mcp
-description: Text formats of the Jutsu Unreal MCP server's read_asset / write_asset / edit_asset sections (Blueprint and anim graphs, variables, components, widget trees, materials, sound cues, Niagara systems, emitters, scripts and scratch pads, Control Rig hierarchies and graphs, StateTrees, Smart Objects, Gameplay Effects, Abilities and Cues (Gameplay Ability System), Mutable Customizable Object graphs, macros and instances, Pose Search databases, Chooser and Proxy tables, Behavior Trees and Blackboards, MetaSound graphs, IK Rigs and IK Retargeters). Use when editing Unreal assets through Jutsu as text, or scripting the Editor or PIE through its run_python.
+description: Jutsu Unreal MCP asset text formats for read_asset / write_asset / edit_asset (Blueprints, materials, Niagara, animation, AI, GAS, audio and more), plus maps, landscapes and run_python in the Editor or PIE. Use before editing Unreal assets or levels through Jutsu.
 ---
 
 # Using Jutsu Unreal MCP
 
-The tools describe themselves; this page only adds the asset-text formats, so writes are right the
-first time.
+The tools describe themselves; this page adds the asset-text formats, so writes are right the first
+time, and names the file to read for each area.
 
-Reach first for the plugin's own tools and asset text: they validate the input, compile, save and
-report what changed. Take `run_python` for what they do not cover (check the tool list and the
-asset's `read_asset` sections first) and for bulk work a script does more simply, such as a loop
-over many assets or actors.
+Do the work with the plugin's MCP tools and asset text: they validate the input, compile, save and
+report what changed. `run_python` is the last resort, for a result no tool reaches: check the tool
+list, the asset's `read_asset` sections and `call_function` first, and when one of them does the
+job, use it, even if it takes several calls. The files below name where Python is the intended
+route (landscapes, World Partition, Level Instances).
+
+Read the file that matches the task before the first write in its area:
+
+| Task | Read |
+| --- | --- |
+| Widget Blueprints: `WidgetTree` canvas slots, `bIsVariable`, `[bind ...]` property bindings, `Animations`, widget events, driving a widget in PIE | [widget.md](widget.md) |
+| Anim Blueprint graphs and `Machine:` state machines; Montage `Sections`, `Notifies`, `Sockets`; Anim Sequence, Montage and Blend Space data | [animation.md](animation.md) |
+| Gameplay tags (path `GameplayTags`), tags used in nodes or pins | [gameplay-tags.md](gameplay-tags.md) |
+| DataTable `Rows`: one `RowName: Column=value ...` line per row, renames, removal, nested struct and array columns | [data-table.md](data-table.md) |
+| Gameplay Ability System: Gameplay Effects (modifiers, magnitudes, executions, components), Ability defaults, Cues, attribute references | [gas.md](gas.md) |
+| Material and Material Function `Graph` and `Properties`, Material Instance `Parameters` | [material.md](material.md) |
+| Sound Cue `Graph` | [sound-cue.md](sound-cue.md) |
+| Niagara System, Emitter and Script assets (`Parameters`, `Emitters`, `System`, `Emitter`, `ScratchPad:`, `Graph`, compile reply) | [niagara.md](niagara.md) |
+| MetaSound `Graph` (classes, wiring, interfaces), presets, member settings | [metasound.md](metasound.md) |
+| Behavior Tree `Tree`, Blackboard `Keys` | [behavior-tree.md](behavior-tree.md) |
+| StateTree `Tree`, StateTree components with parameter overrides | [state-tree.md](state-tree.md) |
+| Smart Object `Definition` (slots, behaviors, annotations, parameters), Smart Object components | [smart-object.md](smart-object.md) |
+| Customizable Object (Mutable) `Graph`, Macro Library `Macro:Name`, instance `Parameters` | [mutable.md](mutable.md) |
+| Pose Search (Motion Matching) schemas and databases (`create_asset` parents, database `Assets`), Chooser Tables (`Table`), Proxy Tables (`Entries`) | [motion-matching.md](motion-matching.md) |
+| Level Sequences: `Sequence` (playback, bindings, spawnables, event keys), `Binding:<Name>` tracks and keys, the `Director` and `Function:` graphs | [level-sequence.md](level-sequence.md) |
+| Control Rig `Hierarchy`, `Rig` and `Function:` graphs, Sequencer Control Rig tracks, loading an animation onto them, baking; IK Rig, IK Retargeter | [control-rig.md](control-rig.md) |
+| PCG graph `Graph` text: nodes, node settings, links, dynamic inputs, subgraphs, parameters | [pcg.md](pcg.md) |
+| Maps (classic, partitioned): actors as text by Outliner folder (`Actors`, `Actors:<Folder>`), one actor's properties and components (`Actor:<label>`), the placeable classes and one class's components and properties (`Actors@<query>`), the `World` overview, World Partition loading and descriptors, Data Layers, HLOD, sublevels, Level Instances and Packed Level Actors (`unreal.JutsuLevelLibrary`), World Partition commandlets | [world.md](world.md) |
+| Landscapes through `unreal.JutsuLandscapeLibrary`: create, sculpt, edit layers, Landscape Patch, target layers and paint, save | [landscape.md](landscape.md) |
+| Landscape dressing: roads (splines), Water, PCG scatter, grass, physical material and Nanite builds | [landscape-dressing.md](landscape-dressing.md) |
+| Multiplayer PIE (`netMode`, `players`, `world: "pie:<n>"`), navigation rebuilds, which editor answers | [pie.md](pie.md) |
+| Any `run_python` script: crash gotchas (deleting assets, switching levels, GeometryScript UVs, primary data assets), frame rules, PIE handles | [run-python.md](run-python.md) |
 
 Editor-state calls (`start_pie`, `stop_pie`, `live_coding_compile`, `open_level`) go one per
 message, each after the previous one answered. `write_asset`, `edit_asset` and `compile_assets` on a
 Blueprint of any kind (Actor, Widget, Anim, Control Rig) are refused while PIE runs: `stop_pie` first, write, then `start_pie`.
-A multiplayer session (`start_pie` `netMode` `listen` or `client`, `players`) lists its instances as `pie:0`, `pie:1`, ...; pass `world: "pie:<n>"` to act in one ([run-python.md](run-python.md)).
+`start_pie` ignores the editor's saved Play settings and runs one standalone player: pass `netMode` and `players` for multiplayer. Multiplayer sessions: [pie.md](pie.md).
 
 ## Assets as text
 
 `read_asset(path)` lists an asset's sections; `read_asset(path, section)` returns one. Change a part
 with `edit_asset(path, section, old_text, new_text)` (exact, unique match, like a file edit), or
 replace a section with `write_asset`. The written text is the whole resulting section: what it leaves
-out is removed (in a `Document` section, listed items are created or updated and the rest stay).
+out is removed.
 Node positions are not part of the text, so never try to place nodes.
 
-`Properties`, `Defaults` and `Parameters` lines are `Name = <json>`. An instanced subobject (input trigger,
-Blackboard key type) is `{"class": "InputTriggerPressed", ...}` (`get_properties` adds its `path`, which writes ignore); struct array elements list only changed members
-(`{}`: all default).
+`Properties`, `Defaults` and `Parameters` lines are `Name = <json>`; a single instanced subobject is
+`{"class": "InputTriggerPressed", ...}` (`get_properties` adds its `path`, which writes ignore).
+**An array of structs or instanced objects is a block, never JSON**: `Name =` and one indented line per
+element, `Field=value` items split at spaces with nested members dotted, an instanced element led by its class,
+only members that differ from the default, `()` for an all-default element. The lines are the whole array
+(drop a line to remove its element; `Name =` alone or `Name = []` clears it):
 
-A read's `# note:` lines (`// note:` in `Document`) name what it does not show; writes skip them. A refusal
+    DefaultKeyMappings.Mappings =       (UE 5.6 and earlier: Mappings =)
+      Action=/Game/Input/IA_Jump.IA_Jump Key=SpaceBar Triggers=[InputTriggerPressed ActuationThreshold=0.75] Modifiers=[InputModifierNegate]
+      Action=/Game/Input/IA_Move.IA_Move Key=W Modifiers=[InputModifierDeadZone LowerThreshold=0.3, InputModifierScalar]
+
+Items may come in any order; a read prints a struct's identity fields first (a mapping's `Action` and `Key`; a Gameplay Effect
+modifier's `Attribute`, see gas.md), then the rest as the struct declares them, and writing that back is `No change.`;
+a list in a line is `Field=[Class a=1, Class b=2]`. In a child Blueprint an element is written against the parent's element at
+the same index (`()` keeps it). A member of a struct property is a dotted name, `Struct.Member = value`. Errors name the line and
+element (`line 3: Modifiers[1].Attribute ...`). A String Table text reads `"LOCTABLE(\"/Game/ST_X.ST_X\", \"Key\")"`; write that string to bind a text to a table key, and copy a read line as it is to keep the binding (a new plain string writes a literal).
+
+A read's `# note:` lines name what it does not show; writes skip them. A refusal
 that names a read-only section `<Section>@<query>` points at the full list of valid names.
 
 Blueprint graph (`EventGraph`, `Function:Name`, `Macro:Name`):
@@ -54,7 +95,8 @@ say Call KismetSystemLibrary.PrintString
   `Call Class.Function` / `Call self.Function`, `Message Interface.Function`, `CallParent Function`,
   `Get Var`, `Set Var` (another object's variable: `Get Class.Var` with `self` linked to it), `Branch`, `Sequence`, `Cast Class`, `PureCast Class`, `Self`, `Reroute`,
   `Macro ForEachLoop`, `MakeStruct S`, `BreakStruct S`, `FunctionEntry(P: type)` (append
-  ` [Pure]` for a pure function; also `[Const] [ThreadSafe] [Category "x"] [Keywords "y"]`),
+  ` [Pure]` for a pure function; also `[Const] [ThreadSafe] [Category "x"] [Keywords "y"]`; `[Exec]` makes it a console command, reached on the PlayerController, its Pawn, HUD, CheatManager or
+  PlayerCameraManager, the GameMode, GameState or GameInstance),
   `FunctionResult(P: type)` (in a `Macro:` graph these are its tunnels; exec pins are type `exec`),
   `Comment "text"`, or a node class with JSON: `SpawnActorFromClass`,
   `SwitchEnum {"Enum":"/Script/Engine.ECollisionChannel"}`.
@@ -73,7 +115,7 @@ say Call KismetSystemLibrary.PrintString
 - Binding an event to another object's dispatcher: `bind AddDelegate {"DelegateReference":
   {"MemberParent":"/Script/Game.Door","MemberName":"OnOpened"}}` with `self = <target>` and
   `Delegate = <event>.OutputDelegate`, where `<event>` is a `CustomEvent` named unlike any parent
-  function. The event takes the delegate's parameters, so write them as the delegate has them, by
+  function; the Blueprint's own dispatcher is `{"MemberName":"OnOpened"}` alone. The event takes the delegate's parameters, so write them as the delegate has them, by
   reference included: `ev CustomEvent OnDone(Context: ref const UpdateContext)`; other text is refused
   with the line that fits.
 - A parameter passed by reference is `Name: ref Type` or `ref const Type`; `T&` and `const T&` also work.
@@ -91,72 +133,33 @@ say Call KismetSystemLibrary.PrintString
 Variables: `Health: float = 100 [EditAnywhere, Category="Stats"]`; types `bool int int64 float
 double string name text Vector Actor /Game/Path/BP_Door class<Actor> soft<Texture2D> T[] set<T>
 map<K, V>` (Blueprint classes, user structs and enums by asset path); flags `EditAnywhere BlueprintReadOnly ExposeOnSpawn Private Replicated RepNotify=Fn
-Transient SaveGame Config Category= Tooltip=`, and `was="OldName"` renames. Writing back what was
-read replies `No change.` and saves nothing. When the asset stores a write differently (ids replaced,
-order normalised, defaults dropped), the reply ends with `--- stored text ... ---` and the section as
-stored: take the next `edit_asset` `old_text` from it. An `edit_asset` miss shows the nearest lines.
+Transient SaveGame Config Category= Tooltip=`, and `was="OldName"` renames; a name that is not an
+identifier reads quoted (`"My Speed": float`). Writing back what was read replies `No change.` and
+saves nothing. Any other write replies `ok`, then only lines you cannot know from your own text:
+`ids: <written>=<stored>, ...` for nodes stored under another id (name them
+by the stored id in your next edit), `removed: ...` after a `write_asset` (what the text left out; at
+most 20 names, then `+N`), `compile:` with its messages when the compile was not clean, and `warning:`
+lines. A clean compile, the saved asset and what you added or changed are not repeated: `read_asset` the
+section to see them. When the asset stores a write differently (ids replaced, order normalised,
+defaults dropped), one line says so, `stored differently: <ids, at most 10, then +N>`; `read_asset`
+them before the next `edit_asset` on them. An `edit_asset` miss shows the nearest lines.
 
-Components / WidgetTree: indented `Name: Class {"Prop":value}`; widget slots `@{"LayoutData":...}`;
+Components / WidgetTree: indented `Name: Class {"Prop":value}` (a Components name that is not an
+identifier reads quoted, as in Variables: `"My Mesh": StaticMeshComponent`); widget slots as a record, `@ Anchors=0,1 Offsets=40,-40,300,24 Alignment=0,1` (widget.md);
 `[socket="hand_r"]` attaches a component to its parent's socket or bone; inherited components are
 marked `[inherited]` and keep their line, whose `{json}` overrides their properties. A changed default reaches placed instances that kept the
 old value.
 
-Widget Blueprints (`WidgetTree` canvas slots and `bIsVariable`, `[bind ...]` property bindings,
-`Animations`, widget events, showing a widget and pressing its buttons in PIE): read
-[widget.md](widget.md) before writing one.
+A Blueprint's `Defaults` starts with `Parent: Pawn`, its parent class; write another class to reparent it
+(`Parent: Pawn` alone is a whole write; a text without the line keeps the parent, a refusal names the line).
 
 One line per item: `Dispatchers` `OnHit(Damage: float)`; `Interfaces` an interface path; user
-struct `Fields` `Count: int = 3`; user enum `Entries` a name; String Table `Entries`
+struct `Fields` `Count: int = 3` (the Variables types but `map`, `softclass<Actor>` too; names read quoted as in Variables); user enum `Entries` a name; String Table `Entries`
 `Key = "Text"`.
 
-Anim Blueprint graphs, Montage `Sections`, `Notifies` and `Sockets`, Anim Sequence, Montage and Blend
-Space data: read [animation.md](animation.md) before writing one.
-
-Gameplay tags (path `GameplayTags`): read [gameplay-tags.md](gameplay-tags.md) before writing one.
-
-Gameplay Ability System (Gameplay Effect modifiers, magnitudes, executions and components; Gameplay Ability
-defaults; Gameplay Cues; attribute references): read [gas.md](gas.md) before writing one.
-
-Material and Material Function `Graph` and `Properties`, Material Instance `Parameters`: read [material.md](material.md)
-before writing one.
-
-Sound Cue `Graph`: read [sound-cue.md](sound-cue.md) before writing one.
-
-Niagara System, Emitter and Script assets (`Parameters`, `Emitters`, `System`, `Emitter`,
-`ScratchPad:` and `Graph` sections, and their compile reply): read [niagara.md](niagara.md) before
-writing one.
-
-`Document` (StateTree, Behavior Tree, PCG, MetaSound, Level Sequence, Control Rig, Anim
-Blueprint state machines, maps): the JSON read returns. Copy a clause's shape to add an item
-(most domains write `"create": {...}`); a clause with an existing item's `authoringId`, the key the
-read printed for it (StateTree `state_19`, valid until the next write), or its name and type updates
-it; items left out stay. Remove with `{"remove": {"authoringId": "..."}, "destructive": true}`; a
-remove that matches nothing fails and lists what is there.
-
-PCG `Document`: a connection to a dynamic input its node lacks adds the inputs up to it, as the Add pin button does:
-Merge `In2`, `In3`, Gather, Union, Merge Attributes (UE 5.6+), Outer Intersection `Source2` (all lanes). A node with
-dynamic inputs reads `"dynamicInputs": N` (unconnected ones too); writing it grows the node to at least N and never
-removes a pin. An unknown label is refused with the node's pins and the next dynamic input.
-
-Behavior Tree `Tree` text (indented node lines, `decorator`/`service` lines) and Blackboard `Keys`
-(`Name: Type<Class> [flags]`): read [behavior-tree.md](behavior-tree.md) before writing one.
-
-StateTree `Tree` text and StateTree components with parameter overrides: read
-[state-tree.md](state-tree.md) before writing one.
-
-Smart Object `Definition` text (slots, behaviors, annotations, parameters) and Smart Object
-components: read [smart-object.md](smart-object.md) before writing one.
-
-MetaSound `Graph` (classes, wiring, interfaces) and `Document` presets: read [metasound.md](metasound.md) before writing one.
-
-Customizable Object (Mutable) `Graph`, Macro Library `Macro:Name` and instance `Parameters`: read [mutable.md](mutable.md) before writing one.
-
-Pose Search (Motion Matching) schemas and databases (`create_asset` parents, the database `Assets` list), Chooser Tables (`Table`) and Proxy Tables (`Entries`): read
-[motion-matching.md](motion-matching.md) before writing one.
-
-Control Rig `Hierarchy` (controls, nulls, their settings), `Rig` and `Function:` graphs,
-Sequencer Control Rig tracks, loading an animation onto them and baking; IK Rig and IK Retargeter: read
-[control-rig.md](control-rig.md) before building a rig.
+No asset has a `Document` section: asking for it is refused, and the refusal names the text section to use (Blueprint
+`Variables`/`Defaults`/graphs, Widget Blueprint `WidgetTree`, Material and MetaSound `Graph`, StateTree and Behavior
+Tree `Tree`, Control Rig `Hierarchy`/`Rig`/`Function:Name`).
 
 Anything without a text section (animation curves and sync markers, editor utilities) is reachable
 through `call_function` on Unreal's scripting libraries, and past that through `run_python`.
@@ -167,7 +170,3 @@ colour curves put keys under `X:` / `R:` channel headers; a channel left out is 
 with `get_float_value(t)`.
 `create_asset` `options` set factory properties: a BlendSpace needs `{"TargetSkeleton": path}`; a
 Blueprint interface is `class Blueprint`, `parent Interface`, `{"BlueprintType": "BPTYPE_Interface"}`.
-
-`run_python` crash gotchas (deleting assets, switching levels, GeometryScript UVs, primary data
-assets copied in Python), frame and PIE rules, and navigation rebuilds: read
-[run-python.md](run-python.md) before scripting the Editor or PIE.

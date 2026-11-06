@@ -102,7 +102,8 @@ ParticleUpdate
 ```
 Properties
   EmitterState = {"LoopBehavior": "Once"}
-  SpawnInfos = [{"Type": "Burst", "Amount": {"Min": 12, "Max": 12}}]
+  SpawnInfos =
+    Amount.Min=12 Amount.Max=12
 
 Modules
   InitializeParticle {"LifetimeDistribution": {"Mode": "UniformRange", "ChannelConstantsAndRanges": [0.1, 0.25]}}
@@ -114,7 +115,8 @@ Renderers
 ```
 
 - A lightweight emitter has `Properties` (its settings: `EmitterState`, `SpawnInfos`, `FixedBounds`,
-  ...), `Modules` and `Renderers`. Its modules are fixed: a listed one is on, with its changed
+  ...; `SpawnInfos` and other arrays of records are blocks: `SpawnInfos =` and one record line per
+  element, indented under it), `Modules` and `Renderers`. Its modules are fixed: a listed one is on, with its changed
   properties as `{json}` (class without `NiagaraStatelessModule_`); one left out is off, its settings
   kept. `InitializeParticle` and `SolveVelocitiesAndForces` are always on.
 - A distribution is its `Mode` with `ChannelConstantsAndRanges` (`UniformRange` one range for all
@@ -190,13 +192,13 @@ out Output Module [Usage=ParticleSpawn]
 ## Write reply
 
 A write of any of these sections waits for the whole compile, CPU and GPU, and replies with
-`compile:`, then `renderer` and `stack` lines (the issues the Niagara editor shows, with the fix it
+`compile:` when it has errors or warnings (a clean compile prints nothing), then `renderer` and `stack` lines (the issues the Niagara editor shows, with the fix it
 offers); those two are not counted in the `compile:` verdict. The asset is saved even when the
 compile fails. A scratch pad no stack uses is not compiled, so its errors show once a stack runs it.
 
 ## Verify
 
-1. Read the `compile:`, `renderer` and `stack` lines of the last write; fix every error before going on.
+1. Read the `compile:`, `renderer` and `stack` lines of the last write (none of them: it compiled clean); fix every error before going on.
 2. `spawn_actor` a `NiagaraActor` in view and set its component's asset to the system.
 3. Feed what it reads: write Data Channel entries with `set_properties` or `run_python`, or set
    `User.*` parameters on the component.

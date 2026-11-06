@@ -11,10 +11,10 @@ create_asset(path="/Game/MM/PSD_Locomotion", class="PoseSearchDatabase", parent=
 
 - A schema's `parent` is its skeleton; the factory adds the default channels. A database's `parent` is
   its schema (`options` {"TargetSchema": path} does the same).
-- A schema is plain properties. `read_asset(schema, "Properties")` shows `Channels` as instanced
-  objects (`{"class": "...", members}`), `SampleRate`, the mirror table and the rest; `write_asset`
-  with that text changes them, and Pose Search recomputes the schema. Remove or reorder a channel by
-  editing the `Channels` array.
+- A schema is plain properties. `read_asset(schema, "Properties")` shows `Channels` as a block, one
+  class-led line per channel (`Channels =` then `  PoseSearchFeatureChannel_Position SampleTimeOffset=0.2`),
+  `SampleRate`, the mirror table and the rest; `write_asset` with that text changes them, and Pose Search
+  recomputes the schema. Remove or reorder a channel by editing its lines (the lines are the whole list).
 
 ## Database animation list: `Assets`
 

@@ -85,13 +85,16 @@ Roughness = 0.75
 Tint = {"R":1,"G":0.5,"B":0.25,"A":1}
 Base = "/Game/T_Rock.T_Rock"
 Fancy = true
+AOChannel = {"R":false,"G":true,"B":false,"A":false}
 Layer[0].LayerRough = 0.9
 Blend[0].BlendAlpha = 0.25
 # Tint2 = {"R":1,"G":1,"B":1,"A":1} (inherited)
 ```
 
-Scalar (a number), vector (`{"R":..}` or `[r,g,b,a]`), texture (asset path or `None`) and static switch
-(`true`/`false`). Only overridden parameters are lines; `# ... (inherited)` lines show what the others
-hold and may be kept or dropped. A parameter the text leaves out loses its override. A material layer
+Scalar (a number), vector (`{"R":..}` or `[r,g,b,a]`), texture (asset path or `None`), static switch
+(`true`/`false`) and static component mask (`{"R":true,"G":false,..}`, channels left out off, or
+`[r,g,b,a]` booleans; at least one channel on, and only channels the masked input has). Only
+overridden parameters are lines; `# ... (inherited)` lines show what the others hold and may be kept
+or dropped. A parameter the text leaves out loses its override. A material layer
 stack's parameters are `Layer[i].Name` and `Blend[i].Name` (the layer or blend index in the stack, as
 the read prints them); a stack comes from the parent material's `MaterialAttributeLayers` node.

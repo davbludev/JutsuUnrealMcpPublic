@@ -8,23 +8,35 @@ reads, then `WidgetTree`, then `Animations` and the `EventGraph`.
 
 ```
 Root: CanvasPanel
-  HealthBar: ProgressBar @{"LayoutData":{"Anchors":{"Minimum":{"X":0,"Y":1},"Maximum":{"X":0,"Y":1}},"Offsets":{"Left":40,"Top":-40,"Right":300,"Bottom":24},"Alignment":{"X":0,"Y":1}}} [bind Percent=GetHealthPercent]
-  Score: TextBlock @{"LayoutData":{"Anchors":{"Minimum":{"X":1,"Y":0},"Maximum":{"X":1,"Y":0}},"Offsets":{"Left":-40,"Top":40,"Right":0,"Bottom":0},"Alignment":{"X":1,"Y":0}},"bAutoSize":true} [bind Text=Stats.Label]
-  Crosshair: Image @{"LayoutData":{"Anchors":{"Minimum":{"X":0.5,"Y":0.5},"Maximum":{"X":0.5,"Y":0.5}},"Offsets":{"Left":0,"Top":0,"Right":16,"Bottom":16},"Alignment":{"X":0.5,"Y":0.5}}}
-  Menu: VerticalBox
-    PlayButton: Button
+  HealthBar: ProgressBar @ Anchors=0,1 Offsets=40,-40,300,24 Alignment=0,1 [bind Percent=GetHealthPercent]
+  Score: TextBlock @ Anchors=1,0 Offsets=-40,40,0,0 Alignment=1,0 AutoSize [bind Text=Stats.Label]
+  Crosshair: Image @ Anchors=0.5,0.5 Offsets=0,0,16,16 Alignment=0.5,0.5
+  Menu: VerticalBox @ Anchors=0,0,1,1 Offsets=0,0,0,0
+    PlayButton: Button @ Padding=8,4 HAlign=Center
       PlayLabel: TextBlock {"Text":"Play"}
-    QuitButton: Button
+    QuitButton: Button @ Size=Fill Padding.Top=12
       QuitLabel: TextBlock {"Text":"Quit"}
 ```
 
-- A line is `Name: Class {widget properties} @{slot properties} [bind ...]`, two spaces per level,
-  children in order. Both JSON parts hold only values that differ from the class defaults.
-- Canvas slot: `LayoutData` holds `Anchors` (`Minimum`/`Maximum`, 0-1 of the parent), `Offsets` and
-  `Alignment` (the widget's own pivot, 0-1). With a point anchor (`Minimum` = `Maximum`), `Left`/`Top`
-  is the position from the anchor and `Right`/`Bottom` the size; `"bAutoSize":true` sizes the widget
-  to its content instead. A struct value is written whole, so give `LayoutData` all three members.
-- Other panels' slots take their own members: `@{"Padding":{"Left":8}}`.
+- A line is `Name: Class {widget properties} @ slot record [bind ...]`, two spaces per level,
+  children in order. `{...}` is JSON, `@` starts the slot record: the child's fields in its parent's
+  slot (`Name=value` items split at spaces, a value has no spaces), written as `Field` for a true
+  bool. Both hold only values that differ from the class defaults, and a slot field left out returns
+  to its default. The old `@{...}` JSON form is refused.
+- Canvas slot (child of a CanvasPanel): `Anchors=x,y` is a point anchor and `Anchors=minX,minY,maxX,maxY`
+  a stretch, both 0-1 of the parent; `Offsets=left,top,right,bottom`: with a point anchor `left,top` is
+  the position from the anchor and `right,bottom` the size, with a stretch they are margins from the
+  anchors; `Alignment=x,y` is the widget's own pivot, 0-1; `AutoSize` sizes the widget to its
+  content (the Details panel's Size To Content); `ZOrder=n`. The names are the animation path
+  `Slot.LayoutData.<member>` shortened; the full dotted path (`LayoutData.Offsets.Left=40`) also works.
+- Box, overlay, uniform grid, scroll and wrap slots (a uniform grid slot has no `Padding`): `Padding=8` (all sides), `Padding=h,v` or `Padding=l,t,r,b`;
+  one side is `Padding.Right=12`. `HAlign=Fill|Left|Center|Right`, `VAlign=Fill|Top|Center|Bottom`.
+  A Horizontal/Vertical Box or ScrollBox slot also takes `Size=Fill` (share the space), `Size=Fill,2` (twice the
+  share) or `Size=Auto` (the content's size). Grid slots add `Row`, `Column`, `RowSpan`, `ColumnSpan`,
+  `Layer`, `Nudge=x,y`; a Wrap Box slot `FillEmptySpace`, `ForceNewLine`.
+- A field of another panel's slot is refused naming the slot class and its fields
+  (`the field 'Anchors' does not apply to the OverlaySlot of 'A'; fields: ...`). A Border's content slot
+  has no fields: its padding and alignment are the Border's own `{"Padding":...}`.
 - A widget that a graph names (a `ComponentEvent`, a `Get` of the widget) or that you reach in PIE
   through `get_properties` is a Blueprint variable: add `"bIsVariable":true` to its `{...}`. Button,
   ProgressBar and Image are variables by default, so their read leaves it out; TextBlock and panels
@@ -50,6 +62,11 @@ g Get Health
 
 Write the function before the `WidgetTree` that binds it; a source through a widget added in the same
 `WidgetTree` write binds on a second write.
+
+Deleting a bound function (empty `Function:` text) is refused, naming each `Widget.Property`: leave the
+clause out of the `WidgetTree` first. A binding whose function or variable is already gone reads
+`[bind Text=<missing>]`; write `<missing>` back to keep it, another source to replace it, or no clause
+to remove it.
 
 ## Graph events on widgets
 

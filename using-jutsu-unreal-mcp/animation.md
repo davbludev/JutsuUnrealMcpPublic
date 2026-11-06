@@ -20,12 +20,50 @@ out TransitionResult
   bCanEnterTransition = fast.ReturnValue
 ```
 
-States, the entry and transitions are added in `Document`; their graphs then appear as sections.
-A machine clause lists only what it changes: a transition's `from`/`to` name a state alias of the
-clause or an existing state's name, so `{"find": {"name": "Locomotion"}, "transitions": {"back":
-{"create": {"from": "Run", "to": "Idle"}}}}` needs no `states`. A transition, state or machine sets
-its settings in `properties` by their property names: `{"CrossfadeDuration": 0.15}`. The read lists
-only settings changed from their defaults, so a fresh transition reads `"properties": []`.
+A machine of the AnimGraph is section `Machine:<Name>`: its states, conduits, aliases, entry and
+transitions, one line per item; their graphs then appear as sections. A machine in an anim layer is
+`Machine:<Layer>/<Name>`, one inside a state's pose graph `Machine:<State>/<Name>`
+(`Machine:<Machine>/<State>/<Name>` when another animation graph has that state's name; a layer's plain
+name always names the layer). The outline lists them; a path naming no such graph or machine is refused
+with the sections there are. The machine node itself is a `StateMachine <Name>` line in the graph that
+holds it (`Function:<Layer>`, `State:<Machine>/<State>`).
+
+```
+machine [MaxTransitionsPerFrame=2]
+entry Idle
+state Idle
+state Run [bAlwaysResetOnEntry=true]
+conduit CanStop
+alias Anywhere [global]
+alias Moving [Walk, Run]
+Idle -> Run [CrossfadeDuration=0.15]
+Idle -> Run #2 [LogicType=TLT_Custom, rule=true]
+```
+
+Writing makes the machine match: an item or transition left out is removed with its `State:`,
+`Transition:` or `Blend:` section; `state Jog [was="Walk"]` renames and keeps the pose graph. States,
+conduits and aliases share one name namespace; an alias covers states. Settings are property names,
+shown only where they differ from a newly placed item's; a mistyped name or enum value is refused
+with the lane's choices. A second transition with the same ends is `#2` in graph order, as its
+`Transition:` section; writing only `A -> B #2` keeps that one and removes the first (it then reads
+`A -> B`). Notify events are settings by event name: a state's `StateEntered`, `StateLeft`,
+`StateFullyBlended`, a transition's `TransitionStart`, `TransitionEnd`, `TransitionInterrupt`
+(`state Run [StateEntered=OnRun, StateLeft="Left Run"]`); leaving one out, or `=None`, clears it. An
+event that also holds a Notify object or notify state class (set in the editor) reads by its name
+with a `# note:`; a write that would change it is refused. `rule=true` is a rule with no graph; once
+the `Transition:` section links the rule pin, leave `rule` out. `[shared=CanMove]` on several
+transitions gives them one shared rule: its graph is the `Transition:` section of the first of them in
+graph order (the others have none; edit it there, it applies to all) and takes no `rule=`. Leaving
+`shared=` out unshares: the transition gets a new empty rule (set `rule=` on the same line), unless
+no other transition still shares the graph and it is the earliest leaving, which keeps the graph.
+Shared rules read under names unique in the machine (the editor allows repeats and empty names): the
+stored name, `Unnamed` for none, and `"Name #2"`, `#3` (first free number) where an earlier rule reads
+so or another is stored so, with a `# note:`; write the read name to keep a rule, another to rename it.
+The numbers can shift after a rule goes: read before the next write. Crossfade sharing is set in the editor, never by a write; a group reads as a `# note:`, and a write
+changing its `CrossfadeDuration`, `BlendMode`, `CustomBlendCurve` or blend profile must give its lines
+one value each. Values compare with case (`StateEntered=onidle` over `OnIdle` is a change).
+`LogicType=TLT_Custom` adds the section `Blend:Machine/From->To` (`#2` like its `Transition:`;
+`TransitionPoseEvaluator` nodes `from`/`to` feed `out CustomTransitionResult`); another logic type removes it.
 Naming an optional property in a pin line (`PlayRate = 2`) exposes it as a pin; `PlayRate [hidden]`
 (a line with no value) hides it again; `hidden` stays an ordinary value and node id.
 
@@ -35,8 +73,10 @@ rig in `{"Node":{"ControlRigClass":"/Game/CR_Arms.CR_Arms_C"}}` on UE 5.5-5.7 an
 turns its public variables into pins named like them (`Speed = 2`). `Pin = @Owner.Path` binds a pin to a
 property access path (a variable, a member chain, or a function as the last element); a bound pin
 reads the same way. A node's `UpdateFunction`, `InitialUpdateFunction` and `BecomeRelevantFunction` sit
-beside `Node`, not in it: `{"Node":{...},"UpdateFunction":{"MemberName":"UpdateSpeed"}}`; a `Function:` section whose entry is `FunctionEntry() [ThreadSafe]` is
-thread-safe (`FunctionEntry` flags: [SKILL.md](SKILL.md)).
+beside `Node`, not in it: `{"Node":{...},"UpdateFunction":{"MemberName":"UpdateSpeed"}}` names the
+Blueprint's own function; the function is a `Function:` section whose entry is
+`FunctionEntry(Context: ref const AnimUpdateContext, Node: ref const AnimNodeReference) [ThreadSafe]` (another signature
+fails the compile; `FunctionEntry` flags: [SKILL.md](SKILL.md)).
 
 Cached poses: `SaveCachedPose Name` stores a pose, `UseCachedPose Name` links to it by that name
 (a rename of the save node keeps the links). Pose-list nodes (`LayeredBoneBlend`, `BlendListByInt`,
@@ -51,17 +91,9 @@ exposed entry the text stops naming stays on the node (a new `BoundEnum` is a ne
 Anim layers: writing a `Function:<Layer>` that does not exist makes an anim layer (an animation graph
 with its own `Root`) in an Anim Layer Interface, and in an Anim Blueprint when the text has a `Root` or
 `LinkedInputPose` line; without one it is a plain function. Layers an Anim Blueprint implements from an interface are `Function:` sections too. Put
-`LinkedInputPose` nodes on it for its inputs. A layer's machines, and machines nested in a state's
-graph, are read in the Document with `"graph": "<Layer or State graph name>"` (`"<Machine>/<State>"` when another graph has the state's name; the read gives it); name it in a `create`
-clause to place the machine there.
+`LinkedInputPose` nodes on it for its inputs. A layer's machines are `Machine:<Layer>/<Name>` sections.
 
-In the Document a machine clause also takes `conduits` and `aliases` beside `states` (one key
-namespace; a conduit's rule is its `State:` section; an alias takes `global: true` or `states: [keys]`).
-Transitions to and from them are ordinary clauses. A transition with `"LogicType": "TLT_Custom"` gets a
-section `Blend:Machine/From->To` (`TransitionPoseEvaluator` nodes `from`/`to` feed `out
-CustomTransitionResult`); another logic type removes it. Not authorable here: a transition's shared
-rule (`bSharedRules`), state and transition notify events, and linked-layer slot setup; use
-`run_python` for those.
+Not authorable as text: linked-layer slot setup; use `run_python` for it.
 
 Montage `Sections`: `Loop @ 0.5 -> Loop` (seconds, optional next section). Montage and sequence
 `Notifies`: `Track: Name` lines, each followed by `  0.25 AnimNotify_PlaySound {"Sound":"..."}`,
