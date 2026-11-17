@@ -7,7 +7,7 @@ reads `Input Input` and `Output Output`, the graph's own nodes, which every text
 
 1. Find kinds: `read_asset section=Kinds:Graph@sampler` lists matching kinds, then `Kinds:Graph@SurfaceSampler`
    one kind with its pins (`in`/`out`) and settings (type, default, enum entries).
-2. Write the whole graph. A landscape scatter:
+2. A landscape scatter:
 
 ```
 Input Input
@@ -38,6 +38,10 @@ Output Output
 - Dynamic inputs: a link to the next one adds it (Merge, Gather, Union, Merge Attributes from UE 5.6 `In2`, `In3`;
   Outer Intersection `Source2` on every lane); a later one adds those between. Pins are never removed.
 - Instanced settings (a spawner's mesh selector) are setting lines too (next section).
+- The Graph writes partially: a node, link or setting line with a problem is skipped and named under `not applied:`,
+  with the lines under its node and every line linking to it; the node of its id stays as it was, links and settings
+  included. A setting Unreal refuses while the write runs skips its whole node line. Still refused whole: a bad
+  `Parameter` line, links that loop, and leaving out a parameter a kept Get Parameter node reads.
 
 ### Instanced settings
 

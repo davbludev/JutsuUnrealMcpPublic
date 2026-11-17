@@ -36,6 +36,8 @@ write it as section `Assets`, one line per entry:
   back to the defaults. Animation sequences, blend spaces, composites, montages and multi anim assets
   all take the same line; the plugin picks the entry kind from the asset's class on every engine.
 - `edit_asset(db, "Assets", old_text, new_text)` changes one line's settings.
+- Writes are partial: a bad line is skipped and keeps its asset's entry as it was, in place; a line whose asset does
+  not load keeps every entry no line names. A `None` line (an empty entry, UE 5.5/5.6) keeps an empty entry as it is.
 
 ## Chooser tables: `Table`
 
@@ -59,6 +61,10 @@ Fallback /Game/Anim/A_Idle.A_Idle
   `nested Branch` makes a chooser inside the table; its own columns and rows are section `Table:Branch`.
 - Remove a row by leaving its line out; every column is resized with the rows. Rows are told apart by
   position.
+- The table writes partially: a bad row (result, option or cell) is skipped and the row at its place stays as it was,
+  its cells included; a bad `Column` line keeps the column at its place, or, when another line is that column (same
+  kind and settings), every column no line is; the rows that give it a cell are skipped too; a bad `Fallback` keeps the fallback; a line that is
+  no Column, Row or Fallback is skipped and every column no line is, the rows past the text's and the fallback stay.
 - `Properties` holds the result type, result class and parameters (context objects).
 
 ## Proxy tables: `Entries`
@@ -72,6 +78,8 @@ Entry /Game/Anim/PA_Idle.PA_Idle /Game/Anim/A_Idle.A_Idle
 ```
 
 Results are written as in a row, except `nested`; options `{"key":...,"outputs":[...]}` follow the result.
+Writes are partial: a bad line keeps its proxy asset's entry as it was, in place; a line whose proxy asset does not
+load (or is no `Entry` line) keeps every entry no line names.
 
 ## Anim Blueprint nodes
 

@@ -24,7 +24,7 @@ A machine of the AnimGraph is section `Machine:<Name>`: its states, conduits, al
 transitions, one line per item; their graphs then appear as sections. A machine in an anim layer is
 `Machine:<Layer>/<Name>`, one inside a state's pose graph `Machine:<State>/<Name>`
 (`Machine:<Machine>/<State>/<Name>` when another animation graph has that state's name; a layer's plain
-name always names the layer). The outline lists them; a path naming no such graph or machine is refused
+name always names the layer). The outline lists them (in a very big outline the largest of `State:*`, `Transition:*` and `Blend:*` become one name list each; `section="State:Locomotion/*"` lists one machine's with summaries); a path naming no such graph or machine is refused
 with the sections there are. The machine node itself is a `StateMachine <Name>` line in the graph that
 holds it (`Function:<Layer>`, `State:<Machine>/<State>`).
 
@@ -43,14 +43,14 @@ Idle -> Run #2 [LogicType=TLT_Custom, rule=true]
 Writing makes the machine match: an item or transition left out is removed with its `State:`,
 `Transition:` or `Blend:` section; `state Jog [was="Walk"]` renames and keeps the pose graph. States,
 conduits and aliases share one name namespace; an alias covers states. Settings are property names,
-shown only where they differ from a newly placed item's; a mistyped name or enum value is refused
-with the lane's choices. A second transition with the same ends is `#2` in graph order, as its
+shown only where they differ from a newly placed item's; a line with a mistyped name or enum value is not applied,
+naming the lane's choices. A second transition with the same ends is `#2` in graph order, as its
 `Transition:` section; writing only `A -> B #2` keeps that one and removes the first (it then reads
 `A -> B`). Notify events are settings by event name: a state's `StateEntered`, `StateLeft`,
 `StateFullyBlended`, a transition's `TransitionStart`, `TransitionEnd`, `TransitionInterrupt`
 (`state Run [StateEntered=OnRun, StateLeft="Left Run"]`); leaving one out, or `=None`, clears it. An
 event that also holds a Notify object or notify state class (set in the editor) reads by its name
-with a `# note:`; a write that would change it is refused. `rule=true` is a rule with no graph; once
+with a `# note:`; a line that would change it is not applied. `rule=true` is a rule with no graph; once
 the `Transition:` section links the rule pin, leave `rule` out. `[shared=CanMove]` on several
 transitions gives them one shared rule: its graph is the `Transition:` section of the first of them in
 graph order (the others have none; edit it there, it applies to all) and takes no `rule=`. Leaving
@@ -61,11 +61,17 @@ stored name, `Unnamed` for none, and `"Name #2"`, `#3` (first free number) where
 so or another is stored so, with a `# note:`; write the read name to keep a rule, another to rename it.
 The numbers can shift after a rule goes: read before the next write. Crossfade sharing is set in the editor, never by a write; a group reads as a `# note:`, and a write
 changing its `CrossfadeDuration`, `BlendMode`, `CustomBlendCurve` or blend profile must give its lines
-one value each. Values compare with case (`StateEntered=onidle` over `OnIdle` is a change).
+one value each (lines that disagree are all not applied); while a member's line is not applied, a line changing another
+member's crossfade is not applied either (the engine copies it onto the whole group). Values compare with case (`StateEntered=onidle` over `OnIdle` is a change).
 `LogicType=TLT_Custom` adds the section `Blend:Machine/From->To` (`#2` like its `Transition:`;
 `TransitionPoseEvaluator` nodes `from`/`to` feed `out CustomTransitionResult`); another logic type removes it.
 Naming an optional property in a pin line (`PlayRate = 2`) exposes it as a pin; `PlayRate [hidden]`
-(a line with no value) hides it again; `hidden` stays an ordinary value and node id.
+(a line with no value) hides it again; `hidden` stays an ordinary value and node id. A line whose value fails shows no pin.
+
+`Machine:` and the graph sections (`Function:AnimGraph`, `State:`, `Transition:`, `Blend:`) write partially: a line
+that fails keeps its item, transition or node as it was, and a line naming it (a transition, the entry, an alias, a
+link) is not applied either; both lines of a rename conflict are skipped. A step the engine refuses after the checks
+takes the whole `Machine:` write back.
 
 Anim node properties show member by member. A `ControlRig` node takes its
 rig in `{"Node":{"ControlRigClass":"/Game/CR_Arms.CR_Arms_C"}}` on UE 5.5-5.7 and
@@ -76,7 +82,7 @@ reads the same way. A node's `UpdateFunction`, `InitialUpdateFunction` and `Beco
 beside `Node`, not in it: `{"Node":{...},"UpdateFunction":{"MemberName":"UpdateSpeed"}}` names the
 Blueprint's own function; the function is a `Function:` section whose entry is
 `FunctionEntry(Context: ref const AnimUpdateContext, Node: ref const AnimNodeReference) [ThreadSafe]` (another signature
-fails the compile; `FunctionEntry` flags: [SKILL.md](SKILL.md)).
+fails the compile; `FunctionEntry` flags: [blueprint.md](blueprint.md)).
 
 Cached poses: `SaveCachedPose Name` stores a pose, `UseCachedPose Name` links to it by that name
 (a rename of the save node keeps the links). Pose-list nodes (`LayeredBoneBlend`, `BlendListByInt`,
@@ -101,6 +107,14 @@ Montage `Sections`: `Loop @ 0.5 -> Loop` (seconds, optional next section). Monta
 notify); a notify matches by track, time and class. `Sockets`: skeleton `Grip: hand_r {"RelativeLocation":{"X":10}}`,
 Static Mesh `Grip {"Tag":"grip"}`. `[was="Old"]` renames a section or socket.
 
+`Sections`, `Notifies` and `Sockets` write partially: a bad line is skipped (named under `not applied:`) and keeps what it
+names as it was: its section or socket (by `was`, else name), for a notify line the notifies of its track no other line
+matches, for a `Track:` line that track with its notifies. A line whose name cannot be read keeps every item no line
+names. A section whose `-> Next` was skipped is skipped too. A montage starts in its first section, which stays at 0:
+a line moving the section at 0 off it is skipped (add another section at 0 in the same write to move it). A Notifies
+line not starting with a time is a track line when it has a colon outside quotes before any `{` or starts with `Track`
+(`Trak: Feet` is skipped and keeps track Feet); any other is a bad notify line of the track above it.
+
 ## Anim Sequence, Montage and Blend Space data
 
 Event settings go on the notify line in one bracket after the properties, only what differs from the
@@ -114,7 +128,7 @@ The rest is a `Properties` / `set_properties` write, `call_function` on `Animati
 `run_python` (`unreal.AnimationLibrary`):
 
 - Create: `create_asset` `AnimSequence` / `AnimMontage` with `options {"TargetSkeleton": "...",
-  "SourceAnimation": "..."}`. A sequence's frames and rate come from its controller in `run_python`
+  "SourceAnimation": "..."}`; a BlendSpace needs `{"TargetSkeleton": path}`. A sequence's frames and rate come from its controller in `run_python`
   (`get_editor_property('controller')`: `set_frame_rate`, `set_number_of_frames`).
 - Root motion, additive type, compression, `RetargetSource`, `RateScale`: `Properties` of the sequence, or
   `SetRootMotionEnabled`, `SetRootMotionLockType`, `SetAdditiveAnimationType`.

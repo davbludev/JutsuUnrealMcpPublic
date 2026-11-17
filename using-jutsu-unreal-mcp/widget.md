@@ -37,6 +37,10 @@ Root: CanvasPanel
 - A field of another panel's slot is refused naming the slot class and its fields
   (`the field 'Anchors' does not apply to the OverlaySlot of 'A'; fields: ...`). A Border's content slot
   has no fields: its padding and alignment are the Border's own `{"Padding":...}`.
+- WidgetTree writes partially: a bad line (class, property, slot, binding, place) is skipped with every line under it, and
+  named under `not applied:`; the widget it names stays as it was, with its children, where its line stands. The other
+  lines are written and widgets no line names are removed. A skipped widget that cannot stay so (its name unreadable, its
+  own place the problem, or written under a skipped line away from its children) refuses the whole write.
 - A widget that a graph names (a `ComponentEvent`, a `Get` of the widget) or that you reach in PIE
   through `get_properties` is a Blueprint variable: add `"bIsVariable":true` to its `{...}`. Button,
   ProgressBar and Image are variables by default, so their read leaves it out; TextBlock and panels
@@ -99,6 +103,13 @@ Toast [0-1]
   new animation, key its root panel (`Root.RenderOpacity`). Other tracks (events, materials) are kept
   and named by a `# note:` line.
 - Left-out keys, channels and animations are removed.
+- `Animations` writes partially: a line with a problem is skipped and named under `not applied:`. A skipped channel line
+  keeps its channel's keys; a skipped animation line keeps the animations its name and its `was=` name as they are, and
+  its channel lines are skipped with it. A `was=` out of place (before the range, unquoted, or its quote not closed, as in
+  `Glide [0-1] [was="Slide]`) skips its line, and the animation it names stays. An animation line that does not read
+  keeps the animation of the name it starts with (`Fade [0-1] [loop]` keeps `Fade`). Skipped too: a line whose name an earlier line has (also a skipped one), a rename of or onto
+  an animation a skipped line names, two lines with one `was=`, a line keeping a name another renames away, a new or
+  renamed animation under the name of one that stays. A text none of whose lines applies is refused and changes nothing.
 
 React to an animation's end with `Event OnAnimationFinished` in the `EventGraph`.
 

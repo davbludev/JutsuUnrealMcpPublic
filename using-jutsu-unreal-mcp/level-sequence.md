@@ -26,9 +26,11 @@ event [0-120]
     `spawn` track).
   - `spawn actor "<label>"`: a spawnable from that actor's template; it reads back as `spawn <its class>`.
   - `unbound` is what a possessable whose actor is gone reads as; write it back to keep it.
-- `[was="Old"]` renames a binding (same binding, same tracks); the old name is free again in the same
-  write. A binding line that switches between `actor` and `spawn`, or a spawnable's class, is a new
-  binding: write it under a new name. Bindings left out are removed with their tracks.
+- `[was="Old"]` renames a binding (same binding, same tracks), quoted and written right before the colon (a
+  `was=` unquoted, not closed or elsewhere in the name skips its line, and the binding it names stays); a new
+  binding takes the old name in a later write. A binding line that switches between `actor` and
+  `spawn`, or a spawnable's class, is a new binding: write it under a new name. Bindings left out are
+  removed with their tracks.
 - Master tracks follow the bindings in the track grammar below. `event` is the one master track kind
   written; other kinds (camera cuts, audio, fade) read as a `# note: keeps ...` line and stay.
 - A track block under `Sequence` for any other kind is refused with a pointer to `Binding:<Name>`.
@@ -88,7 +90,7 @@ event [0-30]
   `warning: created empty director event <Name>; write its body in Director`. A name the Director
   already uses for a function, variable or graph is refused before anything is created.
 - Write the body in section `Director` (the director's EventGraph, Blueprint graph text, see
-  [SKILL.md](SKILL.md)) or `Function:<Name>`:
+  [blueprint.md](blueprint.md)) or `Function:<Name>`:
 
   ```
   land CustomEvent OnLand()
@@ -98,7 +100,8 @@ event [0-30]
   ```
 
   Writing `Director` creates the director when the sequence has none; `read_asset` lists it as
-  `no director yet` until then. The director lives inside the sequence's package.
+  `no director yet` until then. The director lives inside the sequence's package. A write none of whose
+  lines applies leaves no director behind.
 - Custom events outlive their keys: leaving a key, a section or the whole event track out keeps the
   events in the Director. A key whose custom event is gone reads `frame=(unbound)`; write it back to
   keep it, or name the event it should fire. A `Director` write that takes away a custom event
@@ -106,14 +109,24 @@ event [0-30]
   write the event back in `Director`, or rewrite those keys in `Sequence`.
 - A binding's own event track and a repeater section are kept as notes; event lines in a
   `Binding:<Name>` section are refused toward `Sequence`.
-- Director writes follow the Blueprint rules: `stop_pie` first.
+- Director writes follow the Blueprint rules: `stop_pie` first; they write partially, as Blueprint graph sections do
+  ([blueprint.md](blueprint.md)).
 
 ## Writes
 
-A write is parsed and resolved first; a refusal changes nothing and names the line. A write equal to
-the read replies `No change.`. One write is one undo step and the asset is saved. A success reply is
-`ok`, then `ids: <written>=<stored>` for a name stored differently, `removed:` items, and `warning:`
-for what needs a follow-up. A `# note:`
+`Sequence` and `Binding:<Name>` write partially: a line with a problem is skipped and named under `not applied:`,
+`depends on line N` for a line that needed it, and the other lines are written. What a skipped line names stays as it is: a
+binding line the bindings its name and its `was=` name (the `was=` read even off a line that does not read otherwise), the
+playback line the range, a track line its track (its channel lines go with it), a channel or `Event:` line that channel's
+keys, a section line the stored section of its range, or, when its range names none, the stored section at its position
+among the track's section lines (a written line whose range names none edits the one at its position, else is new). A
+section line that holds none this way (no stored section left at its position, or a range that does not read), and a
+property track line that names no property, keep every section of that track (of that kind) instead; where such a line
+could mean the section a written line pairs with, both can stay (a duplicate). A
+control_rig or spawn track whose sections cannot all be written stays as it is. Binding lines skipped too: a line whose
+name an earlier line has (also a skipped one), a rename of or onto a binding a skipped line names, two lines with one
+`was=`, a line keeping a name another renames away, a line
+binding an actor a kept binding holds. A text none of whose lines applies is refused and changes nothing. `Director` and its `Function:` sections write partially (above). One write is one undo step. A `# note:`
 line in a read names what the text does not show; writes skip it, and what it names stays.
 
 A Level Sequence has no `Document` section: both directions refuse it and name `Sequence`.

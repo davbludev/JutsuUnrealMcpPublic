@@ -1,7 +1,7 @@
 # Mutable (Customizable Objects)
 
 With the Mutable plugin enabled, a Customizable Object has a `Graph` section: its node graph as
-text. Read it first; write back what you read with your changes. Works on UE 5.5-5.8; node types
+text. Read it first; change a part of an existing graph with `edit_asset`. Works on UE 5.5-5.8; node types
 and pin names are that engine's own, so the examples (UE 5.8) differ on 5.5-5.7
 ([earlier engines](#ue-55-57)). `create_asset` with class `CustomizableObject` makes an empty
 object: its graph is the base `Object` node alone.
@@ -48,6 +48,10 @@ pick Switch {"PinType":"float"}
 - A node of another asset is `"<package>:<node id>"`, the id that asset's read prints.
 - `Comment {"NodeComment":"..."}` and `Reroute` round-trip. The plugin lays out the graph; never place
   nodes.
+- The Graph (and a `Macro:` section) writes partially: a line with a problem is skipped and named under
+  `not applied:`, with the lines under its node and every line linking to it; the node of its id stays as it was,
+  links included. The object compiles on what was written. Writing a new `Macro:` section makes the macro first: two
+  undo steps (the macro, then its graph).
 - **Add pin** button pins are made by naming them (UE 5.8). Such a node's pins share one name, so the
   text names the first `Slot` and the next `"Slot #2"`, `"Slot #3"` ..., by a link or a data line; the
   write makes the pins up to the highest one named, before it links. Per-pin data goes on the
@@ -226,8 +230,8 @@ ends with its result when it was not clean (a clean compile prints nothing):
 
 ```
 compile: 1 error(s), 1 warning(s)
-  warning n4ceffd: Could not generate a mesh section because it didn't have a material selected. Please assign one and recompile.
   error n1fc235: The clip mesh with mesh node requires an input clip mesh.
+  warning n4ceffd: Could not generate a mesh section because it didn't have a material selected. Please assign one and recompile.
 ```
 
 - Each Mutable message starts with the ids of the nodes it names (`<package>:<id>` for a node of
@@ -281,6 +285,9 @@ Tint = {"R":1,"G":0.5,"B":0,"A":1}
   bool as JSON, a colour as `{"R","G","B","A"}`, a mesh, texture or material by asset path, a
   projector or transform as a JSON object of its fields.
 - A parameter left out goes back to its default; `State` left out goes back to the first state.
+- `Parameters` writes partially: a line with a problem (an unknown parameter or state, a value the type does not take) is
+  skipped and named under `not applied:`, the parameter or state it names keeps its value, and the other lines are written.
+  A text none of whose lines applies is refused and changes nothing.
 - A parameter named `State` is written `"State" = ...`.
 - Only parameters the object's compiled data has are listed: a parameter node that feeds nothing the
   object builds is not one. Reading compiles an object never compiled.

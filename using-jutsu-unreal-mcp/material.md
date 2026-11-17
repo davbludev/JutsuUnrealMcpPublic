@@ -26,6 +26,12 @@ Output
 - **Outputs.** `<id>` is the node's first output; name another as `<id>.R`, `<id>.RGB`, `<id>.Result`.
   A texture sample's pins are `RGB`, `R`, `G`, `B`, `A`, `RGBA`.
 - **Input names** are the editor label or the property name (Noise `Position`), whichever you read.
+- **Graph writes partially.** A line with a problem (an unknown kind, property, flag, input or output) is skipped and
+  named under `not applied:`, with the lines under its node and every line linking to it; the rest is written. The node
+  of a skipped line's id stays as it was, links and values included, and so do an input or `Output` slot whose line was
+  skipped. The material compiles on what was written; compile errors do not undo it. Still refused whole: removing or
+  changing the kind of an expression loaded at Editor startup, and a texture sampler type problem on a node the text does
+  not change.
 
 ### Function
 
@@ -48,7 +54,7 @@ Output
   Roughness = call.Result
 ```
 
-A function write recompiles the loaded materials that use it and lists their errors. Material Layer and Material Layer Blend are functions: a layer's output takes
+A function write recompiles the loaded materials that use it and lists their errors (when many fail, the first 3, then the others' paths: `compile_assets` lists theirs). Material Layer and Material Layer Blend are functions: a layer's output takes
 `MakeMaterialAttributes`, a blend's inputs are `FunctionInput_MaterialAttributes` (`Top`, `Bottom`).
 
 ### Other nodes
@@ -74,7 +80,9 @@ Named Reroute usages link `Declaration = <declaration id>`; `CustomPrimitiveData
 
 Settings live in `Properties` (`BlendMode`, `ShadingModel`, `MaterialDomain`, `TwoSided`,
 `bUseMaterialAttributes`, usage flags). The section is whole: a setting you leave out returns to its
-default, engine-set `bUsedWith...` flags included, so read, change the lines, write all of them back.
+default, engine-set `bUsedWith...` flags included, so read, change the lines, write all of them back. The settings are applied
+together and compiled once, so a text with a bad line is refused whole, naming every problem. A Material Instance's
+`Properties` write partially, as the generic `Properties` do (SKILL.md).
 An open Material Editor shows the change on 5.8; on 5.5-5.7 the editor window is
 closed (it declines when it has unsaved edits). `set_properties` on the live material recompiles once per call; its reply's `followUps` carries the compile line.
 
@@ -95,6 +103,16 @@ Scalar (a number), vector (`{"R":..}` or `[r,g,b,a]`), texture (asset path or `N
 (`true`/`false`) and static component mask (`{"R":true,"G":false,..}`, channels left out off, or
 `[r,g,b,a]` booleans; at least one channel on, and only channels the masked input has). Only
 overridden parameters are lines; `# ... (inherited)` lines show what the others hold and may be kept
-or dropped. A parameter the text leaves out loses its override. A material layer
+or dropped. A parameter the text leaves out loses its override. `Parameters` writes partially: a line with a
+wrong value is skipped and its parameter keeps its override; a misspelled name is skipped too, and the parameter you meant counts
+as left out and loses its override. A material layer
 stack's parameters are `Layer[i].Name` and `Blend[i].Name` (the layer or blend index in the stack, as
 the read prints them); a stack comes from the parent material's `MaterialAttributeLayers` node.
+
+A `Parameters` write that changes a static switch or static mask compiles the instance's rebuilt permutation,
+waiting for its shaders as a material write does, and lists its errors under a reply that stays ok (an editor
+without a renderer compiles no shaders, so lists none). Other `Parameters` writes compile nothing, and a parent
+instance's write does not compile its children's permutations. `compile_assets` on the instance compiles its own
+permutation (when it overrides a static switch, static mask or base property), lists its errors and fails on
+them; an instance without one renders with another asset's shaders (the nearest parent instance with its own
+permutation, else the root material), and the reply names that asset to compile.

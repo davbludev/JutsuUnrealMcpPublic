@@ -32,7 +32,7 @@ Subtree Shared
   a custom tick rate; `TickRate=0` still counts); from UE 5.8 `CopyParameterBindings`. An unknown flag
   lists the state's flags. Re-indent a line to move a state, with its children and data, under another
   parent; same-named siblings read as `Name #2`.
-- Palette: `Color <name> [R=, G=, B=]` lines (A when not 1) before the states are the tree's colours a state
+- Palette: `Color <name> (r,g,b)` or `[R=, G=, B=]` lines (A when not 1) before the states are the tree's colours a state
   names with `Color=`; `[was="Old"]` renames, a colour left out is removed, and a state naming a colour
   that is not there is refused with the palette. The default colour, which a state without `Color` has,
   shows only once renamed or recoloured and is never removed.
@@ -71,6 +71,23 @@ Subtree Shared
 
 `Tree` is the editor's data as lines and the one that carries state parameters. A binding the lines cannot show
 stays as it is, and the read says so in a `# note:` line. A StateTree has no `Document` section.
+
+`Tree` writes partially: the valid lines are applied (one undo) and each other line is named in the reply's `not applied:`
+block. A skipped line keeps what it names exactly as it was, where its line stands (its `was=` name too, even on a
+malformed line): a state line its state with nodes, transitions and child states; a node line its node with bindings and
+functions; a transition line its transition (matched by trigger and target) with conditions; a parameter, colour,
+binding or function line its own item. Skipped with it: the lines under it, transitions and links to its state,
+bindings reading its node or parameter, states whose `Color=` names its colour. A line of no kind keeps every item of
+its place no line names. A `Schema` line with any problem (its class, its `{values}`) keeps the tree's schema, and the
+other lines are checked against that one. A kept state never moves: wherever its line stands, it stays under its old
+parent; an old parent the text leaves out stays where it stood holding only its kept states (the reply's `note:` line
+names it). On a one-task schema, a task line beside the task a skipped line keeps is skipped too. A line indented under
+a line that takes none (a binding, a colour, a top-level parameter, the schema) is refused on its own and keeps
+nothing: the items its place holds go by the other lines.
+Rename conflicts are skipped on every side: two lines with one `was=`, a line keeping a name another line renames
+away (`State Wander` beside `State Roam [was="Wander"]`: rename one at a time), a rename onto a name another renames
+away, and a line that would take the name of an item a skipped line keeps. A text
+indented with tabs, or none of whose lines applies, changes nothing.
 
 A Blueprint's StateTree component takes the tree and its parameter overrides in `Components`:
 `Brain: StateTreeComponent {"StateTreeRef":{"StateTree":"/Game/AI/ST_Guard.ST_Guard","Parameters":{"Speed":3}}}`.

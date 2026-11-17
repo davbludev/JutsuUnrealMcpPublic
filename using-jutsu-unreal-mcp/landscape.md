@@ -86,8 +86,9 @@ After `TRANSACTION UNDO` the next read is already the restored heights.
   or not a number; raw: whole numbers 0..65535) and writes nothing. Vertices where the landscape has no component (holes in
   its layout) read as 32768 (the origin height) and are not written. An array call (heights, masks, noise, and an import with scale or offset) takes a region of at most 16 777 216 vertices (4096 x 4096); bigger regions raise pointing to heightmap and weightmap files, which have no such limit.
 - Move big data through `run_python`: a 4M-element list crosses into a library call in 0.3-0.6 s (adds about 110 MB), so a whole
-  2048 x 2048 landscape is one call. `call_function` carries JSON in one request capped at 4 MB: about 500 000 numbers (a 700 x 700
-  region).
+  2048 x 2048 landscape is one call. `call_function` takes its arguments in one request capped at 4 MB: about 500 000 numbers (a
+  700 x 700 region), and a returned array is shortened once it has 256 values and 10 000 printed characters (about a thousand floats print whole): the reply's `cut` names the JSON file that holds all of them, so read
+  the values of a region with `run_python` (`h.values`), or open that file.
 - `lib.import_heightmap(land, 'C:/maps/hill.png', offset_x, offset_y, scale, offset_cm, '')` writes a heightmap file with
   its first pixel at that vertex; it must fit inside the loaded landscape (else it raises with the spans). `scale` 1 and
   `offset_cm` 0 store the file's values unchanged; otherwise each height becomes `origin + (file height - origin) * scale +
@@ -168,6 +169,13 @@ lib.delete_edit_layer(land, hill)                            # the layer and its
 - `collapse_edit_layer` needs both layers standard, visible, unlocked and without brushes; final heights stay the same while both
   had alpha 1. On a World Partition landscape `collapse_edit_layer`, `clear_edit_layer` and `delete_edit_layer` need every streaming
   proxy loaded (see section 1).
+- The engine merges edit layers on the GPU. In an editor without a renderer (`-nullrhi`) writes reach each layer's own data but the
+  final heights and weights keep their last merge, and so does everything that reads or builds from them (`get_heights` and
+  `get_weights` with `edit_layer` '', `get_landscape_info`, the exports, the grass, physical material and Nanite builds, spline
+  snapping to the terrain; the height and slope rules of `paint_by_rules` write weights computed from those stale heights). On a
+  landscape with edit layers `collapse_edit_layer` and the operations that work in the world Z of the layers up to `edit_layer`
+  (`apply_height_mask`, `fill_noise`, the `sculpt_*` strokes) refuse, naming the missing renderer. Run edits whose final results matter
+  in an editor that renders.
 - Blueprint brushes sit on a standard layer. `lib.add_brush_to_edit_layer(land, layer, brush)` puts a brush actor on top of the
   layer's brushes (one layer of one landscape at a time), `lib.remove_brush_from_edit_layer(land, brush)` takes it off (the actor
   stays in the level), `lib.move_edit_layer_brush(land, brush, index)` reorders. A Landmass brush is an actor of the Landmass plugin

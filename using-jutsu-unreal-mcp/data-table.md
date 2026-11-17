@@ -18,8 +18,8 @@ Workflow:
 
 1. `create_asset` a `DataTable` with `parent` the row struct (a native `FTableRowBase` struct such as
    `/Script/GameplayTags.GameplayTagTableRow`, or a User Defined Struct path; make its columns with the struct's `Fields`).
-2. `read_asset(table, "Rows")`: a `# note:` line lists every column of the row struct, also when the table is empty.
-3. `write_asset(table, "Rows", text)` with the whole table, or `edit_asset` on single lines.
+2. `read_asset(table, "Rows", match="# note")`: the `# note:` line lists every column of the row struct, also when the table
+   is empty (a plain read ends with it, past the first 500 lines of a big table).
 
 Rules:
 
@@ -30,8 +30,7 @@ Rules:
 - A value is one token. Text, String and Name columns take quotes: `Label="Blade"`. Numbers, `true`/`false`, enum names
   and asset paths are bare (`Rarity=Rare`, `Mesh=/Game/Props/SM_Chair.SM_Chair`); a true bool reads as a bare `Column` (`Locked`), and a bool whose default is true and is false reads as `Column=false`.
   Anything with spaces, commas or parentheses goes in `"..."`, or in the brackets of its own value.
-- A nested struct column is dotted, one member per item (`Reach.X=3`); a vector, rotator or colour with several members is grouped
-  (`Pos=(X=1,Y=2,Z=3)`). An array of structs is its element records in brackets, comma separated, `()` for an
+- A nested struct column is dotted, one member per item (`Reach.X=3`). An array of structs is its element records in brackets, comma separated, `()` for an
   element at its defaults (`Parts=[Weight=2, (), Weight=3 Note="rim"]`); any other array is JSON (`Tags=["a","b"]`).
 - The text is the whole table. A row no line names is removed (the reply names it), a new name adds a row, and the rows end in
   the order of the lines. Reading prints the stored order, so a written order is kept.
@@ -40,7 +39,9 @@ Rules:
 - A row whose line reads as it did is not touched, so it keeps the localization keys of its texts; in a row whose line changes,
   a text column whose text stays the same keeps its key too.
 - An unknown column is refused with the row struct's columns and the close one; a value that does not fit says what the column takes
-  and gives an example. A refused write changes nothing.
+  and gives an example. Rows writes partially: such a line (also a line without `Name:`, a `was` that names nothing, a row
+  name twice, two lines claiming one row by name and `was`) is skipped and named under `not applied:`, and the other lines are
+  written. A skipped line's row stays as it was, unless another line applied to it (a name twice: the first line is written).
+  Only a text none of whose lines changes anything is refused, changing nothing.
 - A name that differs from a row's only in case renames the row to that case.
 - A Composite DataTable takes no writes: its rows come from its parent tables, so a write is refused and a read says so; edit the parents.
-- A write that changes nothing answers `No change.`.

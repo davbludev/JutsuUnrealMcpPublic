@@ -7,12 +7,12 @@ spaces under its first parent:
 Preview /Game/Characters/SK_Hero
 root: Bone
   pelvis: Bone {"Transform":{"Location":[0,0,95]}}
-    hips_ctrl: Control {"ControlType":"Position","LimitEnabled":[{"bMinimum":true,"bMaximum":true},{},{}],"MinimumValue":[-5,0,0],"MaximumValue":[5,0,0],"Offset":{"Location":[10,0,0]}}
-    grip: Socket [color=(R=1,G=0.5,B=0,A=1), description="Hand grip"]
-root_ctrl: Control {"ShapeName":"Circle_Thick","ShapeColor":{"R":1,"G":0,"B":0,"A":1}}
+    hips_ctrl: Control [ControlType=Position, LimitEnabled=[bMinimum bMaximum, (), ()], MinimumValue=[-5,0,0], MaximumValue=[5,0,0], Offset={"Location":[10,0,0]}]
+    grip: Socket [Color=(1,0.5,0), Description="Hand grip"]
+root_ctrl: Control [ShapeName="Circle_Thick", ShapeColor=(1,0,0)]
   hips_space: Null {"Transform":{"Location":[0,0,90]}}
-weight: Curve [value=0.5]
-arm: Connector [description="Left arm", type=Secondary, optional]
+weight: Curve [Value=0.5]
+arm: Connector [Description="Left arm", Type=Secondary, Optional]
 ```
 
 - Null, Control, Curve, Socket, Connector and user-made Bone lines are written; a bone
@@ -21,18 +21,21 @@ arm: Connector [description="Left arm", type=Secondary, optional]
   were imported only takes a mesh of that skeleton or a compatible one (the refusal names the skeleton it expects); the mesh it has already always writes back.
 - A rig made empty takes a mesh's bones with `@import /Game/SKM_Hero` as the whole text (a mesh or
   skeleton path, with a `Preview` line beside it if you want one); read, then write the rest as lines.
-- `[flags]`: a Socket takes `color=(R=..,G=..,B=..,A=..)` and `description="..."`; a Connector takes
-  `description`, `type=Primary|Secondary`, `optional`, `array` (UE 5.6+), `postConstruction` (UE 5.7+), `rules`; a Curve takes
-  `value=0.5`. Only a `Secondary` connector is `optional`, an `array` or `postConstruction`; name one `Primary` connector (the default type) at most. Flags are the whole state: one left out goes back to its default. `[was="Old"]` goes in the
-  same block.
-- `"ExtraParents":["space_b"]` in a transform line adds space-switch parents by line name.
-- A control's `{json}`: `FRigControlSettings` members by name (`ControlType` first), then `Offset`,
-  `ShapeTransform` and the initial `Value`. `MinimumValue`, `MaximumValue` and `Value` are in the
-  control's type: a bool, a number, `[x,y]`, `[x,y,z]`, `[pitch,yaw,roll]` or a transform.
-  `LimitEnabled` has one entry per channel.
+- `[flags]`: a Socket takes `Color=(r,g,b)`, `Description="..."`; a Connector
+  `Description`, `Type=Primary|Secondary`, `Optional`, `Array` (UE 5.6+), `PostConstruction` (UE 5.7+), `Rules`; a Curve
+  `Value=0.5`; a Control `FRigControlSettings` members by name (`ControlType` first; `LimitEnabled` has one entry per
+  channel), `Offset`, `ShapeTransform`, and `MinimumValue`, `MaximumValue`, `Value` in the control's type: a bool, a number,
+  `[x,y]`, `[x,y,z]`, `[pitch,yaw,roll]` or a transform. Only a `Secondary` connector is `Optional`, `Array` or `PostConstruction`; one `Primary` connector (the default type) at most. Flags are the whole state: one left out goes back to its default. `[was="Old"]` goes in the same block.
+- `{"ExtraParents":["space_b"]}` in a Null or Control `{json}` adds space-switch parents by line name; a control's
+  settings as `{json}` still write.
 - A transform is `{"Location":[x,y,z],"Rotation":[pitch,yaw,roll],"Scale":[x,y,z]}`.
 - Re-indent a line to move it (the indent is the first parent only); `[was="Old"]` renames; a line
   left out is removed.
+- `Hierarchy` writes partially: a line that fails is skipped and named under `not applied:`, with the lines indented under
+  it or naming it in `ExtraParents`; every element named like it or its `was` (any type) stays as it was, and a line with
+  no readable name keeps every element. A line Unreal refuses part way is skipped whole: nothing of it stays. A failed
+  `Preview` line leaves the mesh. Read-only elements left out stay, as a `note:`. Only a text none of whose lines
+  applies is refused, changing nothing; `@import` is all or nothing.
 
 ## Graphs
 
@@ -67,12 +70,22 @@ SetBone Unit RigUnit_SetTransform
 - Aggregate pins (a `Sequence`'s outputs, an Add's inputs) are text: naming the node's next one
   creates it (`C -> Next`, `C = 2`), in order, and leaving one out removes it. `D ->` is an execute output that links nothing. An aggregate node reads as its
   unit (`Seq Unit RigVMFunction_Sequence`); its pins past the second always print a line.
+- An execute output, an execute input and a data input take one link (a value output takes many); a text giving one
+  two links skips both lines, naming them. Several branches go through a `Sequence`.
+- Graph sections write partially: a node line that fails is skipped with its pin lines and every line linking to it
+  (`depends on line N`); a node the graph has keeps its pins and every link: a line setting an input it feeds, linking an
+  execute output that runs it, or replacing a node it links is skipped too, and a node it links that the text leaves out
+  stays, as a `note:`. A pin line that fails is skipped and that pin keeps its value
+  and links. A node left out that cannot go (the entry, the return, a read-only node) stays, as a `note:`. Refused whole,
+  changing nothing: a text none of whose node lines applies; a text whose node lines cannot be split (a node line without
+  a type, an id that is not letters, digits and `_` or is used twice, an indented line before any node); a change Unreal
+  refuses outside any one line (a removal, a signature).
 - Values are RigVM text (`(X=1,Y=2,Z=3)`, `(Type=Bone,Name="hand_l")`); links and values may name
   sub-pins (`Value.Translation`, an array element's `Effectors.0.Bone`).
 - Writing a `Function:<Name>` that does not exist creates that local function. Its signature is
   `Entry FunctionEntry(Speed: float, Target: Transform)` (` [Pure]` appended for a pure one, ` [Public]` for one other rigs may call, both ` [Pure, Public]`) and
   `Return FunctionResult(Result: float)`; changing them changes the signature, and every Call node
-  follows it. Empty text deletes the function. Dropping `[Public]` is refused while other assets call it.
+  follows it. Empty text deletes the function. A `FunctionEntry` line dropping `[Public]` is skipped while other assets call it.
 
 The rig's member variables are the `Variables` section. A new rig from a mesh: `create_asset` class `ControlRig`, then `@import`.
 
@@ -92,6 +105,12 @@ Goals that connect to them.
 A Retargeter has `Chains`: `[Operation ]TargetChain SourceChain` (the operation column on UE 5.6 and
 later), and `Ops`, its stack in order:
 `Name type [parent=Op] [disabled] [{settings}]` (`parent=` on UE 5.6 and later).
+
+These sections write partially: a line that fails is skipped and named, and the chain, goal, mapping or operation it
+names stays as it was (a skipped `Solvers` line keeps the solver that stood at its place, moved there if lines before
+it add solvers); an operation under a skipped one is skipped with it. A line Unreal refuses part way is skipped whole.
+Only a text none of whose lines applies is refused, changing nothing; a solver change Unreal refuses, or a removal or
+the operation order, refuses the whole write (the stack is positional).
 
 ## Sequencer
 

@@ -2,7 +2,8 @@
 
 An Unreal Editor plugin that serves an MCP endpoint to a coding agent on the same machine. The
 agent reads and edits assets as text, sets properties, calls functions, runs Python and console
-commands, places actors, and plays and captures PIE.
+commands, places actors, and plays and captures PIE. A free [Lite edition](#lite-edition) reads
+everything and writes plain Blueprints and level actors.
 
 ## Install
 
@@ -20,6 +21,17 @@ commands, places actors, and plays and captures PIE.
 The server listens on loopback only, with no authentication: any process on the machine can run
 Python and console commands in the Editor through it. Do not expose the port through forwarding, a
 proxy, a VPN or a container bridge.
+
+## Lite edition
+
+**Jutsu Unreal MCP Lite** is the free edition on Fab. It reads the whole project, writes plain Blueprints (actor,
+component, object, function library and interface Blueprints), user-defined structs and enums, places and edits
+actors on the open level, and plays and captures PIE. Widget Blueprints, materials, every other asset kind, project settings, Python, console
+commands, imports and function calls are full-edition only: Lite reads those assets and its reply to a write names
+the full edition. Its status-bar item reads **Jutsu MCP Lite**.
+
+To move to the full edition, install it from Fab. It serves the same endpoint, port and tool names, so the agent's
+configuration stays as it is. With both installed the Editor loads the full edition; Lite can then be removed.
 
 ## Agent skill
 

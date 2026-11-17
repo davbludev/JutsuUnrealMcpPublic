@@ -21,6 +21,8 @@ BTComposite_Selector "Root"
 Workflow for a new AI:
 
 1. `create_asset` a `BlackboardData`, then write its `Keys`: `Target: Object<Actor>`, `Goal: Vector`, `HasTarget: Bool`.
+   `Keys` writes partially: a bad line (an unknown type, a bad flag, a name twice) is skipped and named under
+   `not applied:`, its key left as it was; the other lines are written.
 2. `create_asset` a `BehaviorTree` (its editor graph is built; no editor needs opening). Write `Tree` with the
    `blackboard:` line first and one root composite.
 3. Read `Tree` back: it is the stored form. Settings you did not write are class defaults and do not show.
@@ -45,3 +47,6 @@ Destination: Vector [was="Goal"]
   `Blackboard not set`; UE 5.6+, the 5.5 nodes report none) fails the whole write and the tree stays as it was: the refusal
   lists `line N: <error>`.
 - A Behavior Tree has no `Document` section; `Tree` is the whole tree and a text without a node removes it.
+- `Tree` is written whole, not partially: the engine applies the tree as one document, so a text with a bad line is
+  refused and nothing is changed. The refusal lists every line problem (class, nesting, JSON, quotes); the blackboard-key
+  and abort-mode checks stop at the first one, so fix it and write again to see the next.

@@ -10,7 +10,7 @@
 | `Emitter:<Name>` | the emitter's `Properties`, `Parameters` (`Emitter.*`), four stacks, event handlers, simulation stages, `Renderers`; a lightweight one's `Properties`, `Modules`, `Renderers` |
 | `ScratchPad:<Name>`, `ScratchPad:<Emitter>/<Name>` | one scratch-pad graph (below) |
 | `Inputs@<module>` | read-only: a module's inputs, their types, values and what hides them (below) |
-| `Properties` | the system's own settings, as for any asset |
+| `Properties` | the system's own settings, as for any asset (warmup below) |
 
 An emitter asset (`create_asset` class `NiagaraEmitter`) has `Emitter`, the same text as
 `Emitter:<Name>` (`User.*` links are not checked there: the system using it declares them), and its
@@ -20,7 +20,19 @@ and are edited in the emitter asset. A script asset (`create_asset` class `Niaga
 `Graph`, scratch-pad text (below); its `Output` line sets the kind. Stack lines name it by path;
 Niagara names the module after the asset. Epic's library scripts read as `Graph` too.
 
+A Cascade `ParticleSystem` has read-only `Emitter:<Name>` sections: the emitter's `<class> <object>` and
+settings, then each `LOD <k>` with its modules as `<class> <object>` and their changed properties
+(`(same as LOD 0)` for a shared one). Adding or removing emitters, modules and LODs needs the Cascade
+editor; their properties take `set_properties` with `object="<asset object path>:<object>"`. The
+system's own settings (bounds, warmup, LOD distances) are `Properties`.
+
 Build a system in this order: `Parameters`, `Emitters`, scratch pads, then `System` and `Emitter:` stacks.
+
+Warmup in the system's `Properties`: write `WarmupTime` (or `WarmupTickCount`) with `WarmupTickDelta`;
+the other follows; listing both keeps the one that changed (the count when both did), and a write
+that changes neither keeps the warmup as held.
+Niagara floors the time to whole ticks (engine): `WarmupTime = 1` on the default delta 1/15 stores
+14 ticks, 0.933 s. Pick a delta that divides the time (`0.05`, `0.25`).
 
 ```
 User.TracerColor: LinearColor = (R=6,G=3,B=0.8,A=1)
@@ -30,10 +42,13 @@ User.TracerWidth: float = 3
 - Parameter lines are `Namespace.Name: type = value`; a data interface is its class without
   `NiagaraDataInterface` and its changed properties as JSON. Types are those of scratch pads.
   `System.*` and `Emitter.*` lines declare a parameter without a value (modules write it).
+- Vector, colour and Quat values of inputs and user parameters also take their numbers in order: vector X,Y,Z(,W),
+  Position X,Y,Z, colour R,G,B,A, Quat X,Y,Z,W; a left-out number is 0, but a colour's A and a Quat's W are 1.
 - `Emitters` lines are `Name [flags]`. A new name takes one origin: `[from=<emitter asset>]` (a
   template under `/Niagara/DefaultAssets/Templates/Emitters/` or any emitter asset), `[empty]` (Niagara's Minimal emitter)
   or `[lightweight]`; on an existing name these are ignored. `[disabled]`
-  disables, leaving it out enables; `[was="Old"]` renames; a left-out line removes the emitter; the
+  disables, leaving it out enables; `[was="Old"]` renames (a quote left open skips the line, and the emitter
+  it names stays); a left-out line removes the emitter; the
   order of lines is the emitter order. Reads add `[lightweight]` and `[parent=<asset>]`.
 
 ```
@@ -62,21 +77,27 @@ Renderers
   only; death events need `bRequiresPersistentIDs = true`); receive with `/Niagara/Modules/Events/Receive{Death,Location,Collision}Event`.
 - `SimulationStage <Name> [NumIterations=2, IterationSource=DataInterface, DataInterface=Emitter.Grid, disabled]`
   stacks run on GPU emitters only (`SimTarget = "GPUComputeSim"`); a scratch pad there has `[Usage=SimulationStage]`.
-- Under a module, only overridden inputs, by the name Niagara shows (spaces included). A value is a
-  literal (`2.5`, `true`, `(R=1,G=0,B=0,A=1)`, an enum entry's name), a linked parameter
+- Under a module, only overridden inputs, by the name `Inputs@` prints (spaces included; a near name is
+  refused with the names that exist). A value is a
+  literal (`2.5`, `true`, `(R=1,G=0,B=0,A=1)` or numbers in order `(0,0,-300)` (SKILL.md), an enum entry's name), a linked parameter
   (`User.TracerColor`, `Particles.Gravity`), `Call <dynamic input script or ScratchPad section>` with
   its own inputs indented under it, a data interface's changed properties as `{json}` (`{}` for its
   defaults), or `Hlsl "<expression>"`. An input left out returns to the module default.
 - Input lines are stored in the module's own order, and an input equal to its default is not listed.
 - `read_asset` `Inputs@<module>` lists a module's inputs, one `Name - type, ...` line each: a static
   switch with the values it takes (`switch, one of Uniform Curve, Non-Uniform`), an enum's entries, the
-  `default` or the `value` set, and for an input that is off `inactive: shows when <Switch> = <value>
+  module's `default` or the `value` set, and for an input that is off `inactive: shows when <Switch> = <value>
   (now <current>)`. Name the module by where it is, `Inputs@Emitter:Smoke/ParticleUpdate/GravityForce`
   (`System/SystemUpdate/<Module>` for a system stack; `Inputs@Emitter/<Stack>/<Module>` on an
   emitter asset), or by script before you add it, `Inputs@/Niagara/Modules/Update/Forces/GravityForce`
   (a `ScratchPad:` section too). Read it instead of provoking an error to get the list.
 - An input the switches hide takes a value once its switch shows it: set the switch in the same
   lines (any order) or first.
+- A checkbox is an input line of its own (`Use Spawn Probability = true`, true or false); `Inputs@`
+  lists it as `Use Spawn Probability - bool, ..., the checkbox of Spawn Probability` and marks the
+  guarded input `off until Use Spawn Probability = true` while it is false; read shows it only when it
+  differs from its default; a left-out line returns it to the default; while any overridden input's
+  checkbox is off, every write reply says `stack warning <Section> <Module>: <Input> is off until <Toggle> = true.`
 - A `SetParameters` module sets stack parameters. Its inputs are its targets: `Particles.CameraOffset =
   55`. A target the engine knows takes its type; another is typed once, `Particles.Gain: float = 2`
   (later reads list `Particles.Gain = 2`). A target left out is removed, the module stays.
@@ -127,7 +148,8 @@ Renderers
 A Niagara system's scratch-pad scripts are sections: `ScratchPad:<Name>` for the system's own,
 `ScratchPad:<Emitter>/<Name>` for one emitter's. Writing a name that does not exist creates a scratch
 pad of the kind its `Output` names; writing an existing one replaces its whole graph. Write a scratch
-pad before the stack or graph that uses it.
+pad before the stack or graph that uses it. A scratch pad (and a script asset's `Graph`) is written whole for now: a
+text with a bad line is refused naming every problem, and nothing changes.
 
 ```
 in InputMap
@@ -186,15 +208,51 @@ out Output Module [Usage=ParticleSpawn]
 - Literals are Niagara's pin values as the read prints them (`20000`, `true`, `1,0,0`).
 - A Vector linked into a Position pin gets the Convert node Niagara puts there; the text keeps the
   direct link.
-- Pin names match with or without spaces (`EmitterID` finds `Emitter ID`); reads print them as
-  Niagara names them.
+- Pin names are written as reads print them (Niagara's names, spaces included; case aside); a near
+  name (`EmitterID` for `Emitter ID`) is refused naming the pin. A bare `<id>` links a node's only
+  output; with several, name one.
 
 ## Write reply
+
+`Parameters` and `Emitters` write partially: a line with a problem (a type, a value, a data interface
+property, a flag, an origin that does not load) is skipped and named under `not applied:`, and the other
+lines are written. A skipped line keeps what it names as it is: the parameter or emitter of its name, and
+the emitter its `was=` names, read even off a line that does not read otherwise; a kept emitter stays
+where the line stands. These lines are skipped too:
+- a line whose name an earlier line already has, also when that earlier line was skipped;
+- a rename of an emitter a skipped line names, or onto its name;
+- two lines with one `was=`, a line keeping a name another line renames away, a rename onto a name
+  another line renames away: every line of the conflict;
+- a new or renamed emitter under the name of an emitter that stays.
+
+A text none of whose lines applies is refused and changes nothing.
+
+The stack sections (`System`, `Emitter:<Name>`, an emitter asset's `Emitter`) write partially too: a
+property, parameter, module, input, stage or renderer line with a problem (it does not read, an unknown
+script, input, property or class, a value or flag that does not take, an inactive input, a module, input,
+simulation stage or event handler named twice) is skipped and named, and its item stays as it is: the
+module or stage it names (with all its inputs), the input it names, the renderer at its position. A
+`SetParameters` target line whose value does not take adds or retypes no target. The lines under a skipped
+module or stage header are skipped with it; a block of unknown or repeated header keeps every block it may
+mean, and a line no name can be read from keeps everything of its kind no line names. A module, simulation
+stage or event handler the emitter inherits that the text leaves out stays, named in the block. Kept items
+keep their order among themselves; the written lines' items are placed around them in the text's order, and
+a module Niagara will not move there (or that ends up out of the text's order) is skipped where it is. A text none of whose lines applies is refused
+and removes nothing. When Niagara itself fails partway through a line, the whole write is undone and
+refused. A stack or lightweight text with a line indented before any header is refused whole (no block to place
+it in). A lightweight emitter's `Emitter:<Name>` writes partially the same way: a bad `Properties` line keeps
+its property, a bad `Modules` line (one that does not read, a value that does not take, a module listed
+twice) keeps its module as it is, on or off, a misspelt module name (or more text than the name before
+its `{json}`) keeps every module no line names, a bad `Renderers` line keeps the renderer at its position.
+Properties no line names go back to their defaults, and a misspelt property name names nothing, so the
+property it meant goes back to its default too. A scratch pad or script `Graph` is written whole: Niagara imports the graph in one piece.
 
 A write of any of these sections waits for the whole compile, CPU and GPU, and replies with
 `compile:` when it has errors or warnings (a clean compile prints nothing), then `renderer` and `stack` lines (the issues the Niagara editor shows, with the fix it
 offers); those two are not counted in the `compile:` verdict. The asset is saved even when the
 compile fails. A scratch pad no stack uses is not compiled, so its errors show once a stack runs it.
+A system open in the Niagara editor stays open: a write rebuilds that editor's view, as its own undo does
+(the preview restarts, the stack's selection may reset).
 
 ## Verify
 

@@ -1,60 +1,51 @@
 ---
 name: using-jutsu-unreal-mcp
-description: Jutsu Unreal MCP asset text formats for read_asset / write_asset / edit_asset (Blueprints, materials, Niagara, animation, AI, GAS, audio and more), plus maps, landscapes and run_python in the Editor or PIE. Use before editing Unreal assets or levels through Jutsu.
+description: Jutsu Unreal MCP asset text formats and the facts its tools don't state. Use before changing Unreal assets, levels, landscapes or PIE through Jutsu tools.
 ---
 
 # Using Jutsu Unreal MCP
 
-The tools describe themselves; this page adds the asset-text formats, so writes are right the first
-time, and names the file to read for each area.
-
-Do the work with the plugin's MCP tools and asset text: they validate the input, compile, save and
-report what changed. `run_python` is the last resort, for a result no tool reaches: check the tool
-list, the asset's `read_asset` sections and `call_function` first, and when one of them does the
-job, use it, even if it takes several calls. The files below name where Python is the intended
-route (landscapes, World Partition, Level Instances).
-
-Read the file that matches the task before the first write in its area:
+The tool descriptions give each tool's parameters; this page routes to the asset-text formats and holds
+the facts no single tool states. Blueprints, materials, Niagara, animation, widgets, AI, audio and the
+other kinds below have a text form that `read_asset` / `write_asset` / `edit_asset` read and write.
+The tools validate, compile, save and report; `run_python` does only what the script does itself
+(crash cases: [run-python.md](run-python.md)).
+A Lite server (`get_editor_state` has `"edition": "lite"`) writes only plain Blueprints, structs, enums and level actors: [LITE.md](LITE.md).
+The rules on reply size and on calls sent while another runs come with the server's MCP instructions, not from this skill.
 
 | Task | Read |
 | --- | --- |
-| Widget Blueprints: `WidgetTree` canvas slots, `bIsVariable`, `[bind ...]` property bindings, `Animations`, widget events, driving a widget in PIE | [widget.md](widget.md) |
-| Anim Blueprint graphs and `Machine:` state machines; Montage `Sections`, `Notifies`, `Sockets`; Anim Sequence, Montage and Blend Space data | [animation.md](animation.md) |
+| Blueprints: node kinds beyond the basics, switch, Add-pin nodes, delegate binding, RPC flags, function flags, variable types and flags, components, defaults and `Parent:`, dispatchers, interfaces | [blueprint.md](blueprint.md) |
+| User structs, user enums, String Tables, Curve assets | [structs-enums-curves.md](structs-enums-curves.md) |
+| Widget Blueprints: `WidgetTree`, `[bind ...]` bindings, `Animations`, widget events, driving a widget in PIE | [widget.md](widget.md) |
+| Anim Blueprint graphs and `Machine:` state machines; Montage, Anim Sequence, Blend Space | [animation.md](animation.md) |
 | Gameplay tags (path `GameplayTags`), tags used in nodes or pins | [gameplay-tags.md](gameplay-tags.md) |
-| DataTable `Rows`: one `RowName: Column=value ...` line per row, renames, removal, nested struct and array columns | [data-table.md](data-table.md) |
-| Gameplay Ability System: Gameplay Effects (modifiers, magnitudes, executions, components), Ability defaults, Cues, attribute references | [gas.md](gas.md) |
-| Material and Material Function `Graph` and `Properties`, Material Instance `Parameters` | [material.md](material.md) |
-| Sound Cue `Graph` | [sound-cue.md](sound-cue.md) |
-| Niagara System, Emitter and Script assets (`Parameters`, `Emitters`, `System`, `Emitter`, `ScratchPad:`, `Graph`, compile reply) | [niagara.md](niagara.md) |
-| MetaSound `Graph` (classes, wiring, interfaces), presets, member settings | [metasound.md](metasound.md) |
-| Behavior Tree `Tree`, Blackboard `Keys` | [behavior-tree.md](behavior-tree.md) |
-| StateTree `Tree`, StateTree components with parameter overrides | [state-tree.md](state-tree.md) |
-| Smart Object `Definition` (slots, behaviors, annotations, parameters), Smart Object components | [smart-object.md](smart-object.md) |
-| Customizable Object (Mutable) `Graph`, Macro Library `Macro:Name`, instance `Parameters` | [mutable.md](mutable.md) |
-| Pose Search (Motion Matching) schemas and databases (`create_asset` parents, database `Assets`), Chooser Tables (`Table`), Proxy Tables (`Entries`) | [motion-matching.md](motion-matching.md) |
-| Level Sequences: `Sequence` (playback, bindings, spawnables, event keys), `Binding:<Name>` tracks and keys, the `Director` and `Function:` graphs | [level-sequence.md](level-sequence.md) |
-| Control Rig `Hierarchy`, `Rig` and `Function:` graphs, Sequencer Control Rig tracks, loading an animation onto them, baking; IK Rig, IK Retargeter | [control-rig.md](control-rig.md) |
-| PCG graph `Graph` text: nodes, node settings, links, dynamic inputs, subgraphs, parameters | [pcg.md](pcg.md) |
-| Maps (classic, partitioned): actors as text by Outliner folder (`Actors`, `Actors:<Folder>`), one actor's properties and components (`Actor:<label>`), the placeable classes and one class's components and properties (`Actors@<query>`), the `World` overview, World Partition loading and descriptors, Data Layers, HLOD, sublevels, Level Instances and Packed Level Actors (`unreal.JutsuLevelLibrary`), World Partition commandlets | [world.md](world.md) |
-| Landscapes through `unreal.JutsuLandscapeLibrary`: create, sculpt, edit layers, Landscape Patch, target layers and paint, save | [landscape.md](landscape.md) |
-| Landscape dressing: roads (splines), Water, PCG scatter, grass, physical material and Nanite builds | [landscape-dressing.md](landscape-dressing.md) |
-| Multiplayer PIE (`netMode`, `players`, `world: "pie:<n>"`), navigation rebuilds, which editor answers | [pie.md](pie.md) |
-| Any `run_python` script: crash gotchas (deleting assets, switching levels, GeometryScript UVs, primary data assets), frame rules, PIE handles | [run-python.md](run-python.md) |
+| DataTable `Rows` | [data-table.md](data-table.md) |
+| Gameplay Ability System: Gameplay Effects, Abilities, Cues, attribute references | [gas.md](gas.md) |
+| Material, Material Function, Material Instance | [material.md](material.md) |
+| Sound Cue | [sound-cue.md](sound-cue.md) |
+| Niagara System, Emitter and Script assets, `ScratchPad:`; Cascade Particle Systems | [niagara.md](niagara.md) |
+| MetaSound graphs, presets | [metasound.md](metasound.md) |
+| Behavior Tree, Blackboard | [behavior-tree.md](behavior-tree.md) |
+| StateTree, StateTree components | [state-tree.md](state-tree.md) |
+| Smart Object definitions and components | [smart-object.md](smart-object.md) |
+| Customizable Object (Mutable), Macro Library, instances | [mutable.md](mutable.md) |
+| Pose Search (Motion Matching) schemas and databases, Chooser Tables, Proxy Tables | [motion-matching.md](motion-matching.md) |
+| Physics: component collision profiles and responses, Static Mesh simple collision (`Collision`), generating collision shapes, Physics Assets and ragdolls (`Physics` section), project collision channels, profiles and surface types (path `Physics`), Physical Materials, Physics Constraint Actors, Geometry Collections (Chaos Destruction) | [physics.md](physics.md) |
+| Level Sequences: `Sequence`, `Binding:<Name>`, the `Director` and `Function:` graphs | [level-sequence.md](level-sequence.md) |
+| Control Rig, Sequencer Control Rig tracks, baking; IK Rig, IK Retargeter | [control-rig.md](control-rig.md) |
+| PCG graphs | [pcg.md](pcg.md) |
+| Maps (classic, partitioned): `Actors`, `Actors:<Folder>`, `Actor:<label>`, `Actors@<query>`, the `World` overview, World Partition, Data Layers, HLOD, sublevels, Level Instances | [world.md](world.md) |
+| Landscapes: create, sculpt, edit layers, Landscape Patch, paint | [landscape.md](landscape.md) |
+| Landscape dressing: roads (splines), Water, PCG scatter, grass, physical material, Nanite builds | [landscape-dressing.md](landscape-dressing.md) |
+| Multiplayer PIE, a session's log lines, navigation rebuilds, which editor answers | [pie.md](pie.md) |
+| Any `run_python` script: crash gotchas, frame rules, PIE handles | [run-python.md](run-python.md) |
 
-Editor-state calls (`start_pie`, `stop_pie`, `live_coding_compile`, `open_level`) go one per
-message, each after the previous one answered. `write_asset`, `edit_asset` and `compile_assets` on a
-Blueprint of any kind (Actor, Widget, Anim, Control Rig) are refused while PIE runs: `stop_pie` first, write, then `start_pie`.
-`start_pie` ignores the editor's saved Play settings and runs one standalone player: pass `netMode` and `players` for multiplayer. Multiplayer sessions: [pie.md](pie.md).
+Landscapes, Level Instances, Geometry Collections and their fracture, and Physics Assets go through the plugin's
+Python libraries (`unreal.JutsuLandscapeLibrary`, `JutsuLevelLibrary`, `JutsuDestructionLibrary`, `JutsuFractureLibrary`,
+`JutsuPhysicsLibrary`; also callable with `call_function`), which `tools/list` does not show; the pages above hold their calls.
 
-## Assets as text
-
-`read_asset(path)` lists an asset's sections; `read_asset(path, section)` returns one. Change a part
-with `edit_asset(path, section, old_text, new_text)` (exact, unique match, like a file edit), or
-replace a section with `write_asset`. The written text is the whole resulting section: what it leaves
-out is removed.
-Node positions are not part of the text, so never try to place nodes.
-
-`Properties`, `Defaults` and `Parameters` lines are `Name = <json>`; a single instanced subobject is
+A single instanced subobject in `Properties`, `Defaults` or `Parameters` is
 `{"class": "InputTriggerPressed", ...}` (`get_properties` adds its `path`, which writes ignore).
 **An array of structs or instanced objects is a block, never JSON**: `Name =` and one indented line per
 element, `Field=value` items split at spaces with nested members dotted, an instanced element led by its class,
@@ -66,107 +57,107 @@ only members that differ from the default, `()` for an all-default element. The 
       Action=/Game/Input/IA_Move.IA_Move Key=W Modifiers=[InputModifierDeadZone LowerThreshold=0.3, InputModifierScalar]
 
 Items may come in any order; a read prints a struct's identity fields first (a mapping's `Action` and `Key`; a Gameplay Effect
-modifier's `Attribute`, see gas.md), then the rest as the struct declares them, and writing that back is `No change.`;
-a list in a line is `Field=[Class a=1, Class b=2]`. In a child Blueprint an element is written against the parent's element at
-the same index (`()` keeps it). A member of a struct property is a dotted name, `Struct.Member = value`. Errors name the line and
-element (`line 3: Modifiers[1].Attribute ...`). A String Table text reads `"LOCTABLE(\"/Game/ST_X.ST_X\", \"Key\")"`; write that string to bind a text to a table key, and copy a read line as it is to keep the binding (a new plain string writes a literal).
+modifier's `Attribute`, see gas.md), then the rest as the struct declares them. A list in a line is
+`Field=[Class a=1, Class b=2]`. In a child Blueprint an element is written against the parent's element at
+the same index (`()` keeps it). A member of a struct property is a dotted name, `Struct.Member = value`. A vector,
+rotator or colour is also its numbers in order, `Pos=(1,2,3)`, `Tint=(1,0.5,0)`. In a record or flag a left-out number takes the default (child Blueprint: parent's value);
+a slot or Control value needs every number; a palette colour's alpha defaults to 1.
 
-A read's `# note:` lines name what it does not show; writes skip them. A refusal
-that names a read-only section `<Section>@<query>` points at the full list of valid names.
+The wait of `open_level` for running calls ends after 45 s. `write_asset`, `edit_asset` and
+`compile_assets` on a Blueprint of any kind (Actor, Widget, Anim, Control Rig) are refused while PIE
+runs, and while actors of it are left in the world of a map that is no longer open (the refusal names them;
+a restart drops them). An object path inside a map (`/Game/Maps/L.L:PersistentLevel.Door`) resolves only
+while that map is open (`open_level`). Anything without a text section (animation curves and sync markers,
+editor utilities) is reachable through `call_function` on Unreal's scripting libraries or `run_python`.
+`Properties` lists only what differs from the defaults; a read-only value an import or the engine computed (a Sound
+Wave's `Duration`, `NumChannels`, `ImportedSampleRate`; `LUFS`, `SamplePeakDB` from UE 5.7) is read by name with `get_properties`.
 
-Blueprint graph (`EventGraph`, `Function:Name`, `Macro:Name`):
+Files changed on disk under a running editor (`git checkout`, `pull`, `stash`, `restore`) are not picked up by the editor:
+reads show the loaded objects, and the next write saves them over the new file. `reload_assets` without paths compares
+each loaded asset of the project with its file (the hash the file was loaded or saved with), so an asset whose file did not
+change, or that is not loaded, is left alone; it also registers new files and drops gone ones from the Asset Registry. A
+closed map whose files changed is unloaded (the next read loads it); the open level reopens without saving, also for an
+actor file added or removed (the reply names the file). Assets, maps and the open level with unsaved changes are kept and named until
+`discardUnsavedChanges: true`; an asset made in this session and never saved, where git put a file at its path, is
+discarded then (unloaded, the file loads at the next read), never reloaded. The whole call is refused while PIE runs (`stop_pie` first). Each reload clears the undo
+history. A file named on `Not compared` (held by another program, damaged, saved by a newer Unreal) or `Unreal did not
+reload` still has its old asset in memory: a write would save that over the file. Not judged, so reopen the level
+(`open_level`) to read them: a changed file of an unloaded World Partition actor of the open level, and an External Data
+Layer or Content Bundle actor file added or deleted while its actor is not loaded.
 
-```
-n4a2877 Event ReceiveBeginPlay
-  then -> check
-check Branch
-  Condition = n85ea8a.bIsOpen
-  then -> say
-n85ea8a Get bIsOpen
-say Call KismetSystemLibrary.PrintString
-  InString = "Open"
-```
+A write (`write_asset`, `edit_asset`) applies the lines it can and names the rest. When some could not be applied, the reply ends
+with a block: `not applied: N lines; the rest was applied and saved, ...`, then each skipped line as `line N: <line>` (numbered
+in the whole section, also for `edit_asset`) with its reason indented under it (`depends on line M, which was not applied` for a
+line that needed a skipped one). The item a skipped line names stays as it was, name included: a line renaming another item onto that name (`[was=]`) is skipped
+too, in every section of `Name: ...` lines (`'X' is the name of another <item>, which stays.`). The
+next `edit_asset` matches the stored text. One undo reverts the whole write, skipped lines and all.
+A write refuses whole when no line could be applied or a check of the whole call failed. A
+section that stays whole, refusing a text with any bad line, says so on its page. The generic `Properties` section (any asset
+whose page gives its `Properties` no rules of their own; a Sound Cue's, Geometry Collection's, Niagara System's, Material's and
+Material Function's stay whole) writes partially: a line with a
+bad value keeps its property's value, and a property with one bad line (a member line, a block element) keeps all of it. A
+misspelled name names no property, so the property you meant counts as left out and goes back to its default; a line naming no
+property at all (`= 3`) keeps every property the text leaves out.
 
-- `<id> <type>`; existing ids are GUID prefixes, new nodes take any unused name.
-- Under a node: `Pin = literal`, `Pin = <id>.OutPin`, `ExecPin -> <id>` or `-> <id>.Pin`.
-- Types: `Event Name`, `CustomEvent Name(P: type)` (an RPC: append `[Server]`, `[Client]` or `[Multicast]`, plus
-  `[Reliable]`, or `[Server, Reliable]`; no flags clears it; a `{...}` on a node kind that takes none is refused),
-  `ComponentEvent Comp.Delegate`,
-  `Call Class.Function` / `Call self.Function`, `Message Interface.Function`, `CallParent Function`,
-  `Get Var`, `Set Var` (another object's variable: `Get Class.Var` with `self` linked to it), `Branch`, `Sequence`, `Cast Class`, `PureCast Class`, `Self`, `Reroute`,
-  `Macro ForEachLoop`, `MakeStruct S`, `BreakStruct S`, `FunctionEntry(P: type)` (append
-  ` [Pure]` for a pure function; also `[Const] [ThreadSafe] [Category "x"] [Keywords "y"]`; `[Exec]` makes it a console command, reached on the PlayerController, its Pawn, HUD, CheatManager or
-  PlayerCameraManager, the GameMode, GameState or GameInstance),
-  `FunctionResult(P: type)` (in a `Macro:` graph these are its tunnels; exec pins are type `exec`),
-  `Comment "text"`, or a node class with JSON: `SpawnActorFromClass`,
-  `SwitchEnum {"Enum":"/Script/Engine.ECollisionChannel"}`.
-- Switch cases: `SwitchInteger` (optionally `{"StartIndex":1}`) takes `0 -> a`, `2 -> c`; naming
-  a case adds it and any before it, and unnamed cases stay. `SwitchString`/`SwitchName` take
-  their cases from `{"PinNames":["A","B"]}`, then `A -> a`. `SwitchGameplayTag` takes
-  `{"PinTags":["A.B"]}`, then `A.B -> a`. A Gameplay Tag multi-compare
-  (`MultiCompareGameplayTagContainer`) adds `TagCase_<n>` and `Case_<n> True` when named. Tags in
-  node JSON and pin values must be registered first ([gameplay-tags.md](gameplay-tags.md)).
-- Nodes with an **Add pin** button (`Sequence`, `K2Node_MakeArray`, `K2Node_DoOnceMultiInput`, ...)
-  add the pins a line names, up to the node's limit; write the pin name bare: `-> d.C In`. A name
-  the node cannot grow to fails the write and lists its pins.
-- `FormatText`: a literal `Format = "{a} {b}"` makes the argument pins `a` and `b` in the same write
-  (link them: `a = count`; a literal text comes from a linked `MakeLiteralText`); a changed format
-  drops the pins it no longer names. A linked Format keeps its arguments in `{"PinNames":["a"]}`.
-- Binding an event to another object's dispatcher: `bind AddDelegate {"DelegateReference":
-  {"MemberParent":"/Script/Game.Door","MemberName":"OnOpened"}}` with `self = <target>` and
-  `Delegate = <event>.OutputDelegate`, where `<event>` is a `CustomEvent` named unlike any parent
-  function; the Blueprint's own dispatcher is `{"MemberName":"OnOpened"}` alone. The event takes the delegate's parameters, so write them as the delegate has them, by
-  reference included: `ev CustomEvent OnDone(Context: ref const UpdateContext)`; other text is refused
-  with the line that fits.
-- A parameter passed by reference is `Name: ref Type` or `ref const Type`; `T&` and `const T&` also work.
-- Literals: as read prints them; vectors and rotators also `1,2,3` or `(Pitch=0,Yaw=90,Roll=0)`,
-  enums by display name, keys by name (`B = "Escape"`); string, name and text literals are quoted
-  (an unquoted word is a link, except a name of the pin's enum).
-  A rejected value fails the write and names the valid choices.
-- Split struct pins read as `Position_X = ...`; naming a member splits the pin, naming it whole
-  (`Position = v.ReturnValue`) recombines it.
-- A new function: `write_asset(path, "Function:Open", "e FunctionEntry(Speed: float)\n  then -> ...")`;
-  `Function:OnKeyDown` (a parent function) creates the override, while an event-style parent
-  function is `Event Name` in the event graph; a new event-graph page: any free section name, e.g.
-  `write_asset(path, "Combat", ...)`.
+Unreal sometimes changes another asset with the one a call writes: a material instance first put on a Nanite Static Mesh
+gets that usage flag (before UE 5.8 its parent material does), a Blueprint follows a struct it uses.
+`create_asset`, `duplicate_asset`, `import_assets`, `write_asset`, `edit_asset`, `set_properties` and `spawn_actor` save those
+assets too and name them (`also saved: <paths>`, in a JSON reply `alsoSaved`; `(has compile errors)` after a Blueprint the
+change broke). `also changed, not saved: ...` names one that was not saved, with the reason (engine content is never written).
+A material on an actor's component or a Skeletal Mesh, or one put on a mesh while PIE runs, may get its flag only when it is
+first drawn (after the call, or in `take_screenshot`) and is then left unsaved: `get_editor_state` lists it, `save_assets`
+saves it.
 
-Variables: `Health: float = 100 [EditAnywhere, Category="Stats"]`; types `bool int int64 float
-double string name text Vector Actor /Game/Path/BP_Door class<Actor> soft<Texture2D> T[] set<T>
-map<K, V>` (Blueprint classes, user structs and enums by asset path); flags `EditAnywhere BlueprintReadOnly ExposeOnSpawn Private Replicated RepNotify=Fn
-Transient SaveGame Config Category= Tooltip=`, and `was="OldName"` renames; a name that is not an
-identifier reads quoted (`"My Speed": float`). Writing back what was read replies `No change.` and
-saves nothing. Any other write replies `ok`, then only lines you cannot know from your own text:
-`ids: <written>=<stored>, ...` for nodes stored under another id (name them
-by the stored id in your next edit), `removed: ...` after a `write_asset` (what the text left out; at
-most 20 names, then `+N`), `compile:` with its messages when the compile was not clean, and `warning:`
-lines. A clean compile, the saved asset and what you added or changed are not repeated: `read_asset` the
-section to see them. When the asset stores a write differently (ids replaced, order normalised,
-defaults dropped), one line says so, `stored differently: <ids, at most 10, then +N>`; `read_asset`
-them before the next `edit_asset` on them. An `edit_asset` miss shows the nearest lines.
+Silent results: node positions are not part of the text, so a write that changes a graph lays it out
+again; a changed Blueprint default reaches placed instances that kept the old value.
 
-Components / WidgetTree: indented `Name: Class {"Prop":value}` (a Components name that is not an
-identifier reads quoted, as in Variables: `"My Mesh": StaticMeshComponent`); widget slots as a record, `@ Anchors=0,1 Offsets=40,-40,300,24 Alignment=0,1` (widget.md);
-`[socket="hand_r"]` attaches a component to its parent's socket or bone; inherited components are
-marked `[inherited]` and keep their line, whose `{json}` overrides their properties. A changed default reaches placed instances that kept the
-old value.
+**An asset as a commit holds it**: `read_asset` with `revision` (one commit: `HEAD`, `HEAD~3`, a hash, a branch or tag; not a
+range) and any other arguments as usual. The first reply line is `revision <hash>` (plus the name you gave); the tool's hints in
+the reply already carry `revision=` (the asset's own text, a comment holding a hint, is shown as stored). Instead of `git show` on
+a `.uasset` (binary) or reading two whole versions. It needs the asset's folder in a git work tree and `git` on the editor's PATH
+(Source Control settings play no part). Nothing is ever downloaded: a Git LFS object, or a partial clone's file, you never fetched
+is refused until you run the `git lfs fetch` / `git fetch` the refusal names. Files over 1 GiB and files kept through another git
+filter (git-crypt) are refused. The live asset and its unsaved changes are untouched. References to other assets resolve to
+their current versions. Not for `GameplayTags` or `Physics` (refused; `git show <rev>:Config/...` for the settings);
+`write_asset` / `edit_asset` take no revision. A map reads with that commit's actor files: the folder sections and
+`Actor:<label>` (not `World`, not sublevels' actors; see [world.md](world.md)).
 
-A Blueprint's `Defaults` starts with `Parent: Pawn`, its parent class; write another class to reparent it
-(`Parent: Pawn` alone is a whole write; a text without the line keeps the parent, a refusal names the line).
+**What changed since a commit**: `read_asset` with `diff=<revision>` (same rules as `revision`). Without `section`: one line per
+changed section, `<section>  +<added> -<removed>`, or `added` / `removed (<N> lines)` for a section on one side only, plus a
+`class:` / `parent:` line when those changed; `No difference ...` when nothing did (a pattern, `section="Function:*"`, narrows
+it). With `section`: that section's unified diff (`@@ -a,b +c,d @@` hunks, lines prefixed ` `, `-`, `+`, `before` / `after`
+context lines, default 2; `offset` / `limit` page the diff's lines). The text after the prefix is as a plain read prints it, so a
+`+` or ` ` line pastes into `edit_asset` `old_text`. Add `revision=<newer>` to compare two commits instead of a commit and the
+live asset. A section only one side has is refused with the read that shows it there; an asset the revision lacks is refused
+as added since (read it plainly). Graph nodes are compared in the new side's order, so moved nodes are not changes; then a
+hunk's `-a` is where its first old line stands in `read_asset revision=<rev>` and its old lines need not be consecutive
+there. Past 2000 changed lines the reply says so: those lines show as all removed, then all added, not as the smallest diff. Use it before reading
+two versions whole: on a 1000-line graph with one change the diff is 310 characters, the two reads 70 000. Not with `match`.
 
-One line per item: `Dispatchers` `OnHit(Damage: float)`; `Interfaces` an interface path; user
-struct `Fields` `Count: int = 3` (the Variables types but `map`, `softclass<Actor>` too; names read quoted as in Variables); user enum `Entries` a name; String Table `Entries`
-`Key = "Text"`.
+**Which assets changed**: `find_assets` with `changed=<revision>` (`HEAD`: the work tree against it, staged or not, untracked
+files included) or `changed=A..B` (between two commits) lists assets, not files, with `status` (`modified`, `added`, `deleted`,
+`renamed` with `from` for a file moved unchanged, `conflicted`; an Unreal rename rewrites the file, so it lists as deleted and
+added); `query`, `class`, `path`, `offset`, `limit` work as usual, `path` also picks the git work
+tree. A map's actor and object files (`__ExternalActors__/...` hashes) are counted on the map's row (`changedActors`). A modified
+asset (not a map) carries `changes`, the lines `read_asset diff` summarises (`Variables  +1 -0`), compared from copies of its files
+for 10 s per call; a row past that, and a modified map, carries `diff`, the `read_asset` call that compares it (for a map with the
+work tree as the new side it compares with the open level: open the map first; UE 5.7 reads no map at a revision, so there a
+map row carries no call and `note` says why). Changed files that are no assets (source, config) are only counted in
+`note`. Nothing is loaded for the list itself; a Git LFS file touched without a change may be listed as modified.
 
-No asset has a `Document` section: asking for it is refused, and the refusal names the text section to use (Blueprint
-`Variables`/`Defaults`/graphs, Widget Blueprint `WidgetTree`, Material and MetaSound `Graph`, StateTree and Behavior
-Tree `Tree`, Control Rig `Hierarchy`/`Rig`/`Function:Name`).
+**A merge-conflicted asset**: while git waits for a conflicted `.uasset` to be resolved (merge, rebase, cherry-pick, stash),
+`revision` and `diff` take `ours`, `theirs` and `base`, its index stages (in a rebase git's `ours` is the branch rebased onto).
+`revision=theirs diff=base` shows what their side changed, `revision=ours diff=base` what yours changed; `diff=theirs` alone
+compares theirs with the live asset. The reply's first line says which side the work-tree file holds (git keeps ours for a
+binary file) and which bytes the editor holds: a write starts from those, not from the file. When the editor holds a version
+it loaded before git wrote the file, `reload_assets` with the path loads the file. A conflicted Git LFS asset's work-tree file
+is pointer text with conflict markers, no asset: the sides still read from the local LFS store. The plugin resolves nothing:
+take a side or re-apply the other side's changes with `write_asset` / `edit_asset`, save, then `git add` yourself. Outside a
+conflict the side names are refused; a branch or tag called `ours` / `theirs` / `base` / `saved` reads by its full name
+(`refs/heads/ours`). An asset added on both sides has no `base`; one deleted on a side has no side there.
 
-Anything without a text section (animation curves and sync markers, editor utilities) is reachable
-through `call_function` on Unreal's scripting libraries, and past that through `run_python`.
-Curve assets (`CurveFloat`, `CurveVector`, `CurveLinearColor`) have a `Keys` section: one key per line,
-`0.5: 1 linear`, `1: 2 cubic user arrive=0.5 leave=0.5` (`constant`/`linear`/`cubic`; cubic may add
-`smart_auto`, or `user`/`break` with `arrive=` `leave=`, and `arrive_weight=` `leave_weight=`). Vector and
-colour curves put keys under `X:` / `R:` channel headers; a channel left out is cleared. Check values
-with `get_float_value(t)`.
-`create_asset` `options` set factory properties: a BlendSpace needs `{"TargetSkeleton": path}`; a
-Blueprint interface is `class Blueprint`, `parent Interface`, `{"BlueprintType": "BPTYPE_Interface"}`.
+**Unsaved changes**: `diff=saved` compares the asset's file on disk with what the editor holds, so `read_asset path=<asset>
+diff=saved` lists the sections an unsaved change touched (with `section`, its lines) before you save or discard it;
+`revision=saved` reads the file as saved. No git needed. An asset with no unsaved changes answers `No difference` at once
+(`get_editor_state` lists the unsaved packages). Refused for an asset never saved. A map: the open level against its files,
+actor files included (world.md, "Unsaved level edits").
